@@ -1,1 +1,1 @@
-# OFOS Project
+# OFOS Project Schema
