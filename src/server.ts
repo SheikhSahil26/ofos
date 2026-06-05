@@ -8,13 +8,13 @@ import path from "path"
 // import { buildApiRouter } from './routes/index.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { buildApiRouter } from "./routes/index.js";
+import { buildApiRouter } from "./routes";
 
 
 const PORT = process.env.PORT;
 
 
-const __filename = fileURLToPath(import.meta.url);
+// const __filename = fileURLToPath(import.meta.url);
 
 // Get the directory name from the file path
 const __dirname = dirname(__filename);
@@ -53,7 +53,7 @@ app.use("/api", buildApiRouter());
 
 
 
-app.listen(PORT,()=>{
-    console.log("server started at port",PORT);
-})
+app.listen(8080,()=>{
+    console.log("server started at port 8080");
+});
 
