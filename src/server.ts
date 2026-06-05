@@ -8,6 +8,7 @@ import path from "path"
 // import { buildApiRouter } from './routes/index.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildApiRouter } from "./routes/index.js";
 
 
 const PORT = process.env.PORT;
@@ -33,6 +34,9 @@ app.use(express.static(path.join(__dirname,"./public")))
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
+
+//this will initiate all the routes 
+app.use("/api", buildApiRouter());
 
 
 // app.get("/",(req:Request, res:Response) => {
