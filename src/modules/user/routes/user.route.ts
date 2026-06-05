@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { IRoutes } from "../../../common/interfaces/route.interface.js";
-import { UserController } from "../controllers/user.controller.js";
+import { IRoutes } from "../../../common/interfaces/route.interface";
+import { UserController } from "../controllers/user.controller";
 
 export class UserRoutes implements IRoutes{
     path = "/users";

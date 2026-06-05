@@ -12,9 +12,9 @@ export class UserServices{
     }
 
     //update profile of user
-    updateProfile = async(id: string) => {
+    updateProfile = async(id: string, data: any) => {
         try{
-
+            
         }
         catch(err){
             throw err;

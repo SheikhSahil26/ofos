@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
+import { UserServices } from "../services/user.service";
 
 export class UserController{
     
+    private userService = new UserServices();
     //get profile of authenticated user
     getProfile = async(req: Request, res: Response) => {
         try{
             
-            console.log("user profile");
         }
         catch(err){
             console.log(err);
@@ -17,7 +18,12 @@ export class UserController{
     //edit user profile 
     updateProfile = async(req: Request, res: Response) => {
         try{
-
+            const userId = req.params.id;
+            if(typeof userId !== 'string'){
+                return res.status(400).json({success: false, message: "Invalid user id"});
+            }
+            const data = req.body;
+            const user = await this.userService.updateProfile(userId, data);
         }
         catch(err){
             console.log(err);

@@ -8,7 +8,7 @@ import path from "path"
 // import { buildApiRouter } from './routes/index.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { buildApiRouter } from "./modules/routes/index.ts";
+import { buildApiRouter } from "./modules/routes";
 
 
 const PORT = process.env.PORT;
