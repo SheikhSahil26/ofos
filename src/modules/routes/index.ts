@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { IRoutes } from "../common/interfaces/route.interface.js";
-import { UserRoutes } from "../modules/user/routes/user.route.js";
+import type { IRoutes } from "../../common/interfaces/route.interface.js";
+import { UserRoutes } from "../user/routes/user.route.js";
 
 export function buildApiRouter(): Router{
     const router = Router();

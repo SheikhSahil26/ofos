@@ -7,7 +7,7 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs",
+    "module": "node20",
     "target": "esnext",
     "types": ["node"],
     // For nodejs:
@@ -37,9 +37,9 @@
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
-    "moduleResolution": "bundler",
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
   }
 }

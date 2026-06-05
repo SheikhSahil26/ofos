@@ -8,13 +8,13 @@ import path from "path"
 // import { buildApiRouter } from './routes/index.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { buildApiRouter } from "./routes";
+import { buildApiRouter } from "./modules/routes/index.ts";
 
 
 const PORT = process.env.PORT;
 
 
-// const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
 
 // Get the directory name from the file path
 const __dirname = dirname(__filename);

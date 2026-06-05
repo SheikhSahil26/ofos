@@ -3,7 +3,7 @@ import { IRoutes } from "../../../common/interfaces/route.interface.js";
 import { UserController } from "../controllers/user.controller.js";
 
 export class UserRoutes implements IRoutes{
-    path = "users";
+    path = "/users";
     router = Router();
     controller = new UserController();
 

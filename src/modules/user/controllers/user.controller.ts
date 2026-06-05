@@ -6,7 +6,7 @@ export class UserController{
     getProfile = async(req: Request, res: Response) => {
         try{
             
-            
+            console.log("user profile");
         }
         catch(err){
             console.log(err);
