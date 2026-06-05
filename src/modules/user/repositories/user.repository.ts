@@ -6,10 +6,10 @@ export class UserRepository{
     //find user by id
     async findUserById(userId: string): Promise<IExistUser | null>{
         try{
-            return await prisma.users.findUnique({
+            return await prisma.user.findUnique({
                 where: {
                     id: userId
-                }
+                },
                 select: {
                     id: true,
                     email: true,
@@ -25,11 +25,16 @@ export class UserRepository{
     //find user by email
     async findUserByEmail(email: string): Promise<IExistUser | null>{
         try{
-            return await prisma.users.findUnique({
+            return await prisma.user.findUnique({
                 where: {
                     email: email
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    isDeleted: true
                 }
-            })
+            });
         }
         catch(err){
             throw err;
