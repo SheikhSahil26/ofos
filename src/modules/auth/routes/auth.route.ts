@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type{ IRoutes } from "../../common/interfaces/route.interface.js";
-import { AuthController } from "./auth.controller.js";
+import type{ IRoutes } from "../../../common/interfaces/route.interface.js";
+import { AuthController } from "../../controllers/auth.controller.js";
 
 export class AuthRoutes implements IRoutes {
   path = '/auth';
@@ -12,7 +12,7 @@ export class AuthRoutes implements IRoutes {
   }
 
   private initializeRoutes(): void {
-    this.router.post('/register',this.controller.register);
+    this.router.get('/register',this.controller.register);
     
 }
 }
