@@ -8,7 +8,7 @@ import path from "path"
 // import { buildApiRouter } from './routes/index.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { buildApiRouter } from "./routes/index.js";
+import { buildApiRouter } from "./modules/routes";
 
 
 const PORT = process.env.PORT;
@@ -53,7 +53,7 @@ app.use("/api", buildApiRouter());
 
 
 
-app.listen(PORT,()=>{
-    console.log("server started at port",PORT);
-})
+app.listen(8080,()=>{
+    console.log("server started at port 8080");
+});
 
