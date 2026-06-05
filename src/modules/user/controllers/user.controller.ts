@@ -4,6 +4,7 @@ import { UserServices } from "../services/user.service";
 export class UserController{                                                                                   
     
     private userService = new UserServices();
+    
     //get profile of authenticated user
     getProfile = async(req: Request, res: Response) => {
         try{
