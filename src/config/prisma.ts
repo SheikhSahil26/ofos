@@ -2,7 +2,7 @@ import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 import { PrismaClient } from "@prisma/client";
 
- defineConfig({
+defineConfig({
   schema: "prisma/schema.prisma",
 
   datasource: {
@@ -10,10 +10,6 @@ import { PrismaClient } from "@prisma/client";
   },
 });
 
-// src/config/prisma.ts
-
-
 const prisma = new PrismaClient();
 
-
-export {defineConfig, prisma};
+export { defineConfig, prisma };
