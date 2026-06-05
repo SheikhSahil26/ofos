@@ -7,6 +7,7 @@ export function buildApiRouter(): Router{
 
     const routes: IRoutes[] = [
      new AuthRoutes(),
+     
     ]
 
     routes.forEach((route) => {
