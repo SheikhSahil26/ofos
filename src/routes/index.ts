@@ -1,11 +1,12 @@
 import { Router } from "express";
 import type { IRoutes } from "../common/interfaces/route.interface.js";
+import { AuthRoutes } from "../modules/auth/auth.route.js";
 
 export function buildApiRouter(): Router{
     const router = Router();
 
     const routes: IRoutes[] = [
-        //create objects of all router classes here
+     new AuthRoutes(),
     ]
 
     routes.forEach((route) => {

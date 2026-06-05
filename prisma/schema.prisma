@@ -7,3 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model roles {
+  id         BigInt       @id @default(autoincrement())
+  role       String       @unique
+  user_roles user_roles[]
+}
+
+model user_roles {
+  user_id BigInt
+  role_id BigInt
+  roles   roles  @relation(fields: [role_id], references: [id])
+  users   users  @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "user_roles_role_id_fkey")
+}
+
+model users {
+  created_at    DateTime     @default(now())
+  email         String       @unique
+  full_name     String
+  id            BigInt       @id @default(autoincrement())
+  is_active     Boolean      @default(true)
+  is_verified   Boolean      @default(false)
+  mobile        String       @unique
+  password_hash String
+  profile_photo String?
+  updated_at    DateTime
+  user_roles    user_roles[]
+}
