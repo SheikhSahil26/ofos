@@ -76,7 +76,7 @@ CREATE TABLE `restaurants` (
 -- CreateTable
 CREATE TABLE `restaurant_branches` (
     `id` VARCHAR(36) NOT NULL,
-    `restaurant_id` VARCHAR(36) NOT NULL,
+    `restaurant_id` VARCHAR(36) NOT NULL,   
     `owner_id` VARCHAR(36) NOT NULL,
     `branch_name` VARCHAR(255) NULL,
     `contact_number` VARCHAR(20) NULL,
