@@ -1,6 +1,6 @@
 import { RestaurantRepository } from "../repositories/restaurant.repository";
 import { UserRepository } from "../../user/repositories/user.repository";
-import { Branch, IRestaurantValidation, NearbyItem, Pagination, RestaurantsResult } from "../interfaces/restaurant.interface";
+import { IRestaurantValidation, INearbyItem, IPagination, IRestaurantsResult, IBranch } from "../interfaces/restaurant.interface";
 
 
 export class RestaurantService{
@@ -13,7 +13,7 @@ export class RestaurantService{
     page: number,
     limit: number,
     search?: string
-): Promise<{ data: any[]; pagination: Pagination }> {
+): Promise<{ data: any[]; pagination: IPagination }> {
 
     if(page < 1){
         page = 1;
@@ -23,7 +23,7 @@ export class RestaurantService{
         limit = 10;
     }
 
-    const data: RestaurantsResult =
+    const data: IRestaurantsResult =
     await this.restaurantRepo.getRestaurants(
         page,
         limit,
@@ -47,7 +47,7 @@ export class RestaurantService{
     ownerId: string,
     page: number,
     limit: number
-): Promise<{ data: any[]; pagination: Pagination }> {
+): Promise<{ data: any[]; pagination: IPagination }> {
 
     const owner: any =
     await this.userRepo.findUserById(ownerId);
@@ -60,7 +60,7 @@ export class RestaurantService{
         throw new Error("User account deleted");
     }
 
-    const data: RestaurantsResult =
+    const data: IRestaurantsResult =
     await this.restaurantRepo.getRestaurantsByOwnerId(
         ownerId,
         page,
@@ -83,14 +83,14 @@ export class RestaurantService{
     latitude: number,
     longitude: number,
     radius: number
-): Promise<NearbyItem[]> {
+): Promise<INearbyItem[]> {
 
-    const branches: Branch[] =
+    const branches: IBranch[] =
     await this.restaurantRepo.getNearbyBranches();
 
-    const filtered: NearbyItem[] =
+    const filtered: INearbyItem[] =
     branches
-    .map((branch: Branch) => {
+    .map((branch: IBranch) => {
 
         const distance: number =
         this.calculateDistance(
@@ -103,15 +103,15 @@ export class RestaurantService{
         return {
             branch,
             distance
-        } as NearbyItem;
+        } as INearbyItem;
     })
 
     .filter(
-        (item: NearbyItem) => item.distance <= radius
+        (item: INearbyItem) => item.distance <= radius
     )
 
     .sort(
-        (a: NearbyItem, b: NearbyItem) =>
+        (a: INearbyItem, b: INearbyItem) =>
         a.distance - b.distance
     );
 
@@ -151,7 +151,6 @@ private calculateDistance(
 }
 
 //validate restaurant 
-// restaurant.service.ts
 
 async validateRestaurant(
     restaurantId: string

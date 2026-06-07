@@ -60,11 +60,49 @@ export class RestaurantController {
     }
   };
 
-  //create restaurant
-  async createRestaurant(data: any): Promise<void> {
-    try {
-    } catch (err) {
-      throw err;
+  //GET nearby restaurants
+
+getNearbyRestaurants = async(
+    req: Request,
+    res: Response
+) => {
+    try{
+
+        const latitude = Number(req.query.latitude);
+        const longitude = Number(req.query.longitude);
+        const radius = Number(req.query.radius) || 5;
+
+        if(
+            isNaN(latitude) ||
+            isNaN(longitude)
+        ){
+            return res.status(400).json({
+                success: false,
+                message: "Latitude and longitude are required"
+            });
+        }
+
+        const restaurants =
+        await this.restaurantService
+        .getNearbyRestaurants(
+            latitude,
+            longitude,
+            radius
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: restaurants
+        });
+
     }
-  }
+    catch(err){
+        console.log(err);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching nearby restaurants"
+        });
+    }
+}
 }

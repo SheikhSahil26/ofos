@@ -591,6 +591,7 @@ model Order {
   couponUsages        CouponUsage[]
   loyaltyTransactions LoyaltyTransaction[]
   review              Review?
+  supportTickets      SupportTicket[]
 
   @@index([customerId])
   @@index([branchId])

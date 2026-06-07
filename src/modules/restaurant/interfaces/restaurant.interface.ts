@@ -24,26 +24,26 @@ export interface IRestaurantPagination {
     total: number;
 }
 
-export interface Branch {
+export interface IBranch {
     id?: string;
     latitude: string | number;
     longitude: string | number;
     [key: string]: any;
 }
 
-export interface RestaurantsResult {
+export interface IRestaurantsResult {
     restaurants: any[];
     total: number;
 }
 
-export interface Pagination {
+export interface IPagination {
     page: number;
     limit: number;
     total: number;
 }
 
-export interface NearbyItem {
-    branch: Branch;
+export interface INearbyItem {
+    branch: IBranch;
     distance: number;
 }
 

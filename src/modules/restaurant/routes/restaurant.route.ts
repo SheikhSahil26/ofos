@@ -7,12 +7,13 @@ export class RestaurantRoutes implements IRoutes {
   router = Router();
   controller = new RestaurantController();
 
-    constructor() {
-        this.initializeRoutes();
-    }   
+  constructor() {
+    this.initializeRoutes();
+  }
 
-    private initializeRoutes(): void {
-        this.router.get("/", this.controller.getRestaurants);
-        this.router.get("/my-restaurants", this.controller.getMyRestaurants);
-    }
+  private initializeRoutes(): void {
+    this.router.get("/", this.controller.getRestaurants);
+    this.router.get("/nearby", this.controller.getNearbyRestaurants);
+    this.router.get("/owner/my-restaurants", this.controller.getMyRestaurants);
+  }
 }
