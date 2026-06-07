@@ -23,3 +23,33 @@ export interface IRestaurantPagination {
     limit: number;
     total: number;
 }
+
+export interface Branch {
+    id?: string;
+    latitude: string | number;
+    longitude: string | number;
+    [key: string]: any;
+}
+
+export interface RestaurantsResult {
+    restaurants: any[];
+    total: number;
+}
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+}
+
+export interface NearbyItem {
+    branch: Branch;
+    distance: number;
+}
+
+export interface IRestaurantValidation {
+    id: string;
+    ownerId: string;
+    isActive: boolean;
+    isDeleted: boolean;
+}

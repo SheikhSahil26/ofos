@@ -1,14 +1,19 @@
+import { RestaurantRepository } from "../repositories/restaurant.repository";
+import { UserRepository } from "../../user/repositories/user.repository";
+import { Branch, IRestaurantValidation, NearbyItem, Pagination, RestaurantsResult } from "../interfaces/restaurant.interface";
+
 
 export class RestaurantService{
 
-    private restaurantRepo = new RestaurantRepository();
+    private restaurantRepo: RestaurantRepository = new RestaurantRepository();
+    private userRepo: UserRepository = new UserRepository();
 
     //get all restaurants
    async getRestaurants(
-    page:number,
-    limit:number,
-    search?:string
-){
+    page: number,
+    limit: number,
+    search?: string
+): Promise<{ data: any[]; pagination: Pagination }> {
 
     if(page < 1){
         page = 1;
@@ -18,7 +23,7 @@ export class RestaurantService{
         limit = 10;
     }
 
-    const data =
+    const data: RestaurantsResult =
     await this.restaurantRepo.getRestaurants(
         page,
         limit,
@@ -37,23 +42,146 @@ export class RestaurantService{
 }
 
 
-    //get restaurant by id
-    async getRestaurantById(restaurantId: string): Promise<void>{
-        try{
+    //GET owner restaurants
+   async getMyRestaurants(
+    ownerId: string,
+    page: number,
+    limit: number
+): Promise<{ data: any[]; pagination: Pagination }> {
 
-        }
-        catch(err){
-            throw err;
-        }
+    const owner: any =
+    await this.userRepo.findUserById(ownerId);
+
+    if(!owner){
+        throw new Error("User not found");
     }
 
-    //create restaurant
-    async createRestaurant(data: any): Promise<void>{
-        try{
-            
-        }
-        catch(err){
-            throw err;
-        }   
+    if(owner.isDeleted){
+        throw new Error("User account deleted");
     }
+
+    const data: RestaurantsResult =
+    await this.restaurantRepo.getRestaurantsByOwnerId(
+        ownerId,
+        page,
+        limit
+    );
+
+    return {
+        data:data.restaurants,
+
+        pagination:{
+            page,
+            limit,
+            total:data.total
+        }
+    };
+}
+
+    //GET nearby restaurants
+   async getNearbyRestaurants(
+    latitude: number,
+    longitude: number,
+    radius: number
+): Promise<NearbyItem[]> {
+
+    const branches: Branch[] =
+    await this.restaurantRepo.getNearbyBranches();
+
+    const filtered: NearbyItem[] =
+    branches
+    .map((branch: Branch) => {
+
+        const distance: number =
+        this.calculateDistance(
+            latitude,
+            longitude,
+            Number(branch.latitude),
+            Number(branch.longitude)
+        );
+
+        return {
+            branch,
+            distance
+        } as NearbyItem;
+    })
+
+    .filter(
+        (item: NearbyItem) => item.distance <= radius
+    )
+
+    .sort(
+        (a: NearbyItem, b: NearbyItem) =>
+        a.distance - b.distance
+    );
+
+    return filtered;
+}
+
+// calculate distance
+private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+): number {
+    const R = 6371;
+
+    const dLat =
+    (lat2 - lat1) * Math.PI / 180;
+
+    const dLon =
+    (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+    Math.sin(dLat / 2) *
+    Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+
+    const c =
+    2 * Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+    );
+
+    return R * c;
+}
+
+//validate restaurant 
+// restaurant.service.ts
+
+async validateRestaurant(
+    restaurantId: string
+): Promise<IRestaurantValidation>{
+
+    try{
+
+        const restaurant =
+        await this.restaurantRepo
+        .validateRestaurantById(
+            restaurantId
+        );
+
+        if(!restaurant){
+            throw new Error(
+                "Restaurant not found"
+            );
+        }
+
+        if(restaurant.isDeleted){
+            throw new Error(
+                "Restaurant has been deleted"
+            );
+        }
+
+        return restaurant;
+
+    }
+    catch(err){
+        throw err;
+    }
+}
 }

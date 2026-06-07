@@ -1,11 +1,12 @@
+import { IExistingRestaurant, IRestaurantValidation } from "../interfaces/restaurant.interface";
 import { prisma } from "../../../config/prisma";
 
 export class RestaurantRepository {
   // get restaurant details by id
 
-  async getRestaurantDetails(id: string) {
+  async getRestaurantDetails(id: string): Promise<IExistingRestaurant | null> {
     try {
-      return await prisma.restaurant.findUnique({
+      return await prisma.restaurants.findUnique({
         where: {
           id,
         },
@@ -68,7 +69,7 @@ export class RestaurantRepository {
       };
 
       const [restaurants, total] = await Promise.all([
-        prisma.restaurant.findMany({
+        prisma.restaurants.findMany({
           where: whereClause,
 
           skip,
@@ -98,7 +99,7 @@ export class RestaurantRepository {
           },
         }),
 
-        prisma.restaurant.count({
+        prisma.restaurants.count({
           where: whereClause,
         }),
       ]);
@@ -119,7 +120,7 @@ export class RestaurantRepository {
       const skip = (page - 1) * limit;
 
       const [restaurants, total] = await Promise.all([
-        prisma.restaurant.findMany({
+        prisma.restaurants.findMany({
           where: {
             ownerId,
             isDeleted: false,
@@ -141,7 +142,7 @@ export class RestaurantRepository {
           },
         }),
 
-        prisma.restaurant.count({
+        prisma.restaurants.count({
           where: {
             ownerId,
             isDeleted: false,
@@ -161,7 +162,7 @@ export class RestaurantRepository {
   // GET nearby restaurants based on user location
   async getNearbyBranches() {
     try {
-      return await prisma.restaurantBranch.findMany({
+      return await prisma.restaurant_branches.findMany({
         where: {
           isActive: true,
           isDeleted: false,
@@ -169,6 +170,16 @@ export class RestaurantRepository {
           restaurant: {
             isActive: true,
             isDeleted: false,
+          },
+        },
+
+        include: {
+          restaurant: {
+            select: {
+              id: true,
+              name: true,
+              logoUrl: true,
+            },
           },
         },
 
@@ -195,4 +206,27 @@ export class RestaurantRepository {
       throw err;
     }
   }
+
+
+  //Restaurant validation by id
+async validateRestaurantById(
+    id: string
+): Promise<IRestaurantValidation | null> {
+    try{
+        return await prisma.restaurants.findUnique({
+            where:{
+                id
+            },
+            select:{
+                id:true,
+                ownerId:true,
+                isActive:true,
+                isDeleted:true
+            }
+        });
+    }
+    catch(err){
+        throw err;
+    }
+}
 }
