@@ -69,11 +69,19 @@ export class AddressRepository{
     //create new address for user
     async createAddress(data: ICreateAddress, userId: string): Promise<IAddress>{
         try{
+            const payload: any = { userId };
+            if (data.label != null) payload.label = data.label;
+            if (data.addressLine1 != null) payload.addressLine1 = data.addressLine1;
+            if (data.addressLine2 != null) payload.addressLine2 = data.addressLine2;
+            if (data.city != null) payload.city = data.city;
+            if (data.state != null) payload.state = data.state;
+            if (data.pinCode != null) payload.pincode = data.pinCode;
+            if (data.latitude != null) payload.latitude = data.latitude as any;
+            if (data.longitude != null) payload.longitude = data.longitude as any;
+            if (data.isDefault != null) payload.isDefault = data.isDefault;
+
             return prisma.userAddress.create({
-                data: {
-                    ...data,
-                    userId
-                },
+                data: payload,
                 select: addressSelect
             });
         }
