@@ -295,6 +295,7 @@ model RestaurantBranch {
   operatingHours OperatingHour[]
   staff          RestaurantStaff[] @relation("BranchStaffMembers")
   categories     Category[]
+  menuItems      MenuItem[]
   orders         Order[]
   reviews        Review[]
 
@@ -369,6 +370,7 @@ model Category {
 /// Individual food item on the menu
 model MenuItem {
   id           String    @id @default(uuid())
+  branchId     String    @map("branch_id")
   categoryId   String    @map("category_id")
   name         String?   @db.VarChar(255)
   description  String?   @db.Text
@@ -383,6 +385,7 @@ model MenuItem {
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   category       Category        @relation(fields: [categoryId], references: [id])
+  branch         RestaurantBranch          @relation(fields: [branchId], references: [id])
   tags           MenuItemTag[]
   modifierGroups ModifierGroup[]
   orderItems     OrderItem[]
