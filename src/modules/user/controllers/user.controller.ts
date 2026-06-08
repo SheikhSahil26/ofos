@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { IUpdateUser } from "../interfaces/user.interface";
 
-export class UserController{                                                                                   
-    
+export class UserController{
+                                                                                  
     private userService = new UserService();
     
     //get profile of authenticated user

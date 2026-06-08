@@ -16,6 +16,22 @@ const userProfileSelect = {
 
 export class UserRepository{
 
+    //checking user exist or not by id
+    async validateUser(userId: string): Promise<boolean>{
+        try{
+            const user = await this.findUserById(userId);
+
+            if(!user || user.isDeleted){
+                throw new Error("User not found");
+            }
+
+            return true;
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
     //find user by id
     async findUserById(userId: string): Promise<IExistUser | null>{
         try{
@@ -48,22 +64,6 @@ export class UserRepository{
                     isDeleted: true
                 }
             });
-        }
-        catch(err){
-            throw err;
-        }
-    }
-
-    //checking user exist or not by id
-    async validateUser(userId: string): Promise<boolean>{
-        try{
-            const user = await this.findUserById(userId);
-
-            if(!user || user.isDeleted){
-                throw new Error("User not found");
-            }
-
-            return true;
         }
         catch(err){
             throw err;
