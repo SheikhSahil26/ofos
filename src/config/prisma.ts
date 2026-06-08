@@ -1,7 +1,9 @@
+import { Prisma } from "@prisma/client";
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
+import { PrismaClient } from "@prisma/client";
 
-export default defineConfig({
+defineConfig({
   schema: "prisma/schema.prisma",
 
   datasource: {
@@ -9,3 +11,6 @@ export default defineConfig({
   },
 });
 
+const prisma = new PrismaClient();
+
+export { defineConfig, prisma };
