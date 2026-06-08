@@ -10,7 +10,10 @@ defineConfig({
     url: env("DATABASE_URL"),
   },
 });
+<<<<<<< HEAD
 
 const prisma = new PrismaClient();
 
 export { defineConfig, prisma };
+=======
+>>>>>>> feature/forget-password

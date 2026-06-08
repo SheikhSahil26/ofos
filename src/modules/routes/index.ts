@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { IRoutes } from "../../common/interfaces/route.interface.js";
 import { UserRoutes } from "../user/routes/user.route.js";
+import { AuthRoutes } from "../auth/routes/auth.route.js";
 
 export function buildApiRouter(): Router{
     const router = Router();
@@ -8,6 +9,7 @@ export function buildApiRouter(): Router{
     const routes: IRoutes[] = [
         //create objects of all router classes here
         new UserRoutes(),
+        new AuthRoutes()
     ]
 
     routes.forEach((route) => {
