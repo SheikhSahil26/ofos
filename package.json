@@ -4,9 +4,7 @@
   "description": "> A production-ready folder structure guide for backend applications. > This boilerplate demonstrates best practices used in real production systems.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/server.js",
-    "build": "tsc && copyfiles -u 1 src/public/**/* dist/"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -23,26 +21,17 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
-    "bootstrap": "^5.3.8",
     "cookie-parser": "^1.4.7",
-    "cookie-session": "^2.1.1",
     "dotenv": "^17.4.2",
-    "ejs": "^5.0.2",
+    "ejs": "^6.0.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "ioredis": "^5.11.0",
     "jsonwebtoken": "^9.0.3",
-    "multer": "^2.1.1",
-    "mysql2": "^3.22.2",
     "nodemon": "^3.1.14",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-google-oidc": "^0.1.0",
-    "passport-local": "^1.0.0",
     "path": "^0.12.7",
-    "svg-captcha": "^1.4.0",
-    "views": "^1.0.2",
-    "zod": "^4.3.6"
+    "views": "^1.0.2"
   }
 }
