@@ -8,7 +8,8 @@ import path from "path"
 // import { buildApiRouter } from './routes/index.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { buildApiRouter } from "./modules/routes";
+import { buildApiRouter } from "./routes";
+import redisClient from "./config/redis";
 
 
 const PORT = process.env.PORT;
@@ -39,6 +40,15 @@ app.use(express.json())
 app.use("/api", buildApiRouter());
 
 
+//working fine redis
+app.get("/redis-test",async(req:any,res:any)=>{
+    await redisClient.set("name", "Sahil");
+    console.log("redis value added successfully")
+    const value = await redisClient.get("name")
+    console.log(value,"this is redis value")
+})
+
+
 // app.get("/",(req:Request, res:Response) => {
 //    res.render("home")
 // })
@@ -53,7 +63,7 @@ app.use("/api", buildApiRouter());
 
 
 
-app.listen(8080,()=>{
-    console.log("server started at port 8080");
+app.listen(2000,()=>{
+    console.log("server started at port 2000");
 });
 
