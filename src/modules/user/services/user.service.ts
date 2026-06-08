@@ -28,6 +28,19 @@ export class UserService{
         }
     }
 
+    //delete profile photo of user
+    async deletePofilePhoto(userId: string): Promise<IUser | null>{
+        try{
+            //check if user exist or not
+            await this.userRepo.validateUser(userId);
+
+            return await this.userRepo.deleteProfilePhoto(userId);
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
     //delete profile of user
     async deleteProfile(userId: string): Promise<void>{
         try{

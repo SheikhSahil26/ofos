@@ -110,6 +110,24 @@ export class UserRepository{
         }
     }
 
+    //delete profile photo of user
+    async deleteProfilePhoto(userId: string): Promise<IUser | null>{
+        try{
+            return await prisma.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    profilePhoto: null,
+                },
+                select: userProfileSelect,
+            })
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
     //delete profile of user
     async deleteProfile(userId: string) : Promise<void>{
         try{

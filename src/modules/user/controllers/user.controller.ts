@@ -54,6 +54,20 @@ export class UserController{
         }
     }
 
+    //delete profile photo
+    deleteProfilePhoto = async(req: Request, res: Response) => {
+        try{
+            const userId = req.user.id;
+
+            const user = await this.userService.deletePofilePhoto(userId);
+            res.status(200).json({success: true, data: user});
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({success: false, message: "Error removing profile photo"});
+        }
+    }
+
     //delete user account
     deleteUserAccount = async(req: Request, res: Response) => {
         try{
