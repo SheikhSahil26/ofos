@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { IApiResponse, ILoginDto, ISignupDto } from '../interfaces/auth.interface';
 import { AuthService } from '../services/auth.service';
+import jwt from 'jsonwebtoken'
 export class AuthController {
   private authService = new AuthService();
 
@@ -74,7 +75,7 @@ export class AuthController {
 
 
     try {
-      const response: IApiResponse = await this.authService.registerUser(userInfo,role);
+      const response: IApiResponse = await this.authService.registerUser(userInfo, role);
       if (response.status == 'Success') return res.status(201).json(response);
       else res.status(401).json(response);
     } catch (e: any) {
@@ -91,8 +92,37 @@ export class AuthController {
     console.log(loginInfo)
 
     try {
-      const response: IApiResponse = await this.authService.loginUser(loginInfo,role);
-      if (response.status == 'Success') return res.status(201).json(response);
+      const response: IApiResponse = await this.authService.loginUser(loginInfo, role);
+      if (response.status == 'Success') {
+        const {
+          accessToken,
+          refreshToken
+        } = response.data;
+
+
+
+        res.cookie(
+          "refreshToken",
+          refreshToken,
+          {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge:
+              loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60
+          }
+        );
+        return res.status(201).json({
+          status: "Success",
+          statusCode: 200,
+          message:
+            "User Logged in succesfully..",
+          data: {
+            accessToken,
+          }
+        });
+
+      }
       else res.status(401).json(response);
     } catch (e: any) {
       res.status(500).json({ message: e.message })
@@ -100,7 +130,32 @@ export class AuthController {
   };
 
 
+  // Refresh Token : Comes in picture when the user Access Token expire...
+  refreshToken = async (
+    req: Request,
+    res: Response
+  ) => {
 
+    const refreshToken =
+      req.cookies.refreshToken;
+
+    const response =
+      await this.authService.refreshToken(
+        refreshToken
+      );
+
+    if (
+      response.status === "Error"
+    ) {
+      return res.status(401).json(
+        response
+      );
+    }
+
+    return res.status(200).json(
+      response
+    );
+  };
 
   // Api that verify email end send email to that user
   forgetPassword = async (req: Request, res: Response) => {

@@ -38,6 +38,8 @@ export class AuthRoutes implements IRoutes {
     );
 
 
+    this.router.post('/refresh-token',this.controller.refreshToken);
+
 
     // Forget Password  related Routes...........................
     this.router.route('/forget-password/:email')

@@ -7,7 +7,6 @@ import { use } from "passport";
 export class UserRepository {
   constructor(private readonly prisma: PrismaClient) { }
 
-
   // Find user by email
   async findUserByEmail(email: string) {
     try {
@@ -26,31 +25,31 @@ export class UserRepository {
     }
   }
 
-  // async getUserByEmailAndRole(email: string, role: string) {
-  //   try {
-  //     return await this.prisma.user.findFirst({
-  //       where: {
-  //         email: email,
-  //         userRoles: {
-  //           some: {
-  //             role: {
-  //               role: role,
-  //             },
-  //           },
-  //         },
-  //       },
-  //       include: {
-  //         userRoles: {
-  //           include: {
-  //             role: true,
-  //           },
-  //         },
-  //       },
-  //     });
-  //   } catch (e: any) {
-  //     console.log(e.message);
-  //   }
-  // }
+  async getUserByEmailAndRole(email: string, role: string) {
+    try {
+      return await this.prisma.user.findFirst({
+        where: {
+          email: email,
+          userRoles: {
+            some: {
+              role: {
+                role: role,
+              },
+            },
+          },
+        },
+        include: {
+          userRoles: {
+            include: {
+              role: true,
+            },
+          },
+        },
+      });
+    } catch (e: any) {
+      console.log(e.message);
+    }
+  }
 
   async createUser(userInfo: ICreateUserDto, role: string) {
     try {
@@ -107,4 +106,58 @@ export class UserRepository {
 
   }
 
+  async saveRefreshToken(
+    userId: string,
+    refreshToken: string,
+    expiresAt: Date
+  ) {
+
+    return await this.prisma.refreshToken.create({
+      data: {
+        userId,
+        token: refreshToken,
+        expiresAt
+      }
+    });
+
+  }
+
+  async findRefreshToken(
+    refreshToken: string
+  ) {
+
+    return await this.prisma.refreshToken.findFirst({
+      where: {
+        token: refreshToken,
+        isRevoked: false
+      }
+    });
+
+  }
+  async findUserById(
+    userId: string
+  ) {
+
+    return await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    });
+
+  }
+
+  async revokeRefreshToken(
+    refreshToken: string
+) {
+
+    return await this.prisma.refreshToken.updateMany({
+        where: {
+            token: refreshToken
+        },
+        data: {
+            isRevoked: true
+        }
+    });
+
+}
 }
