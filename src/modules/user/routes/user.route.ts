@@ -14,6 +14,7 @@ export class UserRoutes implements IRoutes{
     private initializeRoutes() : void{
         this.router.get("/profile", this.controller.getProfile);
         this.router.patch("/profile", this.controller.updateProfile);
-        this.router.delete("/account", this.controller.deleteUserAccount);
+        this.router.delete("/profile", this.controller.deleteUserAccount);
+        this.router.delete("/profile/photo", this.controller.deleteProfilePhoto);
     }
 }

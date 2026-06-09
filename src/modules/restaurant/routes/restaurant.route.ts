@@ -15,5 +15,9 @@ export class RestaurantRoutes implements IRoutes {
     this.router.get("/", this.controller.getRestaurants);
     this.router.get("/nearby", this.controller.getNearbyRestaurants);
     this.router.get("/owner/my-restaurants", this.controller.getMyRestaurants);
+    this.router.put("/:id", this.controller.updateRestaurant);
+    this.router.patch("/:id/status", this.controller.updateRestaurantStatus);
+    this.router.delete("/:id", this.controller.deleteRestaurant);
+    this.router.get("/:id/reviews", this.controller.getRestaurantReviews);
   }
 }
