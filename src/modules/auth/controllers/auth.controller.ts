@@ -1,12 +1,105 @@
 import type { Request, Response } from 'express';
-import { IApiResponse } from '../interfaces/auth.interface';
+import { IApiResponse, ILoginDto, ISignupDto } from '../interfaces/auth.interface';
 import { AuthService } from '../services/auth.service';
 export class AuthController {
   private authService = new AuthService();
 
-  register = async (req: Request, res: Response) => {
-    res.send("registered");
+  registerPage = async (req: Request, res: Response) => {
+
+    const role: string =
+      String(req.params.role).toUpperCase();
+
+    switch (role) {
+
+      case "CUSTOMER":
+        return res.render(
+          "auth/customer-register"
+        );
+
+      case "RESTAURANT":
+        return res.render(
+          "auth/restaurant-register"
+        );
+
+      case "DELIVERY-PARTNER":
+        return res.render(
+          "auth/delivery-register"
+        );
+
+      default:
+        return res.status(404).send(
+          "Invalid Role"
+        );
+    }
   };
+
+  loginPage = async (
+    req: Request,
+    res: Response
+  ) => {
+
+    const role: string =
+      String(req.params.role).toUpperCase();
+
+    switch (role) {
+
+      case "CUSTOMER":
+        return res.render(
+          "auth/customer-login"
+        );
+
+      case "RESTAURANT":
+        return res.render(
+          "auth/restaurant-login"
+        );
+
+      case "DELIVERY-PARTNER":
+        return res.render(
+          "auth/delivery-login"
+        );
+
+      default:
+        return res.status(404).send(
+          "Invalid Role"
+        );
+    }
+  };
+
+
+  // Register user who does not have already Accounts....
+  register = async (req: Request, res: Response) => {
+    const userInfo: ISignupDto = req.body
+    const role: string =
+      String(req.params.role).toUpperCase();
+
+
+    try {
+      const response: IApiResponse = await this.authService.registerUser(userInfo,role);
+      if (response.status == 'Success') return res.status(201).json(response);
+      else res.status(401).json(response);
+    } catch (e: any) {
+      res.status(500).json({ message: e.message })
+    }
+  };
+
+  // Login role wise user..........
+  login = async (req: Request, res: Response) => {
+    const loginInfo: ILoginDto = req.body
+    const role: string =
+      String(req.params.role).toUpperCase();
+
+    console.log(loginInfo)
+
+    try {
+      const response: IApiResponse = await this.authService.loginUser(loginInfo,role);
+      if (response.status == 'Success') return res.status(201).json(response);
+      else res.status(401).json(response);
+    } catch (e: any) {
+      res.status(500).json({ message: e.message })
+    }
+  };
+
+
 
 
   // Api that verify email end send email to that user
@@ -66,7 +159,7 @@ export class AuthController {
     // let user: any = req.user;
 
     try {
-      const response : IApiResponse = await this.authService.verifyOTPService(otp, email)
+      const response: IApiResponse = await this.authService.verifyOTPService(otp, email)
 
       if (response.status == 'Success') {
         return res.status(200).json(response);
@@ -79,23 +172,23 @@ export class AuthController {
   }
 
   resetPassword = async (req: Request, res: Response) => {
-    
+
     const user: any = req.user
     const password: string = req.body.password;
     if (!password) return res.status(400).json({ message: 'Password must be Required' });
 
     try {
-        const response: IApiResponse = await this.authService.updateUserPasswordService(user.email, password);
+      const response: IApiResponse = await this.authService.updateUserPasswordService(user.email, password);
 
-        if (response.status == 'Success') {
-            return res.status(200).json(response);
-        }
-        else res.status(401).json(response);
+      if (response.status == 'Success') {
+        return res.status(200).json(response);
+      }
+      else res.status(401).json(response);
     } catch (e: any) {
-        res.status(500).json({ message: e.message })
+      res.status(500).json({ message: e.message })
     }
 
   }
 
-  
+
 }

@@ -1,29 +1,110 @@
 import { PrismaClient } from "@prisma/client";
-import type { ICreateUser } from "../interfaces/auth.interface.js";
+import { RestaurantController } from "../../restaurant/controlllers/restaurant.controller";
+import { signupSchema } from "../validators/register.validator";
+import { ICreateUserDto, ISignupDto } from "../interfaces/auth.interface";
+import { use } from "passport";
 
 export class UserRepository {
   constructor(private readonly prisma: PrismaClient) { }
 
-  // Create user
-  // async createProfile(data: ICreateUser) {
-  //   return this.prisma.users.create({
-  //     data: {
-  //       id:full_name: data.fullName,
-  //       email: data.email,
-  //       mobile: data.phone,
-  //       password_hash: data.passwordHash,
-  //       updated_at: new Date(),
-  //     },
-  //   });
-  // }
 
   // Find user by email
   async findUserByEmail(email: string) {
-    const user = await this.prisma.users.findUnique({
-      where: { email },
-      include: { user_roles: { include: { roles: true } } }, // include roles if needed
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        include: { userRoles: { include: { role: true } } }, // include roles if needed
+      });
+
+      console.log("User find by mail")
+      console.log(user)
+      return user;
+
+    } catch (e: any) {
+      console.log(e.message);
+      throw new Error(e.message);
+    }
+  }
+
+  // async getUserByEmailAndRole(email: string, role: string) {
+  //   try {
+  //     return await this.prisma.user.findFirst({
+  //       where: {
+  //         email: email,
+  //         userRoles: {
+  //           some: {
+  //             role: {
+  //               role: role,
+  //             },
+  //           },
+  //         },
+  //       },
+  //       include: {
+  //         userRoles: {
+  //           include: {
+  //             role: true,
+  //           },
+  //         },
+  //       },
+  //     });
+  //   } catch (e: any) {
+  //     console.log(e.message);
+  //   }
+  // }
+
+  async createUser(userInfo: ICreateUserDto, role: string) {
+    try {
+
+      console.log(role)
+
+      return await this.prisma.user.create({
+        data: {
+          fullName: userInfo.fullName,
+          email: userInfo.email,
+          mobile: userInfo.mobile,
+          passwordHash: userInfo.passwordHash,
+
+          userRoles: {
+            create: {
+              role: {
+                connect: {
+                  role: role
+                }
+              }
+            }
+          }
+        },
+        include: {
+          userRoles: {
+            include: {
+              role: true
+            }
+          }
+        }
+      });
+    } catch (e: any) {
+      throw new Error(e.message);
+    }
+  }
+
+  async assignRole(userId: string, role: string) {
+    const roleData = await this.prisma.role.findUnique({
+      where: {
+        role: role
+      }
     });
-    return user;
+
+    if (!roleData) {
+      throw new Error("Role not found");
+    }
+
+    return await this.prisma.userRole.create({
+      data: {
+        userId: userId,
+        roleId: roleData.id
+      }
+    });
+
   }
 
 }

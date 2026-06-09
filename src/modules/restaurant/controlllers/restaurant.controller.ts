@@ -36,7 +36,7 @@ export class RestaurantController {
   //get restaurant by owner
   getMyRestaurants = async (req: Request, res: Response) => {
     try {
-      const userId = req.user.userId;
+      const userId = req.user.userId ;
 
       const page = Number(req.query.page) || 1;
 
