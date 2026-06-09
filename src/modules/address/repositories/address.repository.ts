@@ -1,4 +1,5 @@
 import { prisma } from "../../../config/prisma";
+import { AppError } from "../../../utils/appError";
 import { IAddress, ICreateAddress, IUpdateAddress } from "../interfaces/address.interface";
 
 const addressSelect = {
@@ -25,7 +26,7 @@ export class AddressRepository{
             const address = await this.getAddressById(addressId, userId);
         
             if(!address){
-                throw new Error("Address not found");
+                throw new AppError("Address not found");
             }
 
             return true;

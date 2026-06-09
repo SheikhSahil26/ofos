@@ -225,7 +225,7 @@ model MenuItem {
 
   @@index([categoryId])
   @@index([name])
-  @@index([branch_id], map: "menu_items_branch_id_fkey")
+  @@index([branchId], map: "menu_items_branch_id_fkey")
   @@map("menu_items")
 }
 
