@@ -206,6 +206,7 @@ model Category {
 /// Individual food item on the menu
 model MenuItem {
   id             String          @id @default(uuid())
+  branchId       String          @map("branch_id")
   categoryId     String          @map("category_id")
   name           String?         @db.VarChar(255)
   description    String?         @db.Text
