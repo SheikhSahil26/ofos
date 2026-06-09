@@ -12,8 +12,10 @@ export interface IAddress{
     latitude?: Decimal | null;
     longitude?: Decimal | null;
     isDefault?: boolean | null;
+    isDeleted?: boolean;
     createdAt: Date;
     updatedAt: Date;
+    deletedAt: Date | null;
 }
 
 export interface ICreateAddress{
