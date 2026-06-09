@@ -37,8 +37,8 @@ export class UserController{
 
             //mapping data from request body and file to IUpdateUser interface
             const data: IUpdateUser = {
-                fullName: req.body.fullName,
-                mobile: req.body.mobile
+                fullName: req.body?.fullName,
+                mobile: req.body?.mobile
             };
 
             if(req.file){
