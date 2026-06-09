@@ -36,6 +36,7 @@ model User {
   supportTicketsAsCustomer SupportTicket[]      @relation("TicketCustomer")
   addresses                UserAddress[]
   userRoles                UserRole[]
+  refreshTokens            RefreshToken[]
 
   @@map("users")
 }
@@ -84,6 +85,20 @@ model UserAddress {
   @@index([userId])
   @@map("user_addresses")
 }
+
+model RefreshToken {
+  id          BigInt   @id @default(autoincrement())
+  token       String   @db.Text
+  userId      String   @map("user_id")
+  isRevoked   Boolean  @default(false)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 
 /// Restaurant entity owned by a user
 model Restaurant {
@@ -206,6 +221,7 @@ model Category {
 /// Individual food item on the menu
 model MenuItem {
   id             String          @id @default(uuid())
+  branchId       String          @map("branch_id")
   categoryId     String          @map("category_id")
   name           String?         @db.VarChar(255)
   description    String?         @db.Text
@@ -225,7 +241,7 @@ model MenuItem {
 
   @@index([categoryId])
   @@index([name])
-  @@index([branch_id], map: "menu_items_branch_id_fkey")
+  @@index([branchId], map: "menu_items_branch_id_fkey")
   @@map("menu_items")
 }
 

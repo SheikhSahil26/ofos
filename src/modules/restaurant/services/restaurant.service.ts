@@ -2,6 +2,8 @@ import { RestaurantRepository } from "../repositories/restaurant.repository";
 import { UserRepository } from "../../user/repositories/user.repository";
 import { IRestaurantValidation, INearbyItem, IPagination, IRestaurantsResult, IBranch, ICreateRestaurant, IUpdateRestaurant, ICreateReview } from "../interfaces/restaurant.interface";
 import { prisma } from "../../../config/prisma";
+import { ServiceResponse } from "../../../common/types/service-response.type";
+import { AppError } from "../../../utils/appError";
 
 
 export class RestaurantService{
@@ -14,7 +16,7 @@ export class RestaurantService{
     page: number,
     limit: number,
     search?: string
-): Promise<{ data: any[]; pagination: IPagination }> {
+): Promise<ServiceResponse<any[]> & { pagination: IPagination }> {
 
     if(page < 1){
         page = 1;
@@ -32,15 +34,17 @@ export class RestaurantService{
     );
 
     return {
+        success: true,
         data:data.restaurants,
-
         pagination:{
             page,
             limit,
             total:data.total
-        }
+        },
+        message: "Restaurants fetched successfully",
+        statusCode: 200
+     };
     };
-}
 
 
     //GET owner restaurants
@@ -48,7 +52,7 @@ export class RestaurantService{
     ownerId: string,
     page: number,
     limit: number
-): Promise<{ data: any[]; pagination: IPagination }> {
+): Promise<ServiceResponse<any[]> & { pagination: IPagination }> {
 
     const owner: any =
     await this.userRepo.findUserById(ownerId);
@@ -69,22 +73,24 @@ export class RestaurantService{
     );
 
     return {
-        data:data.restaurants,
-
-        pagination:{
+        success: true,
+        data: data.restaurants,
+        pagination: {
             page,
             limit,
-            total:data.total
-        }
+            total: data.total
+        },
+        message: "Restaurants fetched successfully",
+        statusCode: 200
+     };
     };
-}
 
     //GET nearby restaurants
    async getNearbyRestaurants(
     latitude: number,
     longitude: number,
     radius: number
-): Promise<INearbyItem[]> {
+): Promise<ServiceResponse<INearbyItem[]>> {
 
     const branches =
     await this.restaurantRepo.getNearbyBranches();
@@ -110,6 +116,8 @@ export class RestaurantService{
         );
 
         return {
+            success: true,
+            statusCode: 200,
             branch: {
                 ...branch,
                 latitude: branchLatitude,
@@ -132,7 +140,12 @@ export class RestaurantService{
         a.distance - b.distance
     );
 
-    return filtered;
+    return {
+        success: true,
+        data: filtered,
+        message: "Nearby restaurants fetched successfully",
+        statusCode: 200
+    };
 }
 
 // calculate distance
@@ -171,9 +184,9 @@ private calculateDistance(
 
 async validateRestaurant(
     restaurantId: string
-): Promise<IRestaurantValidation>{
+): Promise<ServiceResponse<IRestaurantValidation>>{
 
-    try{
+
 
         const restaurant =
         await this.restaurantRepo
@@ -182,70 +195,79 @@ async validateRestaurant(
         );
 
         if(!restaurant){
-            throw new Error(
-                "Restaurant not found"
+            throw new AppError(
+                "Restaurant not found",
+                404
             );
         }
 
         if(restaurant.isDeleted){
-            throw new Error(
-                "Restaurant has been deleted"
+            throw new AppError(
+                "Restaurant has been deleted",
+                404
             );
         }
 
-        return restaurant;
+        return {
+            success: true,
+            data: restaurant,
+            message: "Restaurant validated successfully",
+            statusCode: 200
+        };
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 
 //create restaurant
  async createRestaurant(
         ownerId:string,
         data:ICreateRestaurant
-    ){
+    ): Promise<ServiceResponse<{ restaurantId: string; branchId: string }>>{
 
-        try{
-
+  
             const owner =
             await this.userRepo
             .findUserById(ownerId);
 
             if(!owner){
-                throw new Error(
-                    "Owner not found"
+                throw new AppError(
+                    "Owner not found",
+                    404
                 );
             }
 
             if(owner.isDeleted){
-                throw new Error(
-                    "Owner account deleted"
+                throw new AppError(
+                    "Owner account deleted",
+                    404
                 );
             }
 
             if(!data.name?.trim()){
-                throw new Error(
-                    "Restaurant name is required"
+                throw new AppError(
+                    "Restaurant name is required",
+                    400
                 );
             }
 
             if(!data.branchName?.trim()){
-                throw new Error(
-                    "Branch name is required"
+                throw new AppError(
+                    "Branch name is required",
+                    400
                 );
             }
 
             if(data.gstin.length !== 15){
-                throw new Error(
-                    "Invalid GSTIN"
+                throw new AppError(
+                    "Invalid GSTIN",
+                    400
                 );
             }
 
             if(data.fssaiLicense.length !== 14){
-                throw new Error(
-                    "Invalid FSSAI License"
+                throw new AppError(
+                    "Invalid FSSAI License",
+                    400
                 );
             }
 
@@ -253,8 +275,9 @@ async validateRestaurant(
                 data.latitude < -90 ||
                 data.latitude > 90
             ){
-                throw new Error(
-                    "Invalid latitude"
+                throw new AppError(
+                    "Invalid latitude",
+                    400
                 );
             }
 
@@ -262,16 +285,18 @@ async validateRestaurant(
                 data.longitude < -180 ||
                 data.longitude > 180
             ){
-                throw new Error(
-                    "Invalid longitude"
+                throw new AppError(
+                    "Invalid longitude",
+                    400
                 );
             }
 
             if(
                 data.operatingHours.length !== 7
             ){
-                throw new Error(
-                    "All 7 operating days required"
+                throw new AppError(
+                    "All 7 operating days required",
+                    400
                 );
             }
 
@@ -283,8 +308,9 @@ async validateRestaurant(
             );
 
             if(existingRestaurant){
-                throw new Error(
-                    "Restaurant already exists"
+                throw new AppError(
+                    "Restaurant already exists",
+                    400
                 );
             }
 
@@ -315,19 +341,20 @@ async validateRestaurant(
                     );
 
                     return {
+                        success: true,
+                        message: "Restaurant created successfully",
+                        statusCode: 201,
+                        data:{      
                         restaurantId:
                             restaurant.id,
 
                         branchId:
                             branch.id
+                    }
                     };
                 }
             );
 
-        }
-        catch(err){
-            throw err;
-        }
     }
 
 
@@ -335,7 +362,7 @@ async validateRestaurant(
     async validateRestaurantOwnership(
     restaurantId:string,
     userId:string
-){
+): Promise<ServiceResponse<IRestaurantValidation>>{
 
     const restaurant =
     await this.restaurantRepo
@@ -344,26 +371,34 @@ async validateRestaurant(
     );
 
     if(!restaurant){
-        throw new Error(
-            "Restaurant not found"
+        throw new AppError(
+            "Restaurant not found",
+            404
         );
     }
 
     if(restaurant.isDeleted){
-        throw new Error(
-            "Restaurant has been deleted"
+        throw new AppError(
+            "Restaurant has been deleted",
+            404
         );
     }
 
     if(
         restaurant.ownerId !== userId
     ){
-        throw new Error(
-            "Unauthorized access"
+        throw new AppError(
+            "Unauthorized access",
+            403
         );
     }
 
-    return restaurant;
+    return {
+        success: true,
+        data: restaurant,
+        message: "Restaurant ownership validated successfully",
+        statusCode: 200
+    };
 }
 
 // Update restaurant details
@@ -371,9 +406,9 @@ async updateRestaurant(
     restaurantId:string,
     userId:string,
     data:IUpdateRestaurant
-){
+): Promise<ServiceResponse<any>>{
 
-    try{
+
 
         await this.validateRestaurantOwnership(
             restaurantId,
@@ -384,8 +419,9 @@ async updateRestaurant(
             data.gstin &&
             data.gstin.length !== 15
         ){
-            throw new Error(
-                "Invalid GSTIN"
+            throw new AppError(
+                "Invalid GSTIN",
+                400
             );
         }
 
@@ -393,8 +429,9 @@ async updateRestaurant(
             data.fssaiLicense &&
             data.fssaiLicense.length !== 14
         ){
-            throw new Error(
-                "Invalid FSSAI License"
+            throw new AppError(
+                "Invalid FSSAI License",
+                400 
             );
         }
 
@@ -405,8 +442,9 @@ async updateRestaurant(
                 data.latitude > 90
             )
         ){
-            throw new Error(
-                "Invalid latitude"
+            throw new AppError(
+                "Invalid latitude",
+                400
             );
         }
 
@@ -417,8 +455,9 @@ async updateRestaurant(
                 data.longitude > 180
             )
         ){
-            throw new Error(
-                "Invalid longitude"
+            throw new AppError(
+                "Invalid longitude",
+                400 
             );
         }
 
@@ -440,19 +479,22 @@ async updateRestaurant(
                 );
 
                 if(!primaryBranch){
-                    throw new Error(
-                        "Primary branch not found"
+                    throw new AppError(
+                        "Primary branch not found",
+                        404
                     );
                 }
 
-                return restaurant;
+                return {
+                    success : true,
+                    data : restaurant,
+                    message : "Restaurant updated successfully",
+                    statusCode : 200
+                };
             }
         );
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 
 
@@ -462,61 +504,80 @@ async updateRestaurantStatus(
     restaurantId: string,
     userId: string,
     isActive: boolean
-){
+): Promise<ServiceResponse<any>>{
 
-    try{
 
-        const restaurant =
+        const restaurantResponse =
         await this.validateRestaurantOwnership(
             restaurantId,
             userId
         );
 
+        const restaurant = restaurantResponse.data;
+
+        if(!restaurant){
+            throw new AppError(
+                "Restaurant not found",
+                404
+            );
+        }
+
         if(
             restaurant.isActive === isActive
         ){
-            throw new Error(
+            throw new AppError(
                 `Restaurant is already ${
                     isActive
                     ? "active"
                     : "inactive"
-                }`
+                }`,
+                400
             );
         }
 
-        return await this.restaurantRepo
+        const updatedRestaurant =
+        await this.restaurantRepo
         .updateRestaurantStatus(
             restaurantId,
             isActive
         );
 
-    }
-    catch(err){
-        throw err;
-    }
+        return {
+            success: true,
+            data: updatedRestaurant,
+            message: `Restaurant has been ${
+                isActive
+                ? "activated"
+                : "deactivated"
+            } successfully`,
+            statusCode: 200
+        };
+
+
 }
 
 
 // Soft delete restaurant
 
-// restaurant.service.ts
-
 async deleteRestaurant(
     restaurantId: string,
     userId: string
-){
+): Promise<ServiceResponse<null>>{
 
-    try{
 
-        const restaurant =
+
+        const restaurantResponse =
         await this.validateRestaurantOwnership(
             restaurantId,
             userId
         );
 
-        if(restaurant.isDeleted){
-            throw new Error(
-                "Restaurant already deleted"
+        const restaurant = restaurantResponse.data;
+
+        if(restaurant?.isDeleted){
+            throw new AppError(
+                "Restaurant already deleted",
+                400
             );
         }
 
@@ -525,12 +586,14 @@ async deleteRestaurant(
             restaurantId
         );
 
-        return;
+        return {
+            success: true,
+            data: null,
+            message: "Restaurant deleted successfully",
+            statusCode: 200
+        };
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 
 
@@ -540,9 +603,8 @@ async getRestaurantReviews(
     restaurantId:string,
     page:number,
     limit:number
-){
+): Promise<ServiceResponse<any>>{
 
-    try{
 
         await this.validateRestaurant(
             restaurantId
@@ -573,25 +635,21 @@ async getRestaurantReviews(
         );
 
         return {
-
-            reviews:
-            reviewData.reviews,
-
-            averageRating,
-
-            pagination:{
-                page,
-                limit,
-                total:
-                reviewData.total
-            }
+            success: true,
+            data: {
+                reviews: reviewData.reviews,
+                averageRating,
+                pagination: {
+                    page,
+                    limit,
+                    total: reviewData.total
+                }
+            },
+            message: "Restaurant reviews fetched successfully",
+            statusCode: 200
         };
 
     }
-    catch(err){
-        throw err;
-    }
-}
 
 
 // Create Review
@@ -599,9 +657,7 @@ async createReview(
     restaurantId:string,
     userId:string,
     data:ICreateReview
-){
-
-    try{
+): Promise<ServiceResponse<any>>{
 
         await this.validateRestaurant(
             restaurantId
@@ -614,16 +670,18 @@ async createReview(
         );
 
         if(!order){
-            throw new Error(
-                "Order not found"
+            throw new AppError(
+                "Order not found",
+                404
             );
         }
 
         if(
             order.customerId !== userId
         ){
-            throw new Error(
-                "Unauthorized order access"
+            throw new AppError(
+                "Unauthorized order access",
+                403
             );
         }
 
@@ -631,16 +689,18 @@ async createReview(
             order.branch.restaurantId
             !== restaurantId
         ){
-            throw new Error(
-                "Order does not belong to restaurant"
+            throw new AppError(
+                "Order does not belong to restaurant",
+                400
             );
         }
 
         if(
             order.status !== "DELIVERED"
         ){
-            throw new Error(
-                "Review can only be added after delivery"
+            throw new  AppError(
+                "Review can only be added after delivery",
+                400
             );
         }
 
@@ -651,8 +711,9 @@ async createReview(
         );
 
         if(existingReview){
-            throw new Error(
-                "Review already submitted"
+            throw new AppError(
+                "Review already submitted",
+                400
             );
         }
 
@@ -660,8 +721,9 @@ async createReview(
             data.foodRating < 1 ||
             data.foodRating > 5
         ){
-            throw new Error(
-                "Food rating must be between 1 and 5"
+            throw new AppError(
+                "Food rating must be between 1 and 5",
+                400
             );
         }
 
@@ -669,8 +731,9 @@ async createReview(
             data.deliveryRating < 1 ||
             data.deliveryRating > 5
         ){
-            throw new Error(
-                "Delivery rating must be between 1 and 5"
+            throw new AppError(
+                "Delivery rating must be between 1 and 5",
+                400
             );
         }
 
@@ -678,8 +741,9 @@ async createReview(
             data.packagingRating < 1 ||
             data.packagingRating > 5
         ){
-            throw new Error(
-                "Packaging rating must be between 1 and 5"
+            throw new AppError(
+                "Packaging rating must be between 1 and 5",
+                400
             );
         }
 
@@ -692,11 +756,13 @@ async createReview(
             data
         );
 
-        return review;
+        return {
+            success: true,
+            data: review,
+            message: "Review created successfully",
+            statusCode: 201
+        };
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 }
