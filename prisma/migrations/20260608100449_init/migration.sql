@@ -1,140 +1,144 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE `users` (
+    `id` VARCHAR(191) NOT NULL,
+    `full_name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `mobile` VARCHAR(20) NOT NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `profile_photo` TEXT NULL,
+    `is_verified` BOOLEAN NOT NULL DEFAULT false,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
-  - The primary key for the `operating_hours` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - The primary key for the `restaurant_branches` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to drop the column `owner_id` on the `restaurant_branches` table. All the data in the column will be lost.
-  - You are about to alter the column `delivery_radius_km` on the `restaurant_branches` table. The data in that column could be lost. The data in that column will be cast from `Decimal(10,2)` to `Decimal(5,2)`.
-  - The primary key for the `restaurant_staff` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - The primary key for the `restaurants` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - The primary key for the `roles` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to alter the column `role` on the `roles` table. The data in that column could be lost. The data in that column will be cast from `Enum(EnumId(0))` to `VarChar(50)`.
-  - The primary key for the `user_addresses` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - The primary key for the `user_roles` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - The primary key for the `users` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - Added the required column `updated_at` to the `operating_hours` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `updated_at` to the `restaurant_staff` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `updated_at` to the `restaurants` table without a default value. This is not possible if the table is not empty.
-  - Made the column `is_default` on table `user_addresses` required. This step will fail if there are existing NULL values in that column.
+    UNIQUE INDEX `users_email_key`(`email`),
+    UNIQUE INDEX `users_mobile_key`(`mobile`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-*/
--- DropForeignKey
-ALTER TABLE `operating_hours` DROP FOREIGN KEY `operating_hours_branch_id_fkey`;
+-- CreateTable
+CREATE TABLE `roles` (
+    `id` VARCHAR(191) NOT NULL,
+    `role` VARCHAR(50) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE `restaurant_branches` DROP FOREIGN KEY `restaurant_branches_owner_id_fkey`;
+    UNIQUE INDEX `roles_role_key`(`role`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- DropForeignKey
-ALTER TABLE `restaurant_branches` DROP FOREIGN KEY `restaurant_branches_restaurant_id_fkey`;
+-- CreateTable
+CREATE TABLE `user_roles` (
+    `user_id` VARCHAR(191) NOT NULL,
+    `role_id` VARCHAR(191) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE `restaurant_staff` DROP FOREIGN KEY `restaurant_staff_branch_id_fkey`;
+    PRIMARY KEY (`user_id`, `role_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- DropForeignKey
-ALTER TABLE `restaurant_staff` DROP FOREIGN KEY `restaurant_staff_user_id_fkey`;
+-- CreateTable
+CREATE TABLE `user_addresses` (
+    `id` VARCHAR(191) NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
+    `label` VARCHAR(50) NULL,
+    `address_line1` TEXT NULL,
+    `address_line2` TEXT NULL,
+    `city` VARCHAR(100) NULL,
+    `state` VARCHAR(100) NULL,
+    `pincode` VARCHAR(20) NULL,
+    `latitude` DECIMAL(10, 8) NULL,
+    `longitude` DECIMAL(11, 8) NULL,
+    `is_default` BOOLEAN NOT NULL DEFAULT false,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE `restaurants` DROP FOREIGN KEY `restaurants_owner_id_fkey`;
+    INDEX `user_addresses_user_id_idx`(`user_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- DropForeignKey
-ALTER TABLE `user_addresses` DROP FOREIGN KEY `user_addresses_user_id_fkey`;
+-- CreateTable
+CREATE TABLE `restaurants` (
+    `id` VARCHAR(191) NOT NULL,
+    `owner_id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(255) NULL,
+    `description` TEXT NULL,
+    `logo_url` TEXT NULL,
+    `cover_image_url` TEXT NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE `user_roles` DROP FOREIGN KEY `user_roles_role_id_fkey`;
+    INDEX `restaurants_owner_id_idx`(`owner_id`),
+    INDEX `restaurants_name_idx`(`name`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- DropForeignKey
-ALTER TABLE `user_roles` DROP FOREIGN KEY `user_roles_user_id_fkey`;
+-- CreateTable
+CREATE TABLE `restaurant_branches` (
+    `id` VARCHAR(191) NOT NULL,
+    `restaurant_id` VARCHAR(191) NOT NULL,
+    `head_id` VARCHAR(191) NULL,
+    `branch_name` VARCHAR(255) NULL,
+    `address_line1` TEXT NULL,
+    `address_line2` TEXT NULL,
+    `city` VARCHAR(100) NULL,
+    `state` VARCHAR(100) NULL,
+    `pincode` VARCHAR(20) NULL,
+    `contact_number` VARCHAR(20) NULL,
+    `gstin` VARCHAR(50) NULL,
+    `fssai_license` VARCHAR(100) NULL,
+    `verification_status` ENUM('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED') NOT NULL DEFAULT 'PENDING',
+    `latitude` DECIMAL(10, 8) NULL,
+    `longitude` DECIMAL(11, 8) NULL,
+    `delivery_radius_km` DECIMAL(5, 2) NULL,
+    `is_primary` BOOLEAN NOT NULL DEFAULT false,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
--- DropIndex
-DROP INDEX `operating_hours_branch_id_day_of_week_key` ON `operating_hours`;
+    INDEX `restaurant_branches_restaurant_id_idx`(`restaurant_id`),
+    INDEX `restaurant_branches_head_id_idx`(`head_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- DropIndex
-DROP INDEX `restaurant_branches_city_idx` ON `restaurant_branches`;
+-- CreateTable
+CREATE TABLE `operating_hours` (
+    `id` VARCHAR(191) NOT NULL,
+    `branch_id` VARCHAR(191) NOT NULL,
+    `day_of_week` ENUM('MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN') NOT NULL,
+    `open_time` TIME(0) NULL,
+    `close_time` TIME(0) NULL,
+    `is_closed` BOOLEAN NOT NULL DEFAULT false,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
--- DropIndex
-DROP INDEX `restaurant_branches_owner_id_fkey` ON `restaurant_branches`;
+    INDEX `operating_hours_branch_id_idx`(`branch_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- DropIndex
-DROP INDEX `restaurant_branches_pincode_idx` ON `restaurant_branches`;
+-- CreateTable
+CREATE TABLE `restaurant_staff` (
+    `id` VARCHAR(191) NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
+    `branch_id` VARCHAR(191) NOT NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
--- DropIndex
-DROP INDEX `restaurant_branches_state_idx` ON `restaurant_branches`;
-
--- DropIndex
-DROP INDEX `user_roles_role_id_idx` ON `user_roles`;
-
--- DropIndex
-DROP INDEX `user_roles_user_id_idx` ON `user_roles`;
-
--- AlterTable
-ALTER TABLE `operating_hours` DROP PRIMARY KEY,
-    ADD COLUMN `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `deleted_at` DATETIME(3) NULL,
-    ADD COLUMN `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN `updated_at` DATETIME(3) NOT NULL,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `branch_id` VARCHAR(191) NOT NULL,
-    ADD PRIMARY KEY (`id`);
-
--- AlterTable
-ALTER TABLE `restaurant_branches` DROP PRIMARY KEY,
-    DROP COLUMN `owner_id`,
-    ADD COLUMN `head_id` VARCHAR(191) NULL,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `restaurant_id` VARCHAR(191) NOT NULL,
-    MODIFY `address_line1` TEXT NULL,
-    MODIFY `address_line2` TEXT NULL,
-    MODIFY `delivery_radius_km` DECIMAL(5, 2) NULL,
-    ADD PRIMARY KEY (`id`);
-
--- AlterTable
-ALTER TABLE `restaurant_staff` DROP PRIMARY KEY,
-    ADD COLUMN `updated_at` DATETIME(3) NOT NULL,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `user_id` VARCHAR(191) NOT NULL,
-    MODIFY `branch_id` VARCHAR(191) NOT NULL,
-    ADD PRIMARY KEY (`id`);
-
--- AlterTable
-ALTER TABLE `restaurants` DROP PRIMARY KEY,
-    ADD COLUMN `deleted_at` DATETIME(3) NULL,
-    ADD COLUMN `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN `updated_at` DATETIME(3) NOT NULL,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `owner_id` VARCHAR(191) NOT NULL,
-    MODIFY `description` TEXT NULL,
-    MODIFY `logo_url` TEXT NULL,
-    MODIFY `cover_image_url` TEXT NULL,
-    ADD PRIMARY KEY (`id`);
-
--- AlterTable
-ALTER TABLE `roles` DROP PRIMARY KEY,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `role` VARCHAR(50) NOT NULL,
-    ADD PRIMARY KEY (`id`);
-
--- AlterTable
-ALTER TABLE `user_addresses` DROP PRIMARY KEY,
-    ADD COLUMN `deleted_at` DATETIME(3) NULL,
-    ADD COLUMN `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `user_id` VARCHAR(191) NOT NULL,
-    MODIFY `address_line1` TEXT NULL,
-    MODIFY `address_line2` TEXT NULL,
-    MODIFY `is_default` BOOLEAN NOT NULL DEFAULT false,
-    ADD PRIMARY KEY (`id`);
-
--- AlterTable
-ALTER TABLE `user_roles` DROP PRIMARY KEY,
-    MODIFY `user_id` VARCHAR(191) NOT NULL,
-    MODIFY `role_id` VARCHAR(191) NOT NULL,
-    ADD PRIMARY KEY (`user_id`, `role_id`);
-
--- AlterTable
-ALTER TABLE `users` DROP PRIMARY KEY,
-    MODIFY `id` VARCHAR(191) NOT NULL,
-    MODIFY `profile_photo` TEXT NULL,
-    ADD PRIMARY KEY (`id`);
+    INDEX `restaurant_staff_user_id_idx`(`user_id`),
+    INDEX `restaurant_staff_branch_id_idx`(`branch_id`),
+    UNIQUE INDEX `restaurant_staff_user_id_branch_id_key`(`user_id`, `branch_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `categories` (
@@ -154,6 +158,7 @@ CREATE TABLE `categories` (
 -- CreateTable
 CREATE TABLE `menu_items` (
     `id` VARCHAR(191) NOT NULL,
+    `branch_id` VARCHAR(191) NOT NULL,
     `category_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(255) NULL,
     `description` TEXT NULL,
@@ -559,9 +564,6 @@ CREATE TABLE `notifications` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- CreateIndex
-CREATE INDEX `restaurant_branches_head_id_idx` ON `restaurant_branches`(`head_id`);
-
 -- AddForeignKey
 ALTER TABLE `user_roles` ADD CONSTRAINT `user_roles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -594,6 +596,9 @@ ALTER TABLE `categories` ADD CONSTRAINT `categories_branch_id_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `menu_items` ADD CONSTRAINT `menu_items_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `menu_items` ADD CONSTRAINT `menu_items_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `restaurant_branches`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `menu_item_tags` ADD CONSTRAINT `menu_item_tags_menu_item_id_fkey` FOREIGN KEY (`menu_item_id`) REFERENCES `menu_items`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
