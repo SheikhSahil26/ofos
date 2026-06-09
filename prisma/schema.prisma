@@ -206,6 +206,7 @@ model Category {
 /// Individual food item on the menu
 model MenuItem {
   id             String          @id @default(uuid())
+  branchId       String          @map("branch_id")
   categoryId     String          @map("category_id")
   name           String?         @db.VarChar(255)
   description    String?         @db.Text
@@ -225,7 +226,7 @@ model MenuItem {
 
   @@index([categoryId])
   @@index([name])
-  @@index([branch_id], map: "menu_items_branch_id_fkey")
+  @@index([branchId], map: "menu_items_branch_id_fkey")
   @@map("menu_items")
 }
 
