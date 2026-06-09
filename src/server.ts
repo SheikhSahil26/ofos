@@ -9,6 +9,7 @@ import path from "path"
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { buildApiRouter } from "./modules/routes";
+import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
 
 
 const PORT = process.env.PORT;
@@ -43,7 +44,8 @@ app.use("/api", buildApiRouter());
 //    res.render("home")
 // })
 
-
+app.use(errorHandler);
+app.use(notFoundMiddleware);
 
 
 
