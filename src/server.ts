@@ -55,15 +55,7 @@ app.get("/redis-test",async(req:any,res:any)=>{
 
 
 
-
-
-
-
-
-
-
-
-app.listen(2000,()=>{
-    console.log("server started at port 2000");
+app.listen(PORT,()=>{
+    console.log(`server is running on port ${PORT}`);
 });
 

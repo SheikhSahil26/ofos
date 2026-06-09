@@ -21,6 +21,7 @@ model User {
   deletedAt                DateTime?            @map("deleted_at")
   createdAt                DateTime             @default(now()) @map("created_at")
   updatedAt                DateTime             @updatedAt @map("updated_at")
+  RefreshToken             RefreshToken[]
   couponUsages             CouponUsage[]
   deliveryPartner          DeliveryPartner?
   loyaltyAccount           LoyaltyAccount?
@@ -135,7 +136,6 @@ model RestaurantBranch {
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
   categories         Category[]
-  menu_items         MenuItem[]
   operatingHours     OperatingHour[]
   orders             Order[]
   head               RestaurantStaff?   @relation("BranchHead", fields: [headId], references: [id])
@@ -206,25 +206,24 @@ model Category {
 
 /// Individual food item on the menu
 model MenuItem {
-  id                  String           @id @default(uuid())
-  branch_id           String
-  categoryId          String           @map("category_id")
-  name                String?          @db.VarChar(255)
-  description         String?          @db.Text
-  price               Decimal?         @db.Decimal(10, 2)
-  isVeg               Boolean          @default(true) @map("is_veg")
-  imageUrl            String?          @map("image_url") @db.Text
-  isAvailable         Boolean          @default(true) @map("is_available")
-  isBestseller        Boolean          @default(false) @map("is_bestseller")
-  isDeleted           Boolean          @default(false) @map("is_deleted")
-  deletedAt           DateTime?        @map("deleted_at")
-  createdAt           DateTime         @default(now()) @map("created_at")
-  updatedAt           DateTime         @updatedAt @map("updated_at")
-  tags                MenuItemTag[]
-  restaurant_branches RestaurantBranch @relation(fields: [branch_id], references: [id])
-  category            Category         @relation(fields: [categoryId], references: [id])
-  modifierGroups      ModifierGroup[]
-  orderItems          OrderItem[]
+  id             String          @id @default(uuid())
+  branch_id      String
+  categoryId     String          @map("category_id")
+  name           String?         @db.VarChar(255)
+  description    String?         @db.Text
+  price          Decimal?        @db.Decimal(10, 2)
+  isVeg          Boolean         @default(true) @map("is_veg")
+  imageUrl       String?         @map("image_url") @db.Text
+  isAvailable    Boolean         @default(true) @map("is_available")
+  isBestseller   Boolean         @default(false) @map("is_bestseller")
+  isDeleted      Boolean         @default(false) @map("is_deleted")
+  deletedAt      DateTime?       @map("deleted_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  tags           MenuItemTag[]
+  category       Category        @relation(fields: [categoryId], references: [id])
+  modifierGroups ModifierGroup[]
+  orderItems     OrderItem[]
 
   @@index([categoryId])
   @@index([name])
@@ -673,6 +672,18 @@ model Notification {
   @@index([status])
   @@index([notificationType])
   @@map("notifications")
+}
+
+model RefreshToken {
+  id        BigInt   @id @default(autoincrement())
+  token     String   @db.Text
+  user_id   String
+  isRevoked Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  users     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 enum DayOfWeek {
