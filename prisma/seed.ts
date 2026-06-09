@@ -173,11 +173,11 @@ async function main() {
   // ─────────────────────────────────────────────
   const [itemMargherita, itemChickenBBQ, itemGarlic, itemCola, itemChocoCake] =
     await Promise.all([
-      prisma.menuItem.create({ data: { branch_id: branch.id, categoryId: catPizzas.id,    name: "Margherita Pizza",      price: 249.00, isVeg: true,  isBestseller: true  } }),
-      prisma.menuItem.create({ data: { branch_id: branch.id, categoryId: catPizzas.id,    name: "Chicken BBQ Pizza",     price: 399.00, isVeg: false, isBestseller: true  } }),
-      prisma.menuItem.create({ data: { branch_id: branch.id, categoryId: catSides.id,     name: "Garlic Bread",          price: 99.00,  isVeg: true,  isBestseller: false } }),
-      prisma.menuItem.create({ data: { branch_id: branch.id, categoryId: catBeverages.id, name: "Pepsi 500ml",           price: 60.00,  isVeg: true,  isBestseller: false } }),
-      prisma.menuItem.create({ data: { branch_id: branch.id, categoryId: catDesserts.id,  name: "Chocolate Lava Cake",   price: 149.00, isVeg: true,  isBestseller: false } }),
+      prisma.menuItem.create({ data: { branchId: branch.id, categoryId: catPizzas.id,    name: "Margherita Pizza",      price: 249.00, isVeg: true,  isBestseller: true  } }),
+      prisma.menuItem.create({ data: { branchId: branch.id, categoryId: catPizzas.id,    name: "Chicken BBQ Pizza",     price: 399.00, isVeg: false, isBestseller: true  } }),
+      prisma.menuItem.create({ data: { branchId: branch.id, categoryId: catSides.id,     name: "Garlic Bread",          price: 99.00,  isVeg: true,  isBestseller: false } }),
+      prisma.menuItem.create({ data: { branchId: branch.id, categoryId: catBeverages.id, name: "Pepsi 500ml",           price: 60.00,  isVeg: true,  isBestseller: false } }),
+      prisma.menuItem.create({ data: { branchId: branch.id, categoryId: catDesserts.id,  name: "Chocolate Lava Cake",   price: 149.00, isVeg: true,  isBestseller: false } }),
     ]);
   console.log("✅ MenuItems seeded");
 
