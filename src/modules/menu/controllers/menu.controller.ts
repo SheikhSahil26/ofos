@@ -49,7 +49,7 @@ export class MenuController{
 
     updateCategory = asyncHandler(async (req: Request, res: Response) => {
         const categoryId = req.params.id;
-
+        
         if(typeof categoryId != 'string'){
             throw new AppError("Branch ID is required", 400);
         }

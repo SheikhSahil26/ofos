@@ -51,7 +51,7 @@ app.get("/redis-test",async(req:any,res:any)=>{
 app.use(errorHandler);
 app.use(notFoundMiddleware);
 
-app.listen(2000,()=>{
+app.listen(8080,()=>{
     console.log("server started at port 2000");
 });
 
