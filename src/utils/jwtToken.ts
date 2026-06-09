@@ -7,7 +7,7 @@ export const generateAccessToken = (
 ) => {
 
     return jwt.sign(payload,
-        process.env.JWT_ACCESS_SECRET!,
+        String(process.env.JWT_ACCESS_SECRET),
         {
             expiresIn: "15m"
         }
@@ -15,14 +15,14 @@ export const generateAccessToken = (
 };
 
 export const generateRefreshToken = (
-    payload: Express.payload, rememberMe: string
+    userId:string, rememberMe: string
 ) => {
 
     return jwt.sign(
         {
-            payload
+            userId
         },
-        process.env.JWT_REFRESH_SECRET!,
+        String(process.env.JWT_REFRESH_SECRET),
         {
             expiresIn: rememberMe === "on" ? "7d" : "1d"
         }

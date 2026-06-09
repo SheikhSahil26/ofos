@@ -7,7 +7,6 @@ import { PrismaClient, Role } from "@prisma/client";
 import { UserRepository } from '../repositories/auth.repository';
 import { userInfo } from 'node:os';
 import { generateAccessToken, generateRefreshToken } from '../../../utils/jwtToken';
-import { decode } from 'node:punycode';
 
 const prisma = new PrismaClient();
 const userRepo = new UserRepository(prisma);
@@ -127,7 +126,7 @@ export class AuthService {
 
 
             const accessToken: string = generateAccessToken({ userId: existUser.id, role: role, email: existUser.email });
-            const refreshToken: string = generateRefreshToken({ userId: existUser.id, role: role, email: existUser.email }, loginInfo.rememberMe);
+            const refreshToken: string = generateRefreshToken(existUser.id, loginInfo.rememberMe);
 
             await userRepo.saveRefreshToken(
                 existUser.id,
@@ -206,12 +205,15 @@ export class AuthService {
                     process.env.JWT_REFRESH_SECRET!
                 );
 
+            console.log("Decoded Token :", decoded)
+
             // Find refereshtoken from db
             const tokenRecord =
                 await userRepo.findRefreshToken(
                     refreshToken
                 );
 
+            console.log(tokenRecord)
             // token inside databse might be revoked or not exists
             if (!tokenRecord) {
 
@@ -240,9 +242,10 @@ export class AuthService {
 
             const user =
                 await userRepo.findUserById(
-                    decoded.userId
+                    decoded.payload.userId
                 );
 
+            console.log(user)
             if (!user) {
 
                 return {
@@ -253,10 +256,10 @@ export class AuthService {
                 };
             }
 
-            const accessToken: string = generateAccessToken({ userId: user.id, role: decoded.role, email: decoded.email});
+            const accessToken: string = generateAccessToken({ userId: user.id, role: decoded.role, email: decoded.email });
             return {
                 status: "Success",
-                statusCode:200,
+                statusCode: 200,
                 message:
                     "Access token generated",
                 data: {
@@ -266,9 +269,11 @@ export class AuthService {
 
         } catch (error: any) {
 
+            console.log(error.message, error)
+
             return {
                 status: "Error",
-                statusCode:400,
+                statusCode: 400,
                 message:
                     "Invalid refresh token"
             };
@@ -277,7 +282,7 @@ export class AuthService {
     };
 
 
-    verifyUserByEmail = async (email: string): Promise<IApiResponse> => {
+    verifyUserByEmailForOtp = async (email: string): Promise<IApiResponse> => {
         // find user
         const existUser = await userRepo.findUserByEmail(email);
 
@@ -305,6 +310,8 @@ export class AuthService {
         };
 
         const token = jwt.sign(payload, String(process.env.SECRET), { expiresIn: '5m' });
+
+        // const 
 
         const otpLink = 'http://localhost:8080/api/auth/static/inbox'; // you can replace with real email link
 

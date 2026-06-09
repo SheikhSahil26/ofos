@@ -4,6 +4,8 @@ import { signupSchema } from "../validators/register.validator";
 import { ICreateUserDto, ISignupDto } from "../interfaces/auth.interface";
 import { use } from "passport";
 
+
+
 export class UserRepository {
   constructor(private readonly prisma: PrismaClient) { }
 
@@ -27,7 +29,10 @@ export class UserRepository {
 
   async getUserByEmailAndRole(email: string, role: string) {
     try {
-      return await this.prisma.user.findFirst({
+
+      console.log("user")
+
+      const user =  await this.prisma.user.findFirst({
         where: {
           email: email,
           userRoles: {
@@ -46,6 +51,9 @@ export class UserRepository {
           },
         },
       });
+      console.log(user)
+
+      return user
     } catch (e: any) {
       console.log(e.message);
     }

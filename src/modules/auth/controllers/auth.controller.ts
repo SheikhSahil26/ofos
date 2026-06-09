@@ -1,10 +1,17 @@
 import type { Request, Response } from 'express';
 import { IApiResponse, ILoginDto, ISignupDto } from '../interfaces/auth.interface';
 import { AuthService } from '../services/auth.service';
+import { UserRepository } from '../repositories/auth.repository';
 import jwt from 'jsonwebtoken'
+import { PrismaClient } from '@prisma/client';
+
+
+// This below two varible helps for logout directly from the controller...
+const prisma = new PrismaClient();
+const userRepo = new UserRepository(prisma);
+
 export class AuthController {
   private authService = new AuthService();
-
   registerPage = async (req: Request, res: Response) => {
 
     const role: string =
@@ -65,6 +72,7 @@ export class AuthController {
         );
     }
   };
+
 
 
   // Register user who does not have already Accounts....
@@ -129,12 +137,40 @@ export class AuthController {
     }
   };
 
+  logout = async (
+    req: Request,
+    res: Response
+  ) => {
+
+    const refreshToken =
+      req.cookies.refreshToken;
+
+    if (refreshToken) {
+
+      await userRepo.revokeRefreshToken(
+        refreshToken
+      );
+    }
+
+    res.clearCookie(
+      "refreshToken"
+    );
+
+    return res.json({
+      status: "Success",
+      statusCode: 200,
+      message: "Logged out"
+    });
+  };
 
   // Refresh Token : Comes in picture when the user Access Token expire...
   refreshToken = async (
     req: Request,
     res: Response
   ) => {
+
+
+    console.log(req.cookies.refreshToken)
 
     const refreshToken =
       req.cookies.refreshToken;
@@ -157,7 +193,9 @@ export class AuthController {
     );
   };
 
-  // Api that verify email end send email to that user
+
+
+
   forgetPassword = async (req: Request, res: Response) => {
     const email: string = String(req.params.email);
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -171,7 +209,7 @@ export class AuthController {
 
     try {
       // Verify Email is exist or not...............
-      const response: IApiResponse = await this.authService.verifyUserByEmail(email);
+      const response: IApiResponse = await this.authService.verifyUserByEmailForOtp(email);
       if (response.status == 'Success') {
         res.cookie('token', response.data.token, {
           maxAge: 5 * 60 * 1000,

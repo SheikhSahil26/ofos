@@ -8,7 +8,7 @@ export const isAuthenticated = (
 ) => {
 
   passport.authenticate(
-    "jwt",
+    'jwt',
     { session: false },
     (err: any, user: any) => {
 
@@ -16,11 +16,14 @@ export const isAuthenticated = (
         return next(err);
       }
 
+      console.log("Here use.............")
+      console.log(user)
+
       if (!user) {
         return res.status(401).json({
           status: "Error",
           statusCode:401,
-          message: "Unauthorized"
+          message: "Unauthorized++++++++++++++++++++++++++++++"
         });
       }
 
