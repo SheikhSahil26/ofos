@@ -1,14 +1,14 @@
+import { IUpdateUser, IUser } from "../interfaces/user.interface";
 import { UserRepository } from "../repositories/user.repository";
 
-export class UserServices{
+export class UserService{
 
     private userRepo = new UserRepository();
 
     //get profile of user
-    async getProfile (id: string): Promise<void>{
+    async getProfile (userId: string): Promise<IUser | null>{
         try{
-            const userId = id;
-            console.log("user profile");
+            return await this.userRepo.getProfile(userId);
         }
         catch(err){
             throw err;
@@ -16,9 +16,25 @@ export class UserServices{
     }
 
     //update profile of user
-    updateProfile = async(id: string, data: any) => {
+    async updateProfile(userId: string, data: IUpdateUser): Promise<IUser | null> {
         try{
-            const user = await this.userRepo.updateProfile(id, data);
+            //check if user exist or not
+            await this.userRepo.validateUser(userId);
+
+            return await this.userRepo.updateProfile(userId, data);
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
+    //delete profile photo of user
+    async deletePofilePhoto(userId: string): Promise<IUser | null>{
+        try{
+            //check if user exist or not
+            await this.userRepo.validateUser(userId);
+
+            return await this.userRepo.deleteProfilePhoto(userId);
         }
         catch(err){
             throw err;
@@ -26,9 +42,12 @@ export class UserServices{
     }
 
     //delete profile of user
-    deleteProfile = async(id: string) => {
+    async deleteProfile(userId: string): Promise<void>{
         try{
+            //check if user exist or not
+            await this.userRepo.validateUser(userId);
 
+            await this.userRepo.deleteProfile(userId);
         }
         catch(err){
             throw err;
