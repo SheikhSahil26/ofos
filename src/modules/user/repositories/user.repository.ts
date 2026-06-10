@@ -1,6 +1,5 @@
 import { IExistUser, IUpdateUser, IUser } from "../interfaces/user.interface";
 import {prisma} from "../../../config/prisma";
-import { AppError } from "../../../utils/appError";
 
 const userProfileSelect = {
     id: true,
