@@ -20,7 +20,7 @@ export class AuthController {
 
       return res.render(
           `auth/${role}/register`
-        );
+        ,{role:role});
 
     // switch (role) {
 
@@ -55,7 +55,7 @@ export class AuthController {
       String(req.params.role).toLowerCase();
     return res.render(
           `auth/${role}/login`
-        );
+        ,{role:role});
 
     // switch (role) {
 

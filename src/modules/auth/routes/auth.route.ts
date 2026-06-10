@@ -5,6 +5,7 @@ import { isAuthenticated } from "../../../middlewares/authenticateMiddlware.js";
 import { validate } from "../../../middlewares/signupValidate.js";
 import { signupSchema } from "../validators/register.validator.js";
 import "../../../config/jwtAuth.js";
+import { Payload } from "@prisma/client/runtime/library";
 
 
 export class AuthRoutes implements IRoutes {
@@ -42,11 +43,19 @@ export class AuthRoutes implements IRoutes {
 
 
     this.router.post('/refresh-token', this.controller.refreshToken);
-    this.router.post('/logout',this.controller.logout)
+    this.router.post('/logout', this.controller.logout)
 
     //Test the Token
-    this.router.get('/dash', isAuthenticated, (req: Request, res: Response) => {
-      res.send("Helooo")
+    this.router.get('/dashboard', isAuthenticated, (req: Request, res: Response) => {
+      const user = req.user as any;
+
+      console.log("user",user)
+      const role : string = user.role;
+
+      // console.log(role.toLowerCase());
+      
+
+      res.render(`auth/${role.toLowerCase()}/dashboard`)
     })
 
 
@@ -56,7 +65,7 @@ export class AuthRoutes implements IRoutes {
       .get(this.controller.forgetPassword)
       .post(this.controller.verifyOtp)
 
-    this.router.get('/static/inbox',isAuthenticated, this.controller.mailInboxPage);
+    this.router.get('/static/inbox', isAuthenticated, this.controller.mailInboxPage);
     this.router.get('/static/forget-password', this.controller.forgetPasswordPage);
     this.router.patch('/reset-password', this.controller.resetPassword)
 

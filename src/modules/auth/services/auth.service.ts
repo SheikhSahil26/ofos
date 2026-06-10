@@ -52,7 +52,8 @@ export class AuthService {
                         requiresLogin: true,
                         email: userInfo.email
                     },
-                    redirectURL: `/api/auth/${role}/static/login`
+                    // redirectURL: `http://localhost:8080/api/auth/${role}/static/login`
+                    
                 };
             }
 
@@ -79,7 +80,8 @@ export class AuthService {
                 status: "Success",
                 statusCode: 201,
                 message: "Account created successfully.",
-                data: createdUser
+                data: createdUser,
+                // redirectURL: `http://localhost:8080/api/auth/${role}/static/login`
             };
 
         } catch (error: any) {

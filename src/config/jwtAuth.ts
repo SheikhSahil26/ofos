@@ -22,10 +22,9 @@ passport.use(
             const user = await authRepo.getUserByEmailAndRole(jwt_payload.email, jwt_payload.role);
 
             if (user) {
-                return done(null, user);
+                return done(null, jwt_payload);
             }
             else {
-                 console.log(user)
                 return done(null, false);
             }
         }
