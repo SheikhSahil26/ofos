@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,141 +8,134 @@
 
     <link rel="stylesheet" href="/css/auth.css">
 
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <!-- LEFT SIDE -->
+        <!-- LEFT SIDE -->
 
-    <div class="left-panel">
+        <div class="left-panel">
 
-        <div class="brand">Ziggy</div>
+            <div class="brand">Ziggy</div>
 
-        <div class="content">
-            <h1>Welcome back!</h1>
+            <div class="content">
+                <h1>Welcome back!</h1>
 
-            <p>
-                Sign in to continue ordering your favorite food.
-            </p>
+                <p>
+                    Sign in to continue ordering your favorite food.
+                </p>
+            </div>
+
+            <img src="/images/burger.png" alt="Burger" class="burger">
+
+            <div class="wave">〰</div>
+
         </div>
 
-        <img
-            src="/images/burger.png"
-            alt="Burger"
-            class="burger"
-        >
+        <!-- RIGHT SIDE -->
 
-        <div class="wave">〰</div>
+        <div class="right-panel">
 
-    </div>
+            <div class="form-wrapper">
 
-    <!-- RIGHT SIDE -->
+                <h2>Customer Login</h2>
 
-    <div class="right-panel">
+                <span>Enter your details to login</span>
 
-        <div class="form-wrapper">
+                <form action="/customer/login" method="POST">
 
-            <h2>Customer Login</h2>
+                    <div class="input-group">
 
-            <span>Enter your details to login</span>
+                        <label>Email Address</label>
 
-            <form action="/customer/login" method="POST">
+                        <div class="input-box">
 
-                <div class="input-group">
+                            <i class="fa-regular fa-envelope"></i>
 
-                    <label>Mobile Number</label>
+                            <input type="email" name="email" placeholder="Enter restaurant email" required>
 
-                    <div class="input-box">
-
-                        <span class="country">+91</span>
-
-                        <input
-                            type="text"
-                            name="mobile"
-                            placeholder="Enter your mobile number"
-                        >
-                    </div>
-
-                </div>
-
-                <div class="input-group">
-
-                    <label>Password</label>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-lock"></i>
-
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Enter your password"
-                        >
-
-                        <i
-                            class="fa-regular fa-eye toggle"
-                            onclick="togglePassword()"
-                        ></i>
+                        </div>
 
                     </div>
 
-                </div>
+                    <div class="input-group">
 
-                <div
-                    style="
+                        <label>Password</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input type="password" id="password" name="password" placeholder="Enter your password">
+
+                            <i class="fa-regular fa-eye toggle" onclick="togglePassword()"></i>
+
+                        </div>
+
+                    </div>
+                    <div class="terms">
+
+                        <input type="checkbox" name="rememberMe" required>
+
+                        <p>
+                            Remember Me
+                        </p>
+
+                    </div>
+
+
+
+                    <div style="
                         display:flex;
                         justify-content:flex-end;
                         margin-top:10px;
-                    "
-                >
-                    <a
-                        href="/forgot-password"
-                        style="
+                    ">
+                        <a href="/forgot-password" style="
                             color:#777;
                             text-decoration:none;
-                        "
-                    >
-                        Forgot Password?
-                    </a>
+                        ">
+                            Forgot Password?
+                        </a>
+                    </div>
+
+                    <button class="signup-btn">
+                        Login
+                    </button>
+
+                </form>
+
+                <div class="divider">
+                    Or continue with
                 </div>
 
-                <button class="signup-btn">
-                    Login
-                </button>
+                <div class="socials">
 
-            </form>
+                    <button>
+                        <i class="fab fa-google"></i>
+                    </button>
 
-            <div class="divider">
-                Or continue with
-            </div>
+                    <button>
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
 
-            <div class="socials">
+                    <button>
+                        <i class="fab fa-apple"></i>
+                    </button>
 
-                <button>
-                    <i class="fab fa-google"></i>
-                </button>
+                </div>
 
-                <button>
-                    <i class="fab fa-facebook-f"></i>
-                </button>
+                <div class="login-link">
 
-                <button>
-                    <i class="fab fa-apple"></i>
-                </button>
+                    Don't have an account?
 
-            </div>
+                    <a href="/api/auth/customer/static/register">
+                        Sign Up
+                    </a>
 
-            <div class="login-link">
-
-                Don't have an account?
-
-                <a href="/api/auth/customer/static/register">
-                    Sign Up
-                </a>
+                </div>
 
             </div>
 
@@ -149,20 +143,19 @@
 
     </div>
 
-</div>
+    <script>
+        function togglePassword() {
 
-<script>
-function togglePassword() {
+            const password =
+                document.getElementById("password");
 
-    const password =
-        document.getElementById("password");
-
-    password.type =
-        password.type === "password"
-            ? "text"
-            : "password";
-}
-</script>
+            password.type =
+                password.type === "password"
+                    ? "text"
+                    : "password";
+        }
+    </script>
 
 </body>
+
 </html>
