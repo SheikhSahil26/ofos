@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Registration</title>
+
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- LEFT PANEL -->
+
+        <div class="left-panel">
+
+            <div class="brand">Ziggy</div>
+
+            <div class="content">
+
+                <h1>
+                    Partner With Ziggy
+                </h1>
+
+                <p>
+                    Join our growing network of restaurants
+                    and increase your sales with online orders.
+                </p>
+
+            </div>
+
+            <img src="/images/restaurant-signup.png" alt="Restaurant Partner" class="burger">
+
+            <div class="wave">〰</div>
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+
+        <div class="right-panel">
+
+            <div class="form-wrapper">
+
+                <h2>Restaurant Registration</h2>
+
+                <span>
+                    Create your restaurant partner account
+                </span>
+
+                <form action="/restaurant/register" method="POST">
+
+                    <div class="input-group">
+
+                        <label>Restaurant Name</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-store"></i>
+
+                            <input type="text" name="restaurant_name" placeholder="Enter restaurant name" required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Owner Name</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-regular fa-user"></i>
+
+                            <input type="text" name="owner_name" placeholder="Enter owner name" required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Email Address</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-regular fa-envelope"></i>
+
+                            <input type="email" name="email" placeholder="Enter business email" required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Mobile Number</label>
+
+                        <div class="input-box">
+
+                            <span class="country">+91</span>
+
+                            <input type="text" name="mobile" placeholder="Enter mobile number" required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Password</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+                            <i class="fa-regular fa-eye toggle" onclick="togglePassword()"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Confirm Password</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input type="password" name="confirm_password" placeholder="Confirm password" required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="terms">
+
+                        <input type="checkbox" required>
+
+                        <p>
+                            I agree to the
+                            <a href="#">
+                                Terms & Conditions
+                            </a>
+                            and
+                            <a href="#">
+                                Partner Agreement
+                            </a>
+                        </p>
+
+                    </div>
+
+                    <button type="submit" class="signup-btn">
+                        Register Restaurant
+                    </button>
+
+                </form>
+
+                <div class="login-link">
+
+                    Already registered?
+
+                    <a href="/api/auth/restaurant_owner/static/login">
+                        Login
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function togglePassword() {
+
+            const password =
+                document.getElementById("password");
+
+            password.type =
+                password.type === "password"
+                    ? "text"
+                    : "password";
+        }
+    </script>
+
+
+</body>
+
+</html>

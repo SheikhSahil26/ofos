@@ -28,3 +28,16 @@ export const generateRefreshToken = (
         }
     );
 };
+
+export const generateResetToken = (
+    payload : object
+) => {
+
+    return jwt.sign(
+        payload,
+        String(process.env.JWT_RESET_SECRET),
+        {
+            expiresIn: '2m'
+        }
+    );
+};

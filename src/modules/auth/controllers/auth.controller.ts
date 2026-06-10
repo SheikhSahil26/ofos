@@ -1,44 +1,49 @@
 import type { Request, Response } from 'express';
 import { IApiResponse, ILoginDto, ISignupDto } from '../interfaces/auth.interface';
 import { AuthService } from '../services/auth.service';
-import { UserRepository } from '../repositories/auth.repository';
+import { AuthRepository } from '../repositories/auth.repository';
 import jwt from 'jsonwebtoken'
-import { PrismaClient } from '@prisma/client';
 
 
 // This below two varible helps for logout directly from the controller...
-const prisma = new PrismaClient();
-const userRepo = new UserRepository(prisma);
+
+
 
 export class AuthController {
+
+  private authRepo = new AuthRepository();
   private authService = new AuthService();
   registerPage = async (req: Request, res: Response) => {
 
     const role: string =
-      String(req.params.role).toUpperCase();
+      String(req.params.role).toLowerCase();
 
-    switch (role) {
-
-      case "CUSTOMER":
-        return res.render(
-          "auth/customer-register"
+      return res.render(
+          `auth/${role}/register`
         );
 
-      case "RESTAURANT":
-        return res.render(
-          "auth/restaurant-register"
-        );
+    // switch (role) {
 
-      case "DELIVERY-PARTNER":
-        return res.render(
-          "auth/delivery-register"
-        );
+    //   case "CUSTOMER":
+    //     return res.render(
+    //       "auth/customer/customer-register"
+    //     );
 
-      default:
-        return res.status(404).send(
-          "Invalid Role"
-        );
-    }
+    //   case "RESTAURANT":
+    //     return res.render(
+    //       "auth/restaurant-register"
+    //     );
+
+    //   case "DELIVERY-PARTNER":
+    //     return res.render(
+    //       "auth/delivery-register"
+    //     );
+
+    //   default:
+    //     return res.status(404).send(
+    //       "Invalid Role"
+    //     );
+    // }
   };
 
   loginPage = async (
@@ -47,32 +52,34 @@ export class AuthController {
   ) => {
 
     const role: string =
-      String(req.params.role).toUpperCase();
-
-    switch (role) {
-
-      case "CUSTOMER":
-        return res.render(
-          "auth/customer-login"
+      String(req.params.role).toLowerCase();
+    return res.render(
+          `auth/${role}/login`
         );
 
-      case "RESTAURANT":
-        return res.render(
-          "auth/restaurant-login"
-        );
+    // switch (role) {
 
-      case "DELIVERY-PARTNER":
-        return res.render(
-          "auth/delivery-login"
-        );
+    //   case "CUSTOMER":
+    //     return res.render(
+    //       "auth/customer/customer-login"
+    //     );
 
-      default:
-        return res.status(404).send(
-          "Invalid Role"
-        );
-    }
+    //   case "RESTAURANT":
+    //     return res.render(
+    //       "auth/restaurant-login"
+    //     );
+
+    //   case "DELIVERY-PARTNER":
+    //     return res.render(
+    //       "auth/delivery-login"
+    //     );
+
+    //   default:
+    //     return res.status(404).send(
+    //       "Invalid Role"
+    //     );
+    // }
   };
-
 
 
   // Register user who does not have already Accounts....
@@ -147,7 +154,7 @@ export class AuthController {
 
     if (refreshToken) {
 
-      await userRepo.revokeRefreshToken(
+      await this.authRepo.revokeRefreshToken(
         refreshToken
       );
     }
@@ -211,7 +218,7 @@ export class AuthController {
       // Verify Email is exist or not...............
       const response: IApiResponse = await this.authService.verifyUserByEmailForOtp(email);
       if (response.status == 'Success') {
-        res.cookie('token', response.data.token, {
+        res.cookie('resetToken', response.data.token, {
           maxAge: 5 * 60 * 1000,
           httpOnly: true,
         })
@@ -225,8 +232,8 @@ export class AuthController {
   };
 
   // Change password Page
-  changePasswordPage = async (req: Request, res: Response) => {
-    res.send("This is change Password page");
+  forgetPasswordPage = async (req: Request, res: Response) => {
+    res.render('auth/forget-password');
   }
 
   // Sending the mail simulation page to the user with OTP

@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy as JwtStrategy, StrategyOptions } from 'passport-jwt';
 import passport from 'passport';
 import { Request } from 'express';
-import { UserRepository } from '../modules/auth/repositories/auth.repository';
+import { AuthRepository } from '../modules/auth/repositories/auth.repository';
 import { PrismaClient } from '@prisma/client';
 
 
@@ -11,15 +11,15 @@ const opts: StrategyOptions = {
 }
 
 
-const prisma = new PrismaClient();
-const userRepo = new UserRepository(prisma);
+
+const authRepo = new AuthRepository();
 
 passport.use(
     new JwtStrategy(opts, async (jwt_payload, done) => {
         try {
             // console.log("Helooooo***************8")
             // console.log(jwt_payload)
-            const user = await userRepo.getUserByEmailAndRole(jwt_payload.email, jwt_payload.role);
+            const user = await authRepo.getUserByEmailAndRole(jwt_payload.email, jwt_payload.role);
 
             if (user) {
                 return done(null, user);

@@ -4,14 +4,16 @@ import redisClient from '../../../config/redis';
 import jwt from 'jsonwebtoken';
 import type { IApiResponse, ICreateUserDto, ILoginDto, ISignupDto } from '../interfaces/auth.interface';
 import { PrismaClient, Role } from "@prisma/client";
-import { UserRepository } from '../repositories/auth.repository';
+import { AuthRepository } from '../repositories/auth.repository';
 import { userInfo } from 'node:os';
-import { generateAccessToken, generateRefreshToken } from '../../../utils/jwtToken';
+import { generateAccessToken, generateRefreshToken, generateResetToken } from '../../../utils/jwtToken';
 
-const prisma = new PrismaClient();
-const userRepo = new UserRepository(prisma);
+
+
 
 export class AuthService {
+
+    private authRepo = new AuthRepository();
 
     registerUser = async (
         userInfo: ISignupDto,
@@ -21,7 +23,7 @@ export class AuthService {
         try {
 
             const existUser =
-                await userRepo.findUserByEmail(
+                await this.authRepo.findUserByEmail(
                     userInfo.email
                 );
 
@@ -68,7 +70,7 @@ export class AuthService {
             };
 
             const createdUser =
-                await userRepo.createUser(
+                await this.authRepo.createUser(
                     createUserDto,
                     role
                 );
@@ -97,7 +99,7 @@ export class AuthService {
             // possibilities : 2 user have email and password but not have role on this url than assign that role
 
             const existUser =
-                await userRepo.findUserByEmail(
+                await this.authRepo.findUserByEmail(
                     loginInfo.email
                 );
 
@@ -128,7 +130,7 @@ export class AuthService {
             const accessToken: string = generateAccessToken({ userId: existUser.id, role: role, email: existUser.email });
             const refreshToken: string = generateRefreshToken(existUser.id, loginInfo.rememberMe);
 
-            await userRepo.saveRefreshToken(
+            await this.authRepo.saveRefreshToken(
                 existUser.id,
                 refreshToken,
                 new Date(
@@ -159,7 +161,7 @@ export class AuthService {
             // Not contain the role assign role and logged that user
             else {
 
-                await userRepo.assignRole(
+                await this.authRepo.assignRole(
                     existUser.id,
                     role
                 );
@@ -209,7 +211,7 @@ export class AuthService {
 
             // Find refereshtoken from db
             const tokenRecord =
-                await userRepo.findRefreshToken(
+                await this.authRepo.findRefreshToken(
                     refreshToken
                 );
 
@@ -241,7 +243,7 @@ export class AuthService {
             }
 
             const user =
-                await userRepo.findUserById(
+                await this.authRepo.findUserById(
                     decoded.payload.userId
                 );
 
@@ -284,7 +286,7 @@ export class AuthService {
 
     verifyUserByEmailForOtp = async (email: string): Promise<IApiResponse> => {
         // find user
-        const existUser = await userRepo.findUserByEmail(email);
+        const existUser = await this.authRepo.findUserByEmail(email);
 
         if (!existUser) {
             return {
@@ -302,14 +304,11 @@ export class AuthService {
         await redisClient.setEx(`otp:${email}`, 5 * 60, bcryptOTP);
 
         // generate JWT token
-        const payload = {
+        const resetToken = generateResetToken({
             user_id: existUser.id,
             email: existUser.email,
-            otp: otp,
-            roles: existUser.userRoles.map(ur => ur.role.role), // array of roles
-        };
-
-        const token = jwt.sign(payload, String(process.env.SECRET), { expiresIn: '5m' });
+            otp: bcryptOTP,
+        })
 
         // const 
 
@@ -321,7 +320,6 @@ export class AuthService {
             message: 'OTP sent to registered email',
             data: {
                 otpLink,
-                token
             }
         };
     };
@@ -384,7 +382,7 @@ export class AuthService {
     updateUserPasswordService = async (email: string, password: string): Promise<IApiResponse> => {
 
         try {
-            const result = await userRepo.findUserByEmail(email)
+            const result = await this.authRepo.findUserByEmail(email)
             if (result && await comparePassword(password, result?.passwordHash)) {
                 return {
                     status: 'Success',

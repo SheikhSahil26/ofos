@@ -3,16 +3,17 @@ import { RestaurantController } from "../../restaurant/controlllers/restaurant.c
 import { signupSchema } from "../validators/register.validator";
 import { ICreateUserDto, ISignupDto } from "../interfaces/auth.interface";
 import { use } from "passport";
+import {prisma} from '../../../config/prisma'
 
 
 
-export class UserRepository {
-  constructor(private readonly prisma: PrismaClient) { }
+export class AuthRepository {
+  // constructor(private readonly prisma: PrismaClient) { }
 
   // Find user by email
   async findUserByEmail(email: string) {
     try {
-      const user = await this.prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email },
         include: { userRoles: { include: { role: true } } }, // include roles if needed
       });
@@ -32,7 +33,7 @@ export class UserRepository {
 
       console.log("user")
 
-      const user =  await this.prisma.user.findFirst({
+      const user =  await prisma.user.findFirst({
         where: {
           email: email,
           userRoles: {
@@ -64,7 +65,7 @@ export class UserRepository {
 
       console.log(role)
 
-      return await this.prisma.user.create({
+      return await prisma.user.create({
         data: {
           fullName: userInfo.fullName,
           email: userInfo.email,
@@ -95,7 +96,7 @@ export class UserRepository {
   }
 
   async assignRole(userId: string, role: string) {
-    const roleData = await this.prisma.role.findUnique({
+    const roleData = await prisma.role.findUnique({
       where: {
         role: role
       }
@@ -105,7 +106,7 @@ export class UserRepository {
       throw new Error("Role not found");
     }
 
-    return await this.prisma.userRole.create({
+    return await prisma.userRole.create({
       data: {
         userId: userId,
         roleId: roleData.id
@@ -120,7 +121,7 @@ export class UserRepository {
     expiresAt: Date
   ) {
 
-    return await this.prisma.refreshToken.create({
+    return await prisma.refreshToken.create({
       data: {
         userId,
         token: refreshToken,
@@ -134,7 +135,7 @@ export class UserRepository {
     refreshToken: string
   ) {
 
-    return await this.prisma.refreshToken.findFirst({
+    return await prisma.refreshToken.findFirst({
       where: {
         token: refreshToken,
         isRevoked: false
@@ -146,7 +147,7 @@ export class UserRepository {
     userId: string
   ) {
 
-    return await this.prisma.user.findUnique({
+    return await prisma.user.findUnique({
       where: {
         id: userId
       }
@@ -158,7 +159,7 @@ export class UserRepository {
     refreshToken: string
 ) {
 
-    return await this.prisma.refreshToken.updateMany({
+    return await prisma.refreshToken.updateMany({
         where: {
             token: refreshToken
         },

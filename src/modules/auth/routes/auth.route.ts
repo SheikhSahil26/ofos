@@ -56,8 +56,8 @@ export class AuthRoutes implements IRoutes {
       .get(this.controller.forgetPassword)
       .post(this.controller.verifyOtp)
 
-    this.router.get('/static/inbox', this.controller.mailInboxPage);
-    this.router.get('/static/change-password', this.controller.changePasswordPage);
+    this.router.get('/static/inbox',isAuthenticated, this.controller.mailInboxPage);
+    this.router.get('/static/forget-password', this.controller.forgetPasswordPage);
     this.router.patch('/reset-password', this.controller.resetPassword)
 
   }

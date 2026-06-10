@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner Registration</title>
+
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LEFT PANEL -->
+
+    <div class="left-panel">
+
+        <div class="brand">Ziggy</div>
+
+        <div class="content">
+
+            <h1>
+                Start Earning<br>
+                With Ziggy
+            </h1>
+
+            <p>
+                Become a delivery partner and enjoy
+                flexible working hours with attractive
+                earning opportunities.
+            </p>
+
+        </div>
+
+        <img
+            src="/images/rider-register.png"
+            alt="Delivery Rider"
+            class="burger"
+        >
+
+        <div class="wave">〰</div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+
+    <div class="right-panel">
+
+        <div class="form-wrapper">
+
+            <h2>Delivery Partner Registration</h2>
+
+            <span>
+                Create your rider account
+            </span>
+
+            <form action="/delivery/register" method="POST">
+
+                <div class="input-group">
+
+                    <label>Full Name</label>
+
+                    <div class="input-box">
+
+                        <i class="fa-regular fa-user"></i>
+
+                        <input
+                            type="text"
+                            name="full_name"
+                            placeholder="Enter full name"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>Mobile Number</label>
+
+                    <div class="input-box">
+
+                        <span class="country">+91</span>
+
+                        <input
+                            type="text"
+                            name="mobile"
+                            placeholder="Enter mobile number"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>Email Address</label>
+
+                    <div class="input-box">
+
+                        <i class="fa-regular fa-envelope"></i>
+
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Enter email address"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>Vehicle Type</label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-motorcycle"></i>
+
+                        <input
+                            type="text"
+                            name="vehicle_type"
+                            placeholder="Bike / Scooter / Bicycle"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>Password</label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-lock"></i>
+
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Create password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>Confirm Password</label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-lock"></i>
+
+                        <input
+                            type="password"
+                            name="confirm_password"
+                            placeholder="Confirm password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="terms">
+
+                    <input
+                        type="checkbox"
+                        required
+                    >
+
+                    <p>
+                        I agree to the
+                        <a href="#">
+                            Terms & Conditions
+                        </a>
+                        and
+                        <a href="#">
+                            Delivery Partner Agreement
+                        </a>
+                    </p>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="signup-btn"
+                >
+                    Register Now
+                </button>
+
+            </form>
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="/api/auth/delivery_partner/static/login">
+                    Login
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
