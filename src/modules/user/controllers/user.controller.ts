@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { IUpdateUser } from "../interfaces/user.interface";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { uploadImage } from "../../../services/multer.service";
 
 export class UserController{                                                                                 
     private userService = new UserService();
@@ -10,7 +11,7 @@ export class UserController{
     getProfile = asyncHandler(async(req: Request, res: Response) => {
 
         //from token we will get user id
-        const userId = req.user.id;
+        const userId ="05dc33d4-6713-4f32-a59e-6a50e8420934";
 
         if(typeof userId !== 'string'){
             return res.status(400).json({success: false, message: "Invalid user id"});
@@ -25,7 +26,7 @@ export class UserController{
     updateProfile = asyncHandler( async(req: Request, res: Response) => {
 
         //from token we will get user id
-        const userId = req.user.id;
+        const userId = "05dc33d4-6713-4f32-a59e-6a50e8420934";
 
         if(typeof userId !== 'string'){
             return res.status(400).json({success: false, message: "Invalid user id"});
@@ -37,8 +38,16 @@ export class UserController{
             mobile: req.body?.mobile
         };
 
-        if(req.file){
-            data.profilePhoto = req.file.path;
+        let imageurl: string | undefined;
+
+        if (req.file) {
+            imageurl = await uploadImage(
+                req.file.buffer,
+                `profile-${userId}-${Date.now()}`,
+                "/OFOS/profiles",
+            );
+
+            data.profilePhoto = imageurl;
         }
 
         const response = await this.userService.updateProfile(userId, data);

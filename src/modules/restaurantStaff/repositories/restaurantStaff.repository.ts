@@ -51,6 +51,9 @@ export class RestaurantStaffRepository{
             data: {
                 branchId,
                 userId
+            },
+            include: {
+                user: true
             }
         });
     }
