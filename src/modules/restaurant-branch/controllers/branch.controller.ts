@@ -1,8 +1,19 @@
-import { Router } from 'express';
-import { IRoutes } from '../../../common/interfaces/route.interface';
-import { BranchController } from '../controllers/branch.controller';
+import { Request, Response } from "express";
 
-export class BranchRoutes implements IRoutes {
-  path = '/branches';
-  router = Router();
-  controller = new BranchController();
+
+export class BranchController {
+    private branchService = new RestaurantBranchService();
+
+    //get all branches of a restaurant
+    getBranches = async (req: Request, res: Response) => {
+        try {
+
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+                success: false,
+                message: "Error fetching branches",
+            });
+        }
+    }
+}

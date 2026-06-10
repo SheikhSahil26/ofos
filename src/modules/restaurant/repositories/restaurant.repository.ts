@@ -1,12 +1,12 @@
-import { ICreateRestaurant, ICreateReview, IExistingRestaurant, IOperatingHourInput, IRestaurantValidation, IUpdateRestaurant } from "../interfaces/restaurant.interface";
+import { ICreateRestaurant, ICreateReview, IExistingRestaurant, INearbyItem, IOperatingHourInput, IRestaurantsResult, IRestaurantValidation, IUpdateRestaurant } from "../interfaces/restaurant.interface";
 import { prisma } from "../../../config/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, RestaurantBranch } from "@prisma/client";
 
 export class RestaurantRepository {
   // get restaurant details by id
 
   async getRestaurantDetails(id: string): Promise<IExistingRestaurant | null> {
-    try {
+
       return await prisma.restaurant.findUnique({
         where: {
           id,
@@ -51,14 +51,11 @@ export class RestaurantRepository {
           },
         },
       });
-    } catch (err) {
-      throw err;
-    }
   }
 
   //get all active restaurants
-  async getRestaurants(page: number, limit: number, search?: string) {
-    try {
+  async getRestaurants(page: number, limit: number, search?: string): Promise<IRestaurantsResult> {
+  
       const skip = (page - 1) * limit;
 
       const whereClause = {
@@ -112,15 +109,12 @@ export class RestaurantRepository {
         restaurants,
         total,
       };
-    } catch (err) {
-      throw err;
-    }
   }
 
-  // get restaurants by owner id
+  // get restaurants by owner
 
-  async getRestaurantsByOwnerId(ownerId: string, page: number, limit: number) {
-    try {
+  async getRestaurantsByOwnerId(ownerId: string, page: number, limit: number): Promise<IRestaurantsResult> {
+
       const skip = (page - 1) * limit;
 
       const [restaurants, total] = await Promise.all([
@@ -158,15 +152,13 @@ export class RestaurantRepository {
         restaurants,
         total,
       };
-    } catch (err) {
-      throw err;
-    }
+
   }
 
   // GET nearby restaurants based on user location
-  async getNearbyBranches() {
-    try {
-      return await prisma.restaurantBranch.findMany({
+  async getNearbyBranches(): Promise<INearbyItem[]> {
+ 
+      const branches = await prisma.restaurantBranch.findMany({
         where: {
           isActive: true,
           isDeleted: false,
@@ -196,9 +188,20 @@ export class RestaurantRepository {
           },
         },
       });
-    } catch (err) { 
-      throw err;
-    }
+
+      return branches.map((branch) => ({
+        branch: {
+          id: branch.id,
+          branchName: branch.branchName,
+          latitude: branch.latitude ? Number(branch.latitude) : 0,
+          longitude: branch.longitude ? Number(branch.longitude) : 0,
+          city: branch.city,
+          state: branch.state,
+          restaurant: branch.restaurant,
+        },
+        distance: 0,
+      }));
+ 
   }
 
 
@@ -206,7 +209,7 @@ export class RestaurantRepository {
     async validateRestaurantById(
         id: string
     ): Promise<IRestaurantValidation | null> {
-        try{
+
             return await prisma.restaurant.findUnique({
                 where:{ id },
                 select:{
@@ -216,10 +219,7 @@ export class RestaurantRepository {
                     isDeleted:true
                 }
             });
-        }
-        catch(err){
-            throw err;
-        }
+
     }
 
 
@@ -227,8 +227,7 @@ export class RestaurantRepository {
     async findRestaurantByName(
         ownerId:string,
         name:string
-    ){
-        try{
+    ): Promise<IExistingRestaurant | null> {
             return await prisma.restaurant.findFirst({
                 where:{
                     ownerId,
@@ -236,10 +235,7 @@ export class RestaurantRepository {
                     isDeleted:false
                 }
             });
-        }
-        catch(err){
-            throw err;
-        }
+
     }
 
     // create restaurant
@@ -248,8 +244,8 @@ export class RestaurantRepository {
         tx: Prisma.TransactionClient,
         ownerId:string,
         data:ICreateRestaurant
-    ){
-        try{
+    ): Promise<IExistingRestaurant> {
+
             return await tx.restaurant.create({
                 data:{
                   ownerId,
@@ -259,10 +255,7 @@ export class RestaurantRepository {
                   coverImageUrl: data.coverImageUrl ?? null
                 }
             });
-        }
-        catch(err){
-            throw err;
-        }
+
     }
 
 
@@ -271,8 +264,8 @@ export class RestaurantRepository {
         tx: Prisma.TransactionClient,
         restaurantId:string,
         data:ICreateRestaurant
-    ){
-        try{
+    ): Promise<RestaurantBranch> {
+
             return await tx.restaurantBranch.create({
                 data:{
                     restaurantId,
@@ -300,17 +293,12 @@ export class RestaurantRepository {
                 }
             });
         }
-        catch(err){
-            throw err;
-        }
-    }
 
     async createOperatingHours(
         tx: Prisma.TransactionClient,
         branchId:string,
         operatingHours:IOperatingHourInput[]
-    ){
-        try{
+    ): Promise<Prisma.BatchPayload> {
             return await tx.operatingHour.createMany({
                 data: operatingHours.map(hour => ({
                     branchId,
@@ -320,18 +308,14 @@ export class RestaurantRepository {
                     isClosed:hour.isClosed ?? false
                 }))
             });
-        }
-        catch(err){
-            throw err;
-        }
+
     }
 
     // GET Primary branch of restaurant by restaurant id
     async findPrimaryBranchByRestaurantId(
     restaurantId:string
-){
+): Promise<{id:string} | null> {
 
-    try{
 
         return await prisma.restaurantBranch.findFirst({
             where:{
@@ -344,10 +328,6 @@ export class RestaurantRepository {
             }
         });
 
-    }
-    catch(err){
-        throw err;
-    }
 }
 
 // Update restaurant details
@@ -355,9 +335,8 @@ async updateRestaurant(
     tx: Prisma.TransactionClient,
     restaurantId:string,
     data:IUpdateRestaurant
-){
+): Promise<IUpdateRestaurant> {
 
-    try{
         const updateData: Prisma.RestaurantUpdateInput = {};
 
         if (data.name !== undefined) {
@@ -387,10 +366,7 @@ async updateRestaurant(
             data:updateData
         });
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 
 // update restaurant status
@@ -398,10 +374,10 @@ async updateRestaurant(
 async updateRestaurantStatus(
     restaurantId: string,
     isActive: boolean
-){
-    try{
+): Promise<IUpdateRestaurantStatus> {
 
-        return await prisma.restaurant.update({
+
+        return await prisma.restaurant.update({ 
             where:{
                 id: restaurantId
             },
@@ -415,18 +391,15 @@ async updateRestaurantStatus(
             }
         });
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 
 // Delete restaurant (soft delete)
 
 async softDeleteRestaurant(
     restaurantId: string
-){
-    try{
+): Promise<any> {
+
 
         return await prisma.restaurant.update({
             where:{
@@ -439,10 +412,7 @@ async softDeleteRestaurant(
             }
         });
 
-    }
-    catch(err){
-        throw err;
-    }
+
 }
 
 // GET restaurant reviews by restaurant id
@@ -450,8 +420,7 @@ async getRestaurantReviews(
     restaurantId: string,
     page: number,
     limit: number
-){
-    try{
+): Promise<{ reviews: any[]; total: number }> {
 
         const skip = (page - 1) * limit;
 
@@ -514,17 +483,13 @@ async getRestaurantReviews(
             total
         };
 
-    }
-    catch(err){
-        throw err;
-    }
 }
 
 // Average rating for restaurant
 async getRestaurantReviewStats(
     restaurantId:string
-){
-    try{
+): Promise<any>{
+   
 
         const ratings =
         await prisma.review.aggregate({
@@ -551,16 +516,12 @@ async getRestaurantReviewStats(
         return ratings;
 
     }
-    catch(err){
-        throw err;
-    }
-}
 
 // check if order exists for review
 async findOrderForReview(
     orderId: string
-){
-    try{
+): Promise<any> {
+
 
         return await prisma.order.findUnique({
             where:{
@@ -582,19 +543,14 @@ async findOrderForReview(
                 }
             }
         });
-
     }
-    catch(err){
-        throw err;
-    }
-}
+   
 
 // check if review already exists
 async findReviewByOrderId(
     orderId:string
-){
-    try{
-
+): Promise<any> {
+  
         return await prisma.review.findUnique({
             where:{
                 orderId
@@ -602,10 +558,7 @@ async findReviewByOrderId(
         });
 
     }
-    catch(err){
-        throw err;
-    }
-}
+
 
 // Create review
 async createReview(
@@ -613,9 +566,7 @@ async createReview(
     branchId:string,
     deliveryPartnerId:string | null,
     data:ICreateReview
-){
-    try{
-
+): Promise<any> {
         return await prisma.review.create({
 
             data:{
@@ -638,8 +589,5 @@ async createReview(
         });
 
     }
-    catch(err){
-        throw err;
-    }
 }
-}
+

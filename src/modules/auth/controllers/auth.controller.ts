@@ -1,36 +1,49 @@
 import type { Request, Response } from 'express';
 import { IApiResponse, ILoginDto, ISignupDto } from '../interfaces/auth.interface';
 import { AuthService } from '../services/auth.service';
-export class AuthController {
-  private authService = new AuthService();
+import { AuthRepository } from '../repositories/auth.repository';
+import jwt from 'jsonwebtoken'
 
+
+// This below two varible helps for logout directly from the controller...
+
+
+
+export class AuthController {
+
+  private authRepo = new AuthRepository();
+  private authService = new AuthService();
   registerPage = async (req: Request, res: Response) => {
 
     const role: string =
-      String(req.params.role).toUpperCase();
+      String(req.params.role).toLowerCase();
 
-    switch (role) {
-
-      case "CUSTOMER":
-        return res.render(
-          "auth/customer-register"
+      return res.render(
+          `auth/${role}/register`
         );
 
-      case "RESTAURANT":
-        return res.render(
-          "auth/restaurant-register"
-        );
+    // switch (role) {
 
-      case "DELIVERY-PARTNER":
-        return res.render(
-          "auth/delivery-register"
-        );
+    //   case "CUSTOMER":
+    //     return res.render(
+    //       "auth/customer/customer-register"
+    //     );
 
-      default:
-        return res.status(404).send(
-          "Invalid Role"
-        );
-    }
+    //   case "RESTAURANT":
+    //     return res.render(
+    //       "auth/restaurant-register"
+    //     );
+
+    //   case "DELIVERY-PARTNER":
+    //     return res.render(
+    //       "auth/delivery-register"
+    //     );
+
+    //   default:
+    //     return res.status(404).send(
+    //       "Invalid Role"
+    //     );
+    // }
   };
 
   loginPage = async (
@@ -39,30 +52,33 @@ export class AuthController {
   ) => {
 
     const role: string =
-      String(req.params.role).toUpperCase();
-
-    switch (role) {
-
-      case "CUSTOMER":
-        return res.render(
-          "auth/customer-login"
+      String(req.params.role).toLowerCase();
+    return res.render(
+          `auth/${role}/login`
         );
 
-      case "RESTAURANT":
-        return res.render(
-          "auth/restaurant-login"
-        );
+    // switch (role) {
 
-      case "DELIVERY-PARTNER":
-        return res.render(
-          "auth/delivery-login"
-        );
+    //   case "CUSTOMER":
+    //     return res.render(
+    //       "auth/customer/customer-login"
+    //     );
 
-      default:
-        return res.status(404).send(
-          "Invalid Role"
-        );
-    }
+    //   case "RESTAURANT":
+    //     return res.render(
+    //       "auth/restaurant-login"
+    //     );
+
+    //   case "DELIVERY-PARTNER":
+    //     return res.render(
+    //       "auth/delivery-login"
+    //     );
+
+    //   default:
+    //     return res.status(404).send(
+    //       "Invalid Role"
+    //     );
+    // }
   };
 
 
@@ -74,7 +90,7 @@ export class AuthController {
 
 
     try {
-      const response: IApiResponse = await this.authService.registerUser(userInfo,role);
+      const response: IApiResponse = await this.authService.registerUser(userInfo, role);
       if (response.status == 'Success') return res.status(201).json(response);
       else res.status(401).json(response);
     } catch (e: any) {
@@ -91,18 +107,102 @@ export class AuthController {
     console.log(loginInfo)
 
     try {
-      const response: IApiResponse = await this.authService.loginUser(loginInfo,role);
-      if (response.status == 'Success') return res.status(201).json(response);
+      const response: IApiResponse = await this.authService.loginUser(loginInfo, role);
+      if (response.status == 'Success') {
+        const {
+          accessToken,
+          refreshToken
+        } = response.data;
+
+
+
+        res.cookie(
+          "refreshToken",
+          refreshToken,
+          {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge:
+              loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60
+          }
+        );
+        return res.status(201).json({
+          status: "Success",
+          statusCode: 200,
+          message:
+            "User Logged in succesfully..",
+          data: {
+            accessToken,
+          }
+        });
+
+      }
       else res.status(401).json(response);
     } catch (e: any) {
       res.status(500).json({ message: e.message })
     }
   };
 
+  logout = async (
+    req: Request,
+    res: Response
+  ) => {
+
+    const refreshToken =
+      req.cookies.refreshToken;
+
+    if (refreshToken) {
+
+      await this.authRepo.revokeRefreshToken(
+        refreshToken
+      );
+    }
+
+    res.clearCookie(
+      "refreshToken"
+    );
+
+    return res.json({
+      status: "Success",
+      statusCode: 200,
+      message: "Logged out"
+    });
+  };
+
+  // Refresh Token : Comes in picture when the user Access Token expire...
+  refreshToken = async (
+    req: Request,
+    res: Response
+  ) => {
+
+
+    console.log(req.cookies.refreshToken)
+
+    const refreshToken =
+      req.cookies.refreshToken;
+
+    const response =
+      await this.authService.refreshToken(
+        refreshToken
+      );
+
+    if (
+      response.status === "Error"
+    ) {
+      return res.status(401).json(
+        response
+      );
+    }
+
+    return res.status(200).json(
+      response
+    );
+  };
 
 
 
-  // Api that verify email end send email to that user
+
   forgetPassword = async (req: Request, res: Response) => {
     const email: string = String(req.params.email);
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -116,9 +216,9 @@ export class AuthController {
 
     try {
       // Verify Email is exist or not...............
-      const response: IApiResponse = await this.authService.verifyUserByEmail(email);
+      const response: IApiResponse = await this.authService.verifyUserByEmailForOtp(email);
       if (response.status == 'Success') {
-        res.cookie('token', response.data.token, {
+        res.cookie('resetToken', response.data.token, {
           maxAge: 5 * 60 * 1000,
           httpOnly: true,
         })
@@ -132,8 +232,8 @@ export class AuthController {
   };
 
   // Change password Page
-  changePasswordPage = async (req: Request, res: Response) => {
-    res.send("This is change Password page");
+  forgetPasswordPage = async (req: Request, res: Response) => {
+    res.render('auth/forget-password');
   }
 
   // Sending the mail simulation page to the user with OTP

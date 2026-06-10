@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ziggy - Customer Signup</title>
+
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- LEFT SIDE -->
+        <div class="left-panel">
+
+            <div class="brand">
+                Ziggy
+            </div>
+
+            <div class="content">
+
+                <h1>
+                    Delicious food,
+                    delivered fast
+                </h1>
+
+                <p>
+                    Create your account and
+                    experience the best
+                    food delivery service.
+                </p>
+
+            </div>
+
+            <img src="/images/burger.png" alt="burger" class="burger">
+
+            <div class="wave">
+                ~~~~~
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="right-panel">
+
+            <div class="form-wrapper">
+
+                <h2>Customer Sign Up</h2>
+
+                <span>
+                    Create your account to continue
+                </span>
+
+                <form id="signupForm">
+
+                    <div class="input-group">
+
+                        <label>
+                            Full Name
+                        </label>
+
+                        <div class="input-box">
+                            <i class="fa-regular fa-user"></i>
+                            <input type="text" placeholder="Enter your full name">
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>
+                            Mobile Number
+                        </label>
+
+                        <div class="input-box">
+
+                            <span class="country">
+                                +91
+                            </span>
+
+                            <input type="text" placeholder="Enter your mobile number">
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>
+                            Email Address
+                        </label>
+
+                        <div class="input-box">
+                            <i class="fa-regular fa-envelope"></i>
+
+                            <input type="email" placeholder="Enter your email address">
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input id="password" type="password" placeholder="Create a password">
+
+                            <i class="fa-regular fa-eye toggle"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Confirm Password</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input type="password" name="confirm_password" placeholder="Confirm password" required>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="terms">
+
+                        <input type="checkbox">
+
+                        <p>
+                            I agree to the
+                            <a href="#">
+                                Terms & Conditions
+                            </a>
+                            and
+                            <a href="#">
+                                Privacy Policy
+                            </a>
+                        </p>
+
+                    </div>
+
+                    <button class="signup-btn">
+                        Create Account
+                    </button>
+
+                </form>
+
+                <div class="divider">
+                    Or sign up with
+                </div>
+
+                <div class="socials">
+
+                    <button>
+                        <i class="fab fa-google"></i>
+                    </button>
+
+                    <button>
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
+
+                    <button>
+                        <i class="fab fa-apple"></i>
+                    </button>
+
+                </div>
+
+                <div class="login-link">
+
+                    Already have an account?
+
+                    <a href="/api/auth/customer/static/login">
+                        Login
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <script>
+        function togglePassword() {
+
+            const password =
+                document.getElementById("password");
+
+            password.type =
+                password.type === "password"
+                    ? "text"
+                    : "password";
+        }
+    </script>
+
+
+    <script src="/js/customer-register.js"></script>
+
+</body>
+
+</html>
