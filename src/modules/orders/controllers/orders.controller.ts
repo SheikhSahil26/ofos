@@ -1,30 +1,66 @@
 import { Request, Response } from "express";
-import { OrdersService } from "../services/orders.service";
+import { OrderService } from "../services/orders.service";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { AddressService } from "../../address/services/address.service";
+import { CartService } from "../../cart/services/cart.services";
+import { prisma } from "../../../config/prisma";
 
 export class OrdersControllers {
-  private restaurantService = new OrdersService();
+  private ordersService = new OrderService(
+    prisma,
+    new CartService(),
+    new AddressService(),
 
-  // getCart = asyncHandler(
-  //         async (
-  //             req: Request,
-  //             res: Response
-  //         ) => {
+  );
+
+  getCart = asyncHandler(
+          async (
+              req: Request,
+              res: Response
+          ) => {
   
-  //             const userId = 1; // dummy
+              const userId = 1; // dummy
   
-  //             const data =
-  //                 await this.OrdersService.placeOrder(
-  //                     userId
-  //                 );
+              const data =
+                  await this.ordersService.createOrder(
+                      userId
+                  );
   
-  //             return res
-  //                 .status(
-  //                     data.statusCode || 200
-  //                 )
-  //                 .json(data);
-  //         }
-  //     );
+              return res
+                  .status(
+                      data.statusCode || 200
+                  )
+                  .json(data);
+          }
+      );
+
+      // controllers/order.controller.ts
+      createOrder = asyncHandler(
+
+        async(req: Request, res: Response) => {
+  const userId = 1
+  const { addressId, paymentMethod, couponCode, scheduledAt } = req.body;
+
+  if (!addressId || !paymentMethod) {
+    return res.status(400).json({
+      success: false,
+      message: "addressId and paymentMethod are required",
+    });
+  }
+
+  const result = await this.ordersService.createOrder({
+    userId,
+    addressId,
+    paymentMethod,
+    couponCode,
+    scheduledAt,
+  });
+
+  return res.status(result.statusCode).json(result);
+}
+      )
+
+
   
  
 }

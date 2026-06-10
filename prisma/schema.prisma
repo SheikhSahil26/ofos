@@ -37,6 +37,7 @@ model User {
   supportTicketsAsCustomer SupportTicket[]      @relation("TicketCustomer")
   addresses                UserAddress[]
   userRoles                UserRole[]
+  refreshTokens            RefreshToken[]
 
   @@map("users")
 }
@@ -75,16 +76,30 @@ model UserAddress {
   latitude     Decimal?  @db.Decimal(10, 8)
   longitude    Decimal?  @db.Decimal(11, 8)
   isDefault    Boolean   @default(false) @map("is_default")
-  isDeleted    Boolean   @default(false) @map("is_deleted")
-  deletedAt    DateTime? @map("deleted_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  isDeleted    Boolean   @default(false) @map("is_deleted")
   orders       Order[]
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("user_addresses")
 }
+
+model RefreshToken {
+  id          BigInt   @id @default(autoincrement())
+  token       String   @db.Text
+  userId      String   @map("user_id")
+  isRevoked   Boolean  @default(false)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 
 /// Restaurant entity owned by a user
 model Restaurant {
@@ -95,9 +110,9 @@ model Restaurant {
   logoUrl       String?               @map("logo_url") @db.Text
   coverImageUrl String?               @map("cover_image_url") @db.Text
   isActive      Boolean               @default(true) @map("is_active")
-  isDeleted     Boolean               @default(false) @map("is_deleted")
-  deletedAt     DateTime?             @map("deleted_at")
   createdAt     DateTime              @default(now()) @map("created_at")
+  deletedAt     DateTime?             @map("deleted_at")
+  isDeleted     Boolean               @default(false) @map("is_deleted")
   updatedAt     DateTime              @updatedAt @map("updated_at")
   branches      RestaurantBranch[]
   promotions    RestaurantPromotion[]
@@ -115,14 +130,13 @@ model Restaurant {
 model RestaurantBranch {
   id                 String             @id @default(uuid())
   restaurantId       String             @map("restaurant_id")
-  headId             String?            @map("head_id")
   branchName         String?            @map("branch_name") @db.VarChar(255)
+  contactNumber      String?            @map("contact_number") @db.VarChar(20)
   addressLine1       String?            @map("address_line1") @db.Text
   addressLine2       String?            @map("address_line2") @db.Text
   city               String?            @db.VarChar(100)
   state              String?            @db.VarChar(100)
   pincode            String?            @db.VarChar(20)
-  contactNumber      String?            @map("contact_number") @db.VarChar(20)
   gstin              String?            @db.VarChar(50)
   fssaiLicense       String?            @map("fssai_license") @db.VarChar(100)
   verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
@@ -132,9 +146,10 @@ model RestaurantBranch {
   isPrimary          Boolean            @default(false) @map("is_primary")
   isActive           Boolean            @default(true) @map("is_active")
   isDeleted          Boolean            @default(false) @map("is_deleted")
-  deletedAt          DateTime?          @map("deleted_at")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
+  deletedAt          DateTime?          @map("deleted_at")
+  headId             String?            @map("head_id")
   categories         Category[]
   operatingHours     OperatingHour[]
   orders             Order[]
@@ -156,9 +171,9 @@ model OperatingHour {
   openTime  DateTime?        @map("open_time") @db.Time(0)
   closeTime DateTime?        @map("close_time") @db.Time(0)
   isClosed  Boolean          @default(false) @map("is_closed")
-  isDeleted Boolean          @default(false) @map("is_deleted")
-  deletedAt DateTime?        @map("deleted_at")
   createdAt DateTime         @default(now()) @map("created_at")
+  deletedAt DateTime?        @map("deleted_at")
+  isDeleted Boolean          @default(false) @map("is_deleted")
   updatedAt DateTime         @updatedAt @map("updated_at")
   branch    RestaurantBranch @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
@@ -174,8 +189,8 @@ model RestaurantStaff {
   branchId       String             @map("branch_id")
   isActive       Boolean            @default(true) @map("is_active")
   isDeleted      Boolean            @default(false) @map("is_deleted")
-  deletedAt      DateTime?          @map("deleted_at")
   createdAt      DateTime           @default(now()) @map("created_at")
+  deletedAt      DateTime?          @map("deleted_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")
   headOfBranches RestaurantBranch[] @relation("BranchHead")
   branch         RestaurantBranch   @relation("BranchStaffMembers", fields: [branchId], references: [id])
@@ -207,7 +222,7 @@ model Category {
 /// Individual food item on the menu
 model MenuItem {
   id             String          @id @default(uuid())
-  branch_id      String
+  branchId       String          @map("branch_id")
   categoryId     String          @map("category_id")
   name           String?         @db.VarChar(255)
   description    String?         @db.Text
@@ -227,7 +242,7 @@ model MenuItem {
 
   @@index([categoryId])
   @@index([name])
-  @@index([branch_id], map: "menu_items_branch_id_fkey")
+  @@index([branchId], map: "menu_items_branch_id_fkey")
   @@map("menu_items")
 }
 
