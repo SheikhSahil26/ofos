@@ -14,5 +14,7 @@ export class MenuItemRoutes implements IRoutes{
     private initializeRoutes() : void{
         this.router.get("/categories/:categoryId/items", this.controller.getMenuItemsByCategory);
         this.router.post("/categories/:categoryId/items", this.controller.createMenuItem); /* Create a new menu item */
+        this.router.get("/:id",this.controller.getMenuItemById); /* Get menu item details with modifiers and tags */
+        this.router.put("/:id", this.controller.updateMenuItem); /* Update menu item details */
     }
 }

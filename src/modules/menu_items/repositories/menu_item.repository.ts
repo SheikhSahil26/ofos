@@ -1,5 +1,5 @@
 import { prisma } from "../../../config/prisma";
-import { ICreateMenuItem } from "../interfaces/menu_item.interfaces";
+import { ICreateMenuItem, IUpdateMenuItem } from "../interfaces/menu_item.interfaces";
 
 export class MenuItemRepository{
     async createMenuItem(data: ICreateMenuItem) {
@@ -43,4 +43,43 @@ export class MenuItemRepository{
             },
         });
     }
+
+    async getMenuItemById(id: string) {
+        return prisma.menuItem.findFirst({
+            where: {
+                id,
+                isDeleted: false,
+            },
+            include: {
+                tags: {
+                    include: {
+                        dietaryTag: true,
+                    },
+                },
+                modifierGroups: {
+                    include: {
+                        options: true,
+                    },
+                },
+            },
+        });
+    }
+
+    async updateMenuItem(id: string, data: IUpdateMenuItem) {
+        return prisma.menuItem.update({
+            where: {
+                id,
+            },
+            data,
+            include: {
+                tags: {
+                    include: {
+                        dietaryTag: true,
+                    },
+                },
+                modifierGroups: true,
+            },
+        });
+    }
+
 }

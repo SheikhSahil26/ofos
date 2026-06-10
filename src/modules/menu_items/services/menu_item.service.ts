@@ -3,7 +3,7 @@ import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
 import { DietaryTagRepository } from "../../dietaryTags/repositories/dietaryTag.repository";
 import { MenuRepository } from "../../menu/repositories/menu.repository";
-import { ICreateMenuItem } from "../interfaces/menu_item.interfaces";
+import { ICreateMenuItem, IUpdateMenuItem } from "../interfaces/menu_item.interfaces";
 import { MenuItemRepository } from "../repositories/menu_item.repository";
 
 export class MenuItemService{
@@ -72,6 +72,65 @@ export class MenuItemService{
             success: true,
             data: menuItems,
             message: "Menu items fetched successfully",
+            statusCode: 200,
+        };
+    }
+
+    async getMenuItemById(id: string): Promise<ServiceResponse<any>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(id);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        return {
+            success: true,
+            data: menuItem,
+            message: "Menu item fetched successfully",
+            statusCode: 200,
+        };
+    }
+
+    async updateMenuItem(id: string,data: IUpdateMenuItem): Promise<ServiceResponse<any>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(id);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        //if the owner wants to change the category id
+        if (data.categoryId) {
+            const category =
+                await this.menuRepository.getCategoryById(
+                    data.categoryId
+                );
+
+            if (!category) {
+                throw new AppError(
+                    "Category not found",
+                    404
+                );
+            }
+        }
+
+        const updatedMenuItem =
+            await this.menuItemRepository.updateMenuItem(
+                id,
+                data
+            );
+
+        return {
+            success: true,
+            data: updatedMenuItem,
+            message: "Menu item updated successfully",
             statusCode: 200,
         };
     }

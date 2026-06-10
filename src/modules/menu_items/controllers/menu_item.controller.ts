@@ -19,11 +19,32 @@ export class MenuItemController{
 
     getMenuItemsByCategory = asyncHandler(async (req: Request,res: Response) => {
         const categoryId = req.params.categoryId;
-        console.log(categoryId);
         if(typeof categoryId != 'string'){
             throw new AppError("category ID is required", 400);
         }
         const response = await this.menuItemService.getMenuItemsByCategory(categoryId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    getMenuItemById = asyncHandler(async (req: Request,res: Response) => {
+        const id = req.params.id;
+        if(typeof id != 'string'){
+            throw new AppError("category ID is required", 400);
+        }
+        const response = await this.menuItemService.getMenuItemById(id);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    updateMenuItem = asyncHandler(async (req: Request,res: Response) => {
+        const id = req.params.id;
+        if(typeof id != 'string'){
+            throw new AppError("category ID is required", 400);
+        }
+
+        const response =
+            await this.menuItemService.updateMenuItem(id,req.body);
 
         res.status(response.statusCode || 200).json(response);
     });
