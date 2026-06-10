@@ -134,4 +134,134 @@ export class MenuItemService{
             statusCode: 200,
         };
     }
+
+    async updateMenuItemImage(id: string, imageUrl: string): Promise<ServiceResponse<any>> {
+
+        const menuItem =
+            await this.menuItemRepository.getMenuItemById(id);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        const updatedMenuItem =
+            await this.menuItemRepository.updateMenuItemImage(
+                id,
+                imageUrl
+            );
+
+        return {
+            success: true,
+            data: updatedMenuItem,
+            message: "Menu item image updated successfully",
+            statusCode: 200,
+        };
+    }
+
+    async updateAvailability(id: string,isAvailable: boolean): Promise<ServiceResponse<MenuItem>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(id);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        const updatedMenuItem = await this.menuItemRepository.updateAvailability(id, isAvailable);
+
+        return {
+            success: true,
+            data: updatedMenuItem,
+            message: `Menu item ${
+                isAvailable ? "enabled" : "disabled"
+            } successfully`,
+            statusCode: 200,
+        };
+    }
+
+    async updateBestseller(id: string, isBestseller: boolean): Promise<ServiceResponse<any>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(id);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        const updatedMenuItem =
+            await this.menuItemRepository.updateBestseller(id, isBestseller);
+
+        return {
+            success: true,
+            data: updatedMenuItem,
+            message: `Menu item ${
+                isBestseller
+                    ? "marked as bestseller"
+                    : "removed from bestseller"
+            } successfully`,
+            statusCode: 200,
+        };
+    }
+
+    async deleteMenuItem(id: string): Promise<ServiceResponse<null>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(id);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        await this.menuItemRepository.deleteMenuItem(id);
+
+        return {
+            success: true,
+            message: "Menu item deleted successfully",
+            statusCode: 200,
+        };
+    }
+
+    async addDietaryTags(menuItemId: string, tagIds: string[]): Promise<ServiceResponse<any>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(menuItemId);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        const tags = await this.dietaryTagRepository.getDietaryTagsByIds(tagIds);
+
+        if (tags.length !== tagIds.length) {
+            throw new AppError(
+                "One or more dietary tags are invalid",
+                400
+            );
+        }
+
+        await this.menuItemRepository.addDietaryTags(menuItemId, tagIds);
+
+        const updatedMenuItem =
+            await this.menuItemRepository.getMenuItemById(
+                menuItemId
+            );
+
+        return {
+            success: true,
+            data: updatedMenuItem,
+            message: "Dietary tags added successfully",
+            statusCode: 200,
+        };
+    }
 }

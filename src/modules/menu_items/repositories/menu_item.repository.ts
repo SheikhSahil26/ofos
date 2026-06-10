@@ -82,4 +82,59 @@ export class MenuItemRepository{
         });
     }
 
+    async updateMenuItemImage(id: string, imageUrl: string) {
+        return prisma.menuItem.update({
+            where: {
+                id,
+            },
+            data: {
+                imageUrl,
+            },
+        });
+    }
+
+    async updateAvailability(id: string, isAvailable: boolean) {
+        return prisma.menuItem.update({
+            where: {
+                id,
+            },
+            data: {
+                isAvailable,
+            },
+        });
+    }
+
+    async updateBestseller(id: string, isBestseller: boolean) {
+        return prisma.menuItem.update({
+            where: {
+                id,
+            },
+            data: {
+                isBestseller,
+            },
+        });
+    }
+
+    async deleteMenuItem(id: string) {
+        return prisma.menuItem.update({
+            where: {
+                id,
+            },
+            data: {
+                isDeleted: true,
+                deletedAt: new Date(),
+            },
+        });
+    }
+
+    async addDietaryTags(menuItemId: string, tagIds: string[]) {
+        return prisma.menuItemTag.createMany({
+            data: tagIds.map((tagId) => ({
+                menuItemId,
+                tagId,
+            })),
+            skipDuplicates: true,
+        });
+    }
+
 }

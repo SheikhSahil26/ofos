@@ -41,3 +41,44 @@ export const updateMenuItemSchema = Joi.object({
 .messages({
     "object.min": "At least one field is required for update",
 });
+
+export const updateAvailabilitySchema = Joi.object({
+    isAvailable: Joi.boolean()
+        .required()
+        .messages({
+            "any.required":
+                "isAvailable is required",
+            "boolean.base":
+                "isAvailable must be a boolean",
+        }),
+});
+
+export const updateBestsellerSchema = Joi.object({
+    isBestseller: Joi.boolean()
+        .required()
+        .messages({
+            "any.required":
+                "isBestseller is required",
+            "boolean.base":
+                "isBestseller must be a boolean",
+        }),
+});
+
+export const addDietaryTagsSchema = Joi.object({
+    tagIds: Joi.array()
+        .items(
+            Joi.string()
+                .uuid()
+                .required()
+        )
+        .min(1)
+        .required()
+        .messages({
+            "array.base":
+                "tagIds must be an array",
+            "array.min":
+                "At least one tag is required",
+            "any.required":
+                "tagIds is required",
+        }),
+});

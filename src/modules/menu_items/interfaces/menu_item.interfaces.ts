@@ -20,3 +20,19 @@ export interface IUpdateMenuItem {
     isVeg?: boolean;
     categoryId?: string;
 }
+
+export interface IUpdateMenuItemImage {
+    imageUrl: string;
+}
+
+export interface IToggleAvailability {
+    isAvailable: boolean;
+}
+
+export interface IToggleBestseller {
+    isBestseller: boolean;
+} 
+
+export interface IAddDietaryTags {
+    tagIds: string[];
+}
