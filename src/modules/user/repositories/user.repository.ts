@@ -15,138 +15,90 @@ const userProfileSelect = {
 } as const;
 
 export class UserRepository{
-
-    //checking user exist or not by id
-    async validateUser(userId: string): Promise<boolean>{
-        try{
-            const user = await this.findUserById(userId);
-
-            if(!user || user.isDeleted){
-                throw new Error("User not found");
-            }
-
-            return true;
-        }
-        catch(err){
-            throw err;
-        }
-    }
-
+    
     //find user by id
     async findUserById(userId: string): Promise<IExistUser | null>{
-        try{
-            return await prisma.user.findUnique({
-                where: {
-                    id: userId,
-                },
-                select: {
-                    id: true,
-                    email: true,
-                    isDeleted: true,
-                }
-            });
-        }
-        catch(err){
-            throw err;
-        }
+
+        return await prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+            select: {
+                id: true,
+                email: true,
+                isDeleted: true,
+            }
+        });
     }
 
     //find user by email
     async findUserByEmail(email: string): Promise<IExistUser | null>{
-        try{
-            return await prisma.user.findUnique({
-                where: {
-                    email: email
-                },
-                select: {
-                    id: true,
-                    email: true,
-                    isDeleted: true
-                }
-            });
-        }
-        catch(err){
-            throw err;
-        }
+
+        return await prisma.user.findUnique({
+            where: {
+                email: email
+            },
+            select: {
+                id: true,
+                email: true,
+                isDeleted: true
+            }
+        });
     }
 
     //get profile of user
     async getProfile(userId: string) : Promise<IUser | null>{
-        try{
-            const user = await prisma.user.findUnique({
-                where: {
-                    id: userId
-                },
-                select: userProfileSelect
-            });
 
-            if(!user || user.isDeleted){
-                throw new Error("User not found");
-            }
-
-            return user;
-        }
-        catch(err){
-            throw err;
-        }
+        return await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: userProfileSelect
+        });
     }
 
     //update profile of user
     async updateProfile(userId: string, data: IUpdateUser) : Promise<IUser | null>{
-        try{
-            //update user
-            const updatedUser = await prisma.user.update({
-                where: {
-                    id: userId,
-                },
-                data: data,
-                select: userProfileSelect
-            });
 
-            return updatedUser;
-        }
-        catch(err){
-            throw err;
-        }
+        //update user
+        return await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: data,
+            select: userProfileSelect
+        });
     }
 
     //delete profile photo of user
     async deleteProfilePhoto(userId: string): Promise<IUser | null>{
-        try{
-            return await prisma.user.update({
-                where: {
-                    id: userId,
-                },
-                data: {
-                    profilePhoto: null,
-                },
-                select: userProfileSelect,
-            })
-        }
-        catch(err){
-            throw err;
-        }
+
+        return await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                profilePhoto: null,
+            },
+            select: userProfileSelect,
+        })
     }
 
     //delete profile of user
-    async deleteProfile(userId: string) : Promise<void>{
-        try{
-            //delete user
-            await prisma.user.update({
-                where: {
-                    id: userId
-                }, 
-                data: {
-                    isDeleted: true,
-                    isActive: false,
-                    deletedAt: new Date()
-                }
-            });
+    async deleteUserAccount(userId: string) : Promise<void>{
 
-            console.log("user deleted successfully");
-        }
-        catch(err){
-            throw err;
-        } 
+        //delete user
+        await prisma.user.update({
+            where: {
+                id: userId
+            }, 
+            data: {
+                isDeleted: true,
+                isActive: false,
+                deletedAt: new Date()
+            }
+        });
+
+        console.log("user deleted successfully");
     }
 }
