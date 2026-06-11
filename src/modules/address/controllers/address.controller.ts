@@ -10,7 +10,7 @@ export class AddressController{
     //get all addresses of users
     getAddresses = asyncHandler( async(req: Request, res: Response) => {
 
-        const userId = req.user.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         if(typeof userId !== "string"){
             throw new Error("Invalid user id");
@@ -25,7 +25,7 @@ export class AddressController{
     getAddressById = asyncHandler( async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         if(typeof addressId !== "string" || typeof userId !== "string"){
             throw new Error("Invalid address id or user id");
@@ -39,7 +39,7 @@ export class AddressController{
     //create new address for user
     createAddress = asyncHandler(async(req: Request, res: Response) => {
 
-        const userId = req.user.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         const data: ICreateAddress = req.body;
 
@@ -52,7 +52,7 @@ export class AddressController{
     updateAddressById = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         const data: IUpdateAddress = req.body;
 
@@ -69,7 +69,7 @@ export class AddressController{
     deleteAddressById = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         if(typeof addressId !== "string" || typeof userId !== "string"){
             throw new Error("Invalid address id or user id");
@@ -84,7 +84,7 @@ export class AddressController{
     setDefaultAddress = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         //validating address id and user id
         if(typeof addressId !== "string" || typeof userId !== "string"){
