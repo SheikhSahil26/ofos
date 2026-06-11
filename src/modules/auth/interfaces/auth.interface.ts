@@ -33,6 +33,7 @@ export interface ICreateUserDto {
 export interface ILoginDto {
   email: string;
   password: string;
+  rememberMe : string;
 }
 
 
@@ -40,12 +41,17 @@ export interface ILoginDto {
 type SuccessResponse = {
   status: "Success";
   message: string;
+  statusCode : number;
   data?: any;
+  redirectURL?:string
 }
 
 type ErrorResponse = {
   status: "Error";
   message: string;
+  statusCode : number;
+  data?: any;
+  redirectURL?:string
 }
 
 export type IApiResponse = SuccessResponse | ErrorResponse;

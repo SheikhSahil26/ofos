@@ -1,14 +1,17 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import type { IRoutes } from "../../../common/interfaces/route.interface.js";
 import { AuthController } from "../controllers/auth.controller.js";
 import { isAuthenticated } from "../../../middlewares/authenticateMiddlware.js";
 import { validate } from "../../../middlewares/signupValidate.js";
 import { signupSchema } from "../validators/register.validator.js";
+import "../../../config/jwtAuth.js";
+
 
 export class AuthRoutes implements IRoutes {
   path = '/auth';
   router = Router();
   controller = new AuthController();
+
 
   constructor() {
     this.initializeRoutes();
@@ -38,14 +41,23 @@ export class AuthRoutes implements IRoutes {
     );
 
 
+    this.router.post('/refresh-token', this.controller.refreshToken);
+    this.router.post('/logout',this.controller.logout)
+
+    //Test the Token
+    this.router.get('/dash', isAuthenticated, (req: Request, res: Response) => {
+      res.send("Helooo")
+    })
+
 
     // Forget Password  related Routes...........................
+    // Token validation with page are pending...
     this.router.route('/forget-password/:email')
       .get(this.controller.forgetPassword)
       .post(this.controller.verifyOtp)
 
-    this.router.get('/static/inbox', this.controller.mailInboxPage);
-    this.router.get('/static/change-password', this.controller.changePasswordPage);
+    this.router.get('/static/inbox',isAuthenticated, this.controller.mailInboxPage);
+    this.router.get('/static/forget-password', this.controller.forgetPasswordPage);
     this.router.patch('/reset-password', this.controller.resetPassword)
 
   }
