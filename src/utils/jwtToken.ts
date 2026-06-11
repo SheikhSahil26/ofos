@@ -30,12 +30,12 @@ export const generateRefreshToken = (
 };
 
 export const generateResetToken = (
-    payload : object
+    payload : Express.otpPayload
 ) => {
 
     return jwt.sign(
         payload,
-        String(process.env.JWT_RESET_SECRET),
+        String(process.env.JWT_ACCESS_SECRET),
         {
             expiresIn: '2m'
         }

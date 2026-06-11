@@ -12,40 +12,28 @@
 </head>
 
 <body>
-
+    <div id="toast"></div>
     <div class="container">
 
         <!-- LEFT SIDE -->
 
         <div class="left-panel">
-
             <div class="brand">Ziggy</div>
-
             <div class="content">
                 <h1>Welcome back!</h1>
-
-                <p>
-                    Sign in to continue ordering your favorite food.
-                </p>
+                <p>Sign in to continue ordering your favorite food.</p>
             </div>
-
             <img src="/images/burger.png" alt="Burger" class="burger">
-
             <div class="wave">〰</div>
-
         </div>
 
         <!-- RIGHT SIDE -->
 
         <div class="right-panel">
-
             <div class="form-wrapper">
-
                 <h2>Customer Login</h2>
-
                 <span>Enter your details to login</span>
-
-                <form action="/customer/login" method="POST">
+                <form id="loginForm">
 
                     <div class="input-group">
 
@@ -78,7 +66,7 @@
                     </div>
                     <div class="terms">
 
-                        <input type="checkbox" name="rememberMe" required>
+                        <input type="checkbox" name="rememberMe">
 
                         <p>
                             Remember Me
@@ -93,7 +81,7 @@
                         justify-content:flex-end;
                         margin-top:10px;
                     ">
-                        <a href="/forgot-password" style="
+                        <a href="/api/auth/forget-password" style="
                             color:#777;
                             text-decoration:none;
                         ">
@@ -101,9 +89,7 @@
                         </a>
                     </div>
 
-                    <button class="signup-btn">
-                        Login
-                    </button>
+                    <input type="submit" class="signup-btn" value="Login" id="loginBtn">
 
                 </form>
 
@@ -143,19 +129,10 @@
 
     </div>
 
-    <script>
-        function togglePassword() {
-
-            const password =
-                document.getElementById("password");
-
-            password.type =
-                password.type === "password"
-                    ? "text"
-                    : "password";
-        }
-    </script>
-
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/togglePassword.js"></script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/login.js"></script>
 </body>
 
 </html>

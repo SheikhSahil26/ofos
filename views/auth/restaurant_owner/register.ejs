@@ -13,9 +13,11 @@
 
 <body>
 
+    <div id="toast"></div>
     <div class="container">
 
         <!-- LEFT PANEL -->
+
 
         <div class="left-panel">
 
@@ -52,7 +54,7 @@
                     Create your restaurant partner account
                 </span>
 
-                <form action="/restaurant/register" method="POST">
+                <form id="signupForm">
 
                     <!-- <div class="input-group">
 
@@ -156,10 +158,7 @@
                         </p>
 
                     </div>
-
-                    <button type="submit" class="signup-btn">
-                        Register Restaurant
-                    </button>
+                    <input type="submit" class="signup-btn" name="signupBtn" value="Create Account">
 
                 </form>
 
@@ -179,19 +178,11 @@
 
     </div>
 
-    <script>
-        function togglePassword() {
 
-            const password =
-                document.getElementById("password");
-
-            password.type =
-                password.type === "password"
-                    ? "text"
-                    : "password";
-        }
-    </script>
-
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/togglePassword.js"></script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/register.js"></script>
 
 </body>
 
