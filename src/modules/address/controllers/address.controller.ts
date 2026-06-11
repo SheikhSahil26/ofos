@@ -1,0 +1,98 @@
+import { Request, Response } from "express";
+import { AddressService } from "../services/address.service";
+import { ICreateAddress, IUpdateAddress } from "../interfaces/address.interface";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
+
+export class AddressController{
+
+    private addressService = new AddressService();
+
+    //get all addresses of users
+    getAddresses = asyncHandler( async(req: Request, res: Response) => {
+
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
+        if(typeof userId !== "string"){
+            throw new Error("Invalid user id");
+        }
+
+        const response = await this.addressService.getAddresses(userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //get address by id
+    getAddressById = asyncHandler( async(req: Request, res: Response) => {
+
+        const addressId = req.params.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
+        if(typeof addressId !== "string" || typeof userId !== "string"){
+            throw new Error("Invalid address id or user id");
+        }
+
+        const response = await this.addressService.getAddressById(addressId, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //create new address for user
+    createAddress = asyncHandler(async(req: Request, res: Response) => {
+
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
+        const data: ICreateAddress = req.body;
+
+        const response = await this.addressService.createAddress(data, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //update address by id
+    updateAddressById = asyncHandler(async(req: Request, res: Response) => {
+
+        const addressId = req.params.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
+        const data: IUpdateAddress = req.body;
+
+        if(typeof addressId !== "string" || typeof userId !== "string"){
+            throw new Error("Invalid address id or user id");
+        }
+
+        const response = await this.addressService.updateAddressById(addressId, data, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //delete address by id
+    deleteAddressById = asyncHandler(async(req: Request, res: Response) => {
+
+        const addressId = req.params.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
+        if(typeof addressId !== "string" || typeof userId !== "string"){
+            throw new Error("Invalid address id or user id");
+        }
+
+        const response = await this.addressService.deleteAddressById(addressId, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //set default address for user
+    setDefaultAddress = asyncHandler(async(req: Request, res: Response) => {
+
+        const addressId = req.params.id;
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
+        //validating address id and user id
+        if(typeof addressId !== "string" || typeof userId !== "string"){
+            throw new Error("Invalid address id or user id");
+        }
+
+        const response = await this.addressService.setDefaultAddress(addressId, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+}

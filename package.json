@@ -4,7 +4,13 @@
   "description": "> A production-ready folder structure guide for backend applications. > This boilerplate demonstrates best practices used in real production systems.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "nodemon --watch src --exec tsx src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "repository": {
     "type": "git",
@@ -15,23 +21,39 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
     "@types/node": "^25.9.1",
+    "@types/passport": "^1.0.17",
+    "@types/passport-jwt": "^4.0.1",
     "prisma": "^6.19.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "imagekit": "^6.0.0",
     "ioredis": "^5.11.0",
+    "joi": "^18.2.1",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
     "nodemon": "^3.1.14",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "path": "^0.12.7",
+    "redis": "^6.0.0",
     "views": "^1.0.2"
   }
 }
