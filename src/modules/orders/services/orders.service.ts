@@ -3,14 +3,18 @@ import { PrismaClient, PaymentMethodType } from "@prisma/client";
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";
+import { OrdersRepository } from "../repositories/orders.repository";
+import { DELIVERY_TRANSITIONS, STAFF_TRANSITIONS } from "../types/order.types";
 // import { CreateOrderInput, OrderItemInput } from "../types/order.types";
 
 export class OrderService {
+  private orderRepo = new OrdersRepository();
+
   constructor(
     private readonly prisma: PrismaClient,
     private readonly cartService: CartService,
     private readonly addressService: AddressService,
-  ) {}
+  ) { }
 
   async createOrder(
     input: CreateOrderInput
@@ -251,7 +255,7 @@ export class OrderService {
           // 10c. Create modifiers for this order item
           if (item.modifiers.length > 0) {
             await tx.orderItemModifier.createMany({
-              data: item.modifiers.map((mod:any) => ({
+              data: item.modifiers.map((mod: any) => ({
                 orderItemId: orderItem.id,
                 modifierName: mod.modifierName,
                 extraPrice: mod.extraPrice,
@@ -335,12 +339,398 @@ export class OrderService {
     }
   }
 
-  
 
-  async listOrders(userId: number): Promise<ServiceResponse<any>>{
-    
+
+  async listOrders(userId: string): Promise<ServiceResponse<any>> {
+    const orders = await this.orderRepo.listOrdersByUserId(userId);
+    console.log("Orders fetched for user", userId, orders);
+    return {
+      success: true,
+      data: orders,
+      message: "Orders fetched successfully",
+      statusCode: 200,
+    }
+  }
+
+  async getOrderById(orderId: string, userId: string): Promise<ServiceResponse<any>> {
+    //fetch order details from DB
+    //validate order belongs to user
+    //return order details along with items, modifiers, status history etc.
+    const order = await this.orderRepo.getOrderById(orderId);
+
+    if (!order) {
+      return {
+        success: false,
+        error: "Order not found",
+        statusCode: 404,
+      };
+    }
+
+    if (order.customerId !== userId) {
+      return {
+        success: false,
+        error: "Unauthorized access to this order",
+        statusCode: 403,
+      };
+    }
+
+    return {
+      success: true,
+      data: order, // replace with actual order details
+      message: "Order details fetched successfully",
+      statusCode: 200,
+    }
+  }
+
+  async getStatusHistory(orderId: string, userId: string): Promise<ServiceResponse<any>> {
+    //fetch order details from DB
+    //validate order belongs to user
+    //return order details along with items, modifiers, status history etc.
+    const order = await this.orderRepo.getOrderById(orderId);
+
+    if (!order) {
+      return {
+        success: false,
+        error: "Order not found",
+        statusCode: 404,
+      };
+    }
+
+    if (order.customerId !== userId) {
+      return {
+        success: false,
+        error: "Unauthorized access to this order",
+        statusCode: 403,
+      };
+    }
+
+    const statusHistory = await this.orderRepo.getStatusHistory(orderId);
+
+    return {
+      success: true,
+      data: statusHistory,
+      message: "Status history fetched successfully",
+      statusCode: 200,
+    };
+  }
+
+  async updateOrderStatus(orderId: string, newStatus: string): Promise<ServiceResponse<any>> {
+    {
+      //fetch order details from DB
+      //validate order belongs to user
+      //validate newStatus is a valid status done by admin or restaurant staff
+      //update order status in DB
+      //insert a new record in order status history table
+      //return updated order details  
+
+
+
+
+      return {
+        success: true,
+        data: {},
+        message: "Orders fetched successfully",
+        statusCode: 200,
+      }
+
+
+    }
+  }
+
+  // ROUTE 1 — Restaurant Staff Status Update
+  // PATCH /api/orders/:orderId/status
+  // ─────────────────────────────────────────────
+
+  //currently the queries are in service layer later after merging i will add this queries inside restrau staff respository and will call them using restrau service!!
+  async updateOrderStatusByStaff(
+    orderId: string,
+    staffUserId: string,
+  ): Promise<ServiceResponse<any>> {
+
+    // 1. Fetch the order
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId },
+      include: { branch: true, delivery: true },
+    });
+
+    if (!order) {
+      return { success: false, error: "Order not found", statusCode: 404 };
+    }
+
+    // 2. Verify staff belongs to this branch
+    const staffRecord = await this.prisma.restaurantStaff.findFirst({
+      where: {
+        userId: staffUserId,
+        branchId: order.branchId,
+        isActive: true,
+        isDeleted: false,
+      },
+    });
+
+    if (!staffRecord) {
+      return {
+        success: false,
+        error: "You are not assigned to this branch",
+        statusCode: 403,
+      };
+    }
+
+    // 3. Check transition is valid for staff
+    console.log(order,"order")
+    const nextStatus = STAFF_TRANSITIONS[order.status];
+    if (!nextStatus) {
+      return {
+        success: false,
+        error: `Staff cannot transition order from ${order.status}`,
+        statusCode: 400,
+      };
+    }
+
+    const oldStatus = order.status;
+    const isReadyForPickup = nextStatus === "READY_FOR_PICKUP";
+
+    // 4. Run transaction
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+
+      // 4a. Update order status
+      const updated = await tx.order.update({
+        where: { id: orderId },
+        data: { status: nextStatus },
+      });
+
+      // 4b. Log status history
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId,
+          oldStatus,
+          newStatus: nextStatus,
+          changedBy: staffUserId,
+          changedAt: new Date(),
+        },
+      });
+
+      // 4c. If READY_FOR_PICKUP — update delivery + notify active partners
+      if (isReadyForPickup) {
+
+        await tx.delivery.update({
+          where: { orderId },
+          data: { status: "ASSIGNED" },
+        });
+
+        const activePartners = await tx.deliveryPartner.findMany({
+          where: {
+            status: "ACTIVE",
+            isDeleted: false,
+          },
+          select: { userId: true },
+        });
+
+        if (activePartners.length > 0) {
+          await tx.notification.createMany({
+            data: activePartners.map((partner) => ({
+              userId: partner.userId,
+              title: "New Delivery Available",
+              message: `Order ${order.orderNumber} is ready for pickup at ${order.branch?.branchName}`,
+              notificationType: "ORDER_UPDATE",
+              status: "PENDING",
+            })),
+          });
+        }
+      }
+
+      return updated;
+    });
+
+    return {
+      success: true,
+      message: `Order status updated to ${nextStatus}`,
+      data: {
+        orderId,
+        orderNumber: order.orderNumber,
+        oldStatus,
+        newStatus: nextStatus,
+      },
+      statusCode: 200,
+    };
   }
 
 
+  async getOrdersReadyForPickup(): Promise<ServiceResponse<any>> {
+  try {
+
+    const orders = await this.orderRepo.getOrdersReadyForPickup();
+
+    return {
+      success: true,
+      message: "Orders ready for pickup fetched",
+      data: { orders, count: orders.length },
+      statusCode: 200,
+    };
+
+  } catch (error: any) {
+    console.error("getOrdersReadyForPickup error:", error);
+    return { success: false, error: "Failed to fetch orders", statusCode: 500 };
+  }
+}
+
+//currently the repo doesnt consisit of the delivery routes 
+async updateOrderStatusByDeliveryPartner(
+  orderId: string,
+  deliveryUserId: string,
+): Promise<ServiceResponse<any>> {
+  try {
+
+    // 1. Get delivery partner profile
+    const partnerRecord = await this.prisma.deliveryPartner.findFirst({
+      where: { userId: deliveryUserId, isDeleted: false },
+    });
+
+    if (!partnerRecord) {
+      return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+    }
+
+    // 2. Fetch order with delivery
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId },
+      include: { delivery: true },
+    });
+
+    if (!order || !order.delivery) {
+      return { success: false, error: "Order or delivery record not found", statusCode: 404 };
+    }
+
+    const delivery = order.delivery;
+    const oldStatus = order.status;
+
+    // 3. Check transition is valid for delivery partner
+    const nextStatus = DELIVERY_TRANSITIONS[order.status];
+    if (!nextStatus) {
+      return {
+        success: false,
+        error: `Delivery partner cannot transition order from ${order.status}`,
+        statusCode: 400,
+      };
+    }
+
+    // 4. If partner is claiming this order (READY_FOR_PICKUP → PICKED_UP)
+    //    verify no other partner has already claimed it
+    const isClaimingOrder = order.status === "READY_FOR_PICKUP";
+
+    if (isClaimingOrder && delivery.currentPartnerId !== null) {
+      return {
+        success: false,
+        error: "This order has already been claimed by another delivery partner",
+        statusCode: 409,
+      };
+    }
+
+    // 5. If already claimed, verify THIS partner owns it
+    if (!isClaimingOrder && delivery.currentPartnerId !== partnerRecord.id) {
+      return {
+        success: false,
+        error: "You are not assigned to this delivery",
+        statusCode: 403,
+      };
+    }
+
+    const isDelivered = nextStatus === "DELIVERED";
+
+    // 6. Run transaction
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+
+      // 6a. Update order status
+      const updated = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: nextStatus,
+          ...(isDelivered && { deliveredAt: new Date() }),
+        },
+      });
+
+      // 6b. Update delivery record
+      await tx.delivery.update({
+        where: { orderId },
+        data: {
+          status: nextStatus === "PICKED_UP"
+            ? "PICKED_UP"
+            : nextStatus === "DELIVERED"
+            ? "DELIVERED"
+            : delivery.status,
+          currentPartnerId: partnerRecord.id,// claim or confirm partner
+          ...(isClaimingOrder && { acceptedAt: new Date() }),
+          ...(nextStatus === "PICKED_UP" && { pickedUpAt: new Date() }),
+          ...(isDelivered && { deliveredAt: new Date() }),
+        },
+      });
+
+      // 6c. Log status history
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId,
+          oldStatus,
+          newStatus: nextStatus,
+          changedBy: deliveryUserId,
+          changedAt: new Date(),
+        },
+      });
+
+      // 6d. If claiming order — create delivery assignment record
+      if (isClaimingOrder) {
+        await tx.deliveryAssignment.create({
+          data: {
+            deliveryId: delivery.id,
+            partnerId: partnerRecord.id,
+            assignedAt: new Date(),
+            respondedAt: new Date(),
+            responseStatus: "ACCEPTED",
+          },
+        });
+
+        // Set partner as ON_DELIVERY
+        await tx.deliveryPartner.update({
+          where: { id: partnerRecord.id },
+          data: { status: "ON_DELIVERY" },
+        });
+      }
+
+      // 6e. If delivered — notify customer + free up partner
+      if (isDelivered) {
+        await tx.notification.create({
+          data: {
+            userId: order.customerId,
+            title: "Order Delivered!",
+            message: `Your order ${order.orderNumber} has been delivered. Enjoy your meal!`,
+            notificationType: "ORDER_UPDATE",
+            status: "PENDING",
+          },
+        });
+
+        // Free the delivery partner
+        await tx.deliveryPartner.update({
+          where: { id: partnerRecord.id },
+          data: { status: "ACTIVE" },
+        });
+      }
+
+      return updated;
+    });
+
+    return {
+      success: true,
+      message: `Order status updated to ${nextStatus}`,
+      data: {
+        orderId,
+        orderNumber: order.orderNumber,
+        oldStatus,
+        newStatus: nextStatus,
+      },
+      statusCode: 200,
+    };
+
+  } catch (error: any) {
+    console.error("updateOrderStatusByDeliveryPartner error:", error);
+    return { success: false, error: "Failed to update delivery status", statusCode: 500 };
+  }
+}
 
 }
