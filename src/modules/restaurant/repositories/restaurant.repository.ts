@@ -364,7 +364,7 @@ async updateRestaurant(
                 id:restaurantId
             },
             data:updateData
-        }) as IUpdateRestaurant;
+        });
 
 
 }
@@ -374,29 +374,22 @@ async updateRestaurant(
 async updateRestaurantStatus(
     restaurantId: string,
     isActive: boolean
-): Promise<IUpdateRestaurant> {
+): Promise<IUpdateRestaurantStatus> {
 
 
-        const res = await prisma.restaurant.update({ 
-          where:{
-            id: restaurantId
-          },
-          data:{
-            isActive
-          },
-          select:{
-            id:true,
-            name:true,
-            isActive:true
-          }
+        return await prisma.restaurant.update({ 
+            where:{
+                id: restaurantId
+            },
+            data:{
+                isActive
+            },
+            select:{
+                id:true,
+                name:true,
+                isActive:true
+            }
         });
-
-        // Ensure name is a string to satisfy IUpdateRestaurant
-        return {
-          id: res.id,
-          name: res.name ?? '',
-          isActive: res.isActive
-        } as IUpdateRestaurant;
 
 
 }
@@ -495,7 +488,7 @@ async getRestaurantReviews(
 // Average rating for restaurant
 async getRestaurantReviewStats(
     restaurantId:string
-): Promise<any> {
+): Promise<any>{
    
 
         const ratings =
@@ -527,7 +520,7 @@ async getRestaurantReviewStats(
 // check if order exists for review
 async findOrderForReview(
     orderId: string
-) {
+): Promise<any> {
 
 
         return await prisma.order.findUnique({

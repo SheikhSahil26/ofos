@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { UserController } from "../controllers/user.controller";
-import { upload } from "../../../middlewares/multer.middleware";
 
 export class UserRoutes implements IRoutes{
     path = "/users";
@@ -18,4 +17,4 @@ export class UserRoutes implements IRoutes{
         this.router.delete("/profile", this.controller.deleteUserAccount);
         this.router.delete("/profile/photo", this.controller.deleteProfilePhoto);
     }
-} 
+}
