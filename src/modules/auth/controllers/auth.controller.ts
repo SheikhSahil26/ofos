@@ -99,7 +99,6 @@ export class AuthController {
       req.cookies.refreshToken;
 
     if (refreshToken) {
-
       await this.authRepo.revokeRefreshToken(
         refreshToken
       );
