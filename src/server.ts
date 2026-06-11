@@ -63,7 +63,7 @@ app.get("/redis-test",async(req:any,res:any)=>{
 
 
 
-app.listen(8080,()=>{
-    console.log("server started at port 8080");
+app.listen(2000,()=>{
+    console.log("server started at port 2000");
 });
 
