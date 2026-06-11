@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { IUpdateUser } from "../interfaces/user.interface";
+import { uploadImage } from "../../../services/multer.service";
 
 export class UserController{                                                                               
     
@@ -10,7 +11,7 @@ export class UserController{
     getProfile = async(req: Request, res: Response) => {
         try{
             //from token we will get user id
-            const userId = req.user.id;
+            const userId = "05dc33d4-6713-4f32-a59e-6a50e8420934";
 
             if(typeof userId !== 'string'){
                 return res.status(400).json({success: false, message: "Invalid user id"});
@@ -29,7 +30,18 @@ export class UserController{
     updateProfile = async(req: Request, res: Response) => {
         try{
             //from token we will get user id
-            const userId = req.user.id;
+            const userId = "05dc33d4-6713-4f32-a59e-6a50e8420934";
+
+            const file = req.file ? req.file : null;
+            let imageurl: string | undefined;
+
+            if (file) {
+                imageurl = await uploadImage(
+                    file.buffer,
+                    `profile-${userId}-${Date.now()}`,
+                    "/OFOS/profiles",
+                );
+            }
 
             if(typeof userId !== 'string'){
                 return res.status(400).json({success: false, message: "Invalid user id"});
@@ -41,7 +53,9 @@ export class UserController{
                 mobile: req.body?.mobile
             };
 
-            if(req.file){
+            if (imageurl) {
+                data.profilePhoto = imageurl;
+            } else if (req.file?.path) {
                 data.profilePhoto = req.file.path;
             }
 

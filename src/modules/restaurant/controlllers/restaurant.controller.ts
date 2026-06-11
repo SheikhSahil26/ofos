@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { RestaurantService } from "../services/restaurant.service";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
 
 export class RestaurantController {
   private restaurantService = new RestaurantService();
 
   //get all restaurants
-  getRestaurants = async (req: Request, res: Response) => {
-    try {
-      const page = Number(req.query.page) || 1;
+  getRestaurants = asyncHandler(async (req: Request, res: Response) => {
+        const page = Number(req.query.page) || 1;
 
       const limit = Number(req.query.limit) || 10;
 
@@ -20,23 +20,13 @@ export class RestaurantController {
       );
 
       return res.status(200).json({
-        success: true,
         ...data,
       });
-    } catch (err) {
-      console.log(err);
-
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching restaurants",
-      });
-    }
-  };
+  });
 
   //get restaurant by owner
-  getMyRestaurants = async (req: Request, res: Response) => {
-    try {
-      const userId = req.user.userId ;
+  getMyRestaurants = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
 
       const page = Number(req.query.page) || 1;
 
@@ -49,366 +39,195 @@ export class RestaurantController {
       );
 
       return res.status(200).json({
-        success: true,
         ...data,
       });
-    } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching restaurants",
-      });
-    }
-  };
+    
+  });
 
   //GET nearby restaurants
 
-getNearbyRestaurants = async(
-    req: Request,
-    res: Response
-) => {
-    try{
+  getNearbyRestaurants = asyncHandler(async (req: Request, res: Response) => {
 
-        const latitude = Number(req.query.latitude);
-        const longitude = Number(req.query.longitude);
-        const radius = Number(req.query.radius) || 5;
+      const latitude = Number(req.query.latitude);
+      const longitude = Number(req.query.longitude);
+      const radius = Number(req.query.radius) || 5;
 
-        if(
-            isNaN(latitude) ||
-            isNaN(longitude)
-        ){
-            return res.status(400).json({
-                success: false,
-                message: "Latitude and longitude are required"
-            });
-        }
-
-        const restaurants =
-        await this.restaurantService
-        .getNearbyRestaurants(
-            latitude,
-            longitude,
-            radius
-        );
-
-        return res.status(200).json({
-            success: true,
-            data: restaurants
-        });
-
-    }
-    catch(err){
-        console.log(err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Error fetching nearby restaurants"
-        });
-    }
-}
-
-     // create restaurant
-      createRestaurant = async(
-        req: Request,
-        res: Response
-    ) => {
-
-        try{
-
-            const userId =
-                req.user!.userId;
-
-            const restaurant =
-                await this.restaurantService
-                .createRestaurant(
-                    userId,
-                    req.body
-                );
-
-            return res.status(201).json({
-                success:true,
-                message:
-                "Restaurant created successfully",
-                data:restaurant
-            });
-
-        }
-        catch(err){
-
-            console.log(err);
-
-            return res.status(400).json({
-                success:false,
-                message:
-                    err instanceof Error
-                    ? err.message
-                    : "Error creating restaurant"
-            });
-        }
-    };
-
-    // Update restaurant details
-    updateRestaurant = async(
-    req: Request,
-    res: Response
-) => {
-
-    try{
-
-        const restaurantIdRaw = req.params.id;
-        const restaurantId = Array.isArray(restaurantIdRaw)
-          ? restaurantIdRaw[0]
-          : restaurantIdRaw;
-
-        if (!restaurantId) {
-          return res.status(400).json({
-            success: false,
-            message: "Restaurant id is required",
-          });
-        }
-
-        const userId = req.user!.userId;
-
-        const restaurant =
-        await this.restaurantService
-        .updateRestaurant(
-            restaurantId,
-            userId,
-            req.body
-        );
-
-        return res.status(200).json({
-            success:true,
-            message:
-            "Restaurant updated successfully",
-            data:restaurant
-        });
-
-    }
-    catch(err){
-
-        console.log(err);
-
+      if (isNaN(latitude) || isNaN(longitude)) {
         return res.status(400).json({
-            success:false,
-            message:
-            err instanceof Error
-            ? err.message
-            : "Error updating restaurant"
+          success: false,
+          message: "Latitude and longitude are required",
         });
-    }
-}
+      }
 
-// update restaurant status
-// restaurant.controller.ts
+      const restaurants = await this.restaurantService.getNearbyRestaurants(
+        latitude,
+        longitude,
+        radius,
+      );
 
-updateRestaurantStatus = async(
-    req: Request,
-    res: Response
-) => {
+      return res.status(200).json({
+        success: true,
+        data: restaurants,
+      });
+    
+  });
 
-    try{
+  // create restaurant
+  createRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
 
-        const rawId = req.params.id;
+      const restaurant = await this.restaurantService.createRestaurant(
+        userId,
+        req.body,
+      );
 
-        if (!rawId || Array.isArray(rawId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid or missing restaurant id"
-            });
-        }
+      return res.status(201).json({
+        success: true,
+        message: "Restaurant created successfully",
+        data: restaurant,
+      });
+  });
 
-        const restaurantId: string = rawId;
+  // Update restaurant details
+  updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
 
-        const userId =
-        req.user!.userId;
+      const restaurantIdRaw = req.params.id;
+      const restaurantId = Array.isArray(restaurantIdRaw)
+        ? restaurantIdRaw[0]
+        : restaurantIdRaw;
 
-        const { isActive } =
-        req.body;
-
-        if(
-            typeof isActive !== "boolean"
-        ){
-            return res.status(400).json({
-                success:false,
-                message:
-                "isActive must be boolean"
-            });
-        }
-
-        const restaurant =
-        await this.restaurantService
-        .updateRestaurantStatus(
-            restaurantId,
-            userId,
-            isActive
-        );
-
-        return res.status(200).json({
-            success:true,
-            message:
-                isActive
-                ? "Restaurant activated successfully"
-                : "Restaurant deactivated successfully",
-            data: restaurant
-        });
-
-    }
-    catch(err){
-
-        console.log(err);
-
+      if (!restaurantId) {
         return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error updating status"
+          success: false,
+          message: "Restaurant id is required",
         });
-    }
-}
+      }
 
-// delete restaurant
+      const userId = req.user!.userId;
 
-deleteRestaurant = async(
-    req: Request,
-    res: Response
-) => {
+      const restaurant = await this.restaurantService.updateRestaurant(
+        restaurantId,
+        userId,
+        req.body,
+      );
 
-    try{
+      return res.status(200).json({
+        success: true,
+        message: "Restaurant updated successfully",
+        data: restaurant,
+      });
+    });
 
-        const rawId = req.params.id;
+  // update restaurant status
+  // restaurant.controller.ts
 
-        if (!rawId || Array.isArray(rawId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid or missing restaurant id"
-            });
-        }
+  updateRestaurantStatus = asyncHandler(async (req: Request, res: Response) => {
+      const rawId = req.params.id;
 
-        const restaurantId: string = rawId;
-
-        const userId =
-        req.user!.userId;
-
-        await this.restaurantService
-        .deleteRestaurant(
-            restaurantId,
-            userId
-        );
-
-        return res.status(200).json({
-            success: true,
-            message:
-                "Restaurant deleted successfully"
-        });
-
-    }
-    catch(err){
-
-        console.log(err);
-
+      if (!rawId || Array.isArray(rawId)) {
         return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error deleting restaurant"
+          success: false,
+          message: "Invalid or missing restaurant id",
         });
-    }
-}
+      }
 
-// GET restaurant reviews 
-getRestaurantReviews = async(
-    req: Request,
-    res: Response
-) => {
+      const restaurantId: string = rawId;
 
-    try{
+      const userId = req.user!.userId;
 
-        const restaurantId =
-        req.params.id as string;
+      const { isActive } = req.body;
 
-        const page =
-        Number(req.query.page) || 1;
-
-        const limit =
-        Number(req.query.limit) || 10;
-
-        const reviews =
-        await this.restaurantService
-        .getRestaurantReviews(
-            restaurantId,
-            page,
-            limit
-        );
-
-        return res.status(200).json({
-            success:true,
-            data:reviews.reviews,
-
-            averageRating:
-            reviews.averageRating,
-
-            pagination:
-            reviews.pagination
-        });
-
-    }
-    catch(err){
-
-        console.log(err);
-
+      if (typeof isActive !== "boolean") {
         return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error fetching reviews"
+          success: false,
+          message: "isActive must be boolean",
         });
-    }
-}
+      }
 
-// Create review
-createReview = async(
-    req: Request,
-    res: Response
-) => {
+      const restaurant = await this.restaurantService.updateRestaurantStatus(
+        restaurantId,
+        userId,
+        isActive,
+      );
 
-    try{
+      return res.status(200).json({
+        success: true,
+        message: isActive
+          ? "Restaurant activated successfully"
+          : "Restaurant deactivated successfully",
+        data: restaurant,
+      });
+  });
 
-        const restaurantId =
-        req.params.id as string;
+  // delete restaurant
 
-        const userId =
-        req.user!.userId;
+  deleteRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
 
-        const review =
-        await this.restaurantService
-        .createReview(
-            restaurantId,
-            userId,
-            req.body
-        );
+      const rawId = req.params.id;
 
-        return res.status(201).json({
-            success:true,
-            message:
-                "Review submitted successfully",
-            data:review
-        });
-
-    }
-    catch(err){
-
-        console.log(err);
-
+      if (!rawId || Array.isArray(rawId)) {
         return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error creating review"
+          success: false,
+          message: "Invalid or missing restaurant id",
         });
-    }
-}
+      }
+
+      const restaurantId: string = rawId;
+
+      const userId = req.user!.userId;
+
+      await this.restaurantService.deleteRestaurant(restaurantId, userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Restaurant deleted successfully",
+      });
+  });
+
+  // GET restaurant reviews
+  getRestaurantReviews = asyncHandler(async (req: Request, res: Response) => {
+    const restaurantId = req.params.id as string;
+
+      const page = Number(req.query.page) || 1;
+
+      const limit = Number(req.query.limit) || 10;
+
+      const reviews = await this.restaurantService.getRestaurantReviews(
+        restaurantId,
+        page,
+        limit,
+      );
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          review: reviews.data.reviews,
+
+          averageRating: reviews.data.averageRating,
+
+          pagination: reviews.data.pagination,
+        },
+      });
+  });
+
+  // Create review
+  createReview = asyncHandler(async (req: Request, res: Response) => {
+      const restaurantId = req.params.id as string;
+
+      const userId = req.user!.userId;
+
+      const review = await this.restaurantService.createReview(
+        restaurantId,
+        userId,
+        req.body,
+      );
+
+      return res.status(201).json({
+        success: true,
+        message: "Review submitted successfully",
+        data: review,
+      });
+  });
 }

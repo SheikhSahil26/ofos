@@ -11,4 +11,4 @@ export const uploadImage = async (
         folder:   folder,
     });
     return response.url;
-};
+};  
