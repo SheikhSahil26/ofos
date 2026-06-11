@@ -3,6 +3,8 @@ import { IApiResponse, ILoginDto, ISignupDto } from '../interfaces/auth.interfac
 import { AuthService } from '../services/auth.service';
 import { AuthRepository } from '../repositories/auth.repository';
 import jwt from 'jsonwebtoken'
+import redisClient from '../../../config/redis';
+import { date } from 'joi';
 
 
 // This below two varible helps for logout directly from the controller...
@@ -15,70 +17,14 @@ export class AuthController {
   private authService = new AuthService();
   registerPage = async (req: Request, res: Response) => {
 
-    const role: string =
-      String(req.params.role).toLowerCase();
+    const role: string = String(req.params.role).toLowerCase();
 
-      return res.render(
-          `auth/${role}/register`
-        );
-
-    // switch (role) {
-
-    //   case "CUSTOMER":
-    //     return res.render(
-    //       "auth/customer/customer-register"
-    //     );
-
-    //   case "RESTAURANT":
-    //     return res.render(
-    //       "auth/restaurant-register"
-    //     );
-
-    //   case "DELIVERY-PARTNER":
-    //     return res.render(
-    //       "auth/delivery-register"
-    //     );
-
-    //   default:
-    //     return res.status(404).send(
-    //       "Invalid Role"
-    //     );
-    // }
+    return res.render(`auth/${role}/register`, { role: role });
   };
 
-  loginPage = async (
-    req: Request,
-    res: Response
-  ) => {
-
-    const role: string =
-      String(req.params.role).toLowerCase();
-    return res.render(
-          `auth/${role}/login`
-        );
-
-    // switch (role) {
-
-    //   case "CUSTOMER":
-    //     return res.render(
-    //       "auth/customer/customer-login"
-    //     );
-
-    //   case "RESTAURANT":
-    //     return res.render(
-    //       "auth/restaurant-login"
-    //     );
-
-    //   case "DELIVERY-PARTNER":
-    //     return res.render(
-    //       "auth/delivery-login"
-    //     );
-
-    //   default:
-    //     return res.status(404).send(
-    //       "Invalid Role"
-    //     );
-    // }
+  loginPage = async (req: Request, res: Response) => {
+    const role: string = String(req.params.role).toLowerCase();
+    return res.render(`auth/${role}/login`, { role: role });
   };
 
 
@@ -200,7 +146,10 @@ export class AuthController {
     );
   };
 
-
+  getDashboard = (req: Request, res: Response) => {
+    const role: string = String(req.params.role);
+    res.render(`auth/${role.toLowerCase()}/dashboard`, { role: role });
+  }
 
 
   forgetPassword = async (req: Request, res: Response) => {
@@ -218,7 +167,7 @@ export class AuthController {
       // Verify Email is exist or not...............
       const response: IApiResponse = await this.authService.verifyUserByEmailForOtp(email);
       if (response.status == 'Success') {
-        res.cookie('resetToken', response.data.token, {
+        res.cookie('resetToken', response.data.resetToken, {
           maxAge: 5 * 60 * 1000,
           httpOnly: true,
         })
@@ -238,17 +187,23 @@ export class AuthController {
 
   // Sending the mail simulation page to the user with OTP
   mailInboxPage = async (req: Request, res: Response) => {
+    return res.render('auth/inbox')
+  }
 
-    let user: any = req.user;
-    console.log("Helooooooooooo")
-    console.log(user)
-
-    const otp = user.otp;
-    console.log("Helooooo")
-    // const username = user.username;
-    // console.log(otp)
-
-    return res.send(`Subject : Reset your Password , OTP-${otp}`);
+  // Sending the mail simulation page to the user with OTP
+  sentOtpOnMail = async (req: Request, res: Response) => {
+    const user = req.user as Express.otpPayload
+    console.log("user", user.email)
+    const otp = await redisClient.get(`otp:${user.email}`)
+    console.log(otp)
+    return res.json({
+      status: 'Success',
+      statusCode: 200,
+      data: {
+        email: user.email,
+        otp: otp
+      }
+    })
   }
 
   // Verify OTP with help of redis
@@ -256,7 +211,7 @@ export class AuthController {
     const email: string = String(req.params.email);
     const otp: string = req.body.otp;
 
-    // let user: any = req.user;
+
 
     try {
       const response: IApiResponse = await this.authService.verifyOTPService(otp, email)
@@ -271,14 +226,22 @@ export class AuthController {
 
   }
 
+  resetPasswordPage = async (req: Request, res: Response) => {
+    return res.render('auth/reset-password')
+  }
+
+
   resetPassword = async (req: Request, res: Response) => {
 
-    const user: any = req.user
+    const user = req.user as Express.otpPayload
+    console.log("user", user)
+    const email: string = user.email;
+
     const password: string = req.body.password;
     if (!password) return res.status(400).json({ message: 'Password must be Required' });
 
     try {
-      const response: IApiResponse = await this.authService.updateUserPasswordService(user.email, password);
+      const response: IApiResponse = await this.authService.updateUserPasswordService(email, password);
 
       if (response.status == 'Success') {
         return res.status(200).json(response);
