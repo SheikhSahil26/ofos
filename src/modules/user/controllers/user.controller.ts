@@ -4,6 +4,7 @@ import { IUpdateUser } from "../interfaces/user.interface";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
 import { uploadImage } from "../../../services/multer.service";
 import { UserValidation } from "../validations/user.validation";
+import { AppError } from "../../../utils/appError";
 
 export class UserController{                                                                                 
     private userService = new UserService();
@@ -12,6 +13,10 @@ export class UserController{
     getProfile = asyncHandler(async(req: Request, res: Response) => {
 
         const userId =req.user?.id;
+
+        if(typeof userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
 
         UserValidation.validateUserId(userId);
 
@@ -24,6 +29,10 @@ export class UserController{
     updateProfile = asyncHandler( async(req: Request, res: Response) => {
 
         const userId =req.user?.id;
+
+        if(typeof userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
        
         UserValidation.validateUserId(userId);
 
@@ -58,6 +67,10 @@ export class UserController{
         
         const userId =req.user?.id;
 
+        if(typeof userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
         UserValidation.validateUserId(userId);
 
         const response = await this.userService.deletePofilePhoto(userId);
@@ -69,6 +82,10 @@ export class UserController{
     deleteUserAccount = asyncHandler(async(req: Request, res: Response) => {
 
         const userId =req.user?.id;
+
+        if(typeof userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
  
         UserValidation.validateUserId(userId);
 
