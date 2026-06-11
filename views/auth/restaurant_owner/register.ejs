@@ -17,7 +17,7 @@
     <div class="container">
 
         <!-- LEFT PANEL -->
-         
+
 
         <div class="left-panel">
 
@@ -178,23 +178,10 @@
 
     </div>
 
-    <script>
 
-        const role = "<%= role %>";
-
-        function togglePassword() {
-
-            const password =
-                document.getElementById("password");
-
-            password.type =
-                password.type === "password"
-                    ? "text"
-                    : "password";
-        }
-    </script>
-
-
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/togglePassword.js"></script>
+    <script src="/js/common/toast.js"></script>
     <script src="/js/register.js"></script>
 
 </body>

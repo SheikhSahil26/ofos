@@ -98,7 +98,7 @@
                     <div class="forgot-password">
 
 
-                        <a href="/restaurant/forgot-password">
+                        <a href="/api/auth/forget-password">
                             Forgot Password?
                         </a>
 
@@ -125,17 +125,9 @@
         </div>
 
     </div>
-
-    <script>
-        function togglePassword() {
-            const password = document.getElementById("password");
-
-            password.type =
-                password.type === "password"
-                    ? "text"
-                    : "password";
-        }
-    </script>
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/togglePassword.js"></script>
+    <script src="/js/common/toast.js"></script>
     <script src="/js/login.js"></script>
 </body>
 

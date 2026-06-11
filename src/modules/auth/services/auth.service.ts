@@ -15,13 +15,8 @@ export class AuthService {
 
     private authRepo = new AuthRepository();
 
-    registerUser = async (
-        userInfo: ISignupDto,
-        role: string
-    ): Promise<IApiResponse> => {
-
+    registerUser = async (userInfo: ISignupDto,role: string): Promise<IApiResponse> => {
         try {
-
             const existUser =
                 await this.authRepo.findUserByEmail(
                     userInfo.email
@@ -52,8 +47,6 @@ export class AuthService {
                         requiresLogin: true,
                         email: userInfo.email
                     },
-                    // redirectURL: `http://localhost:8080/api/auth/${role}/static/login`
-                    
                 };
             }
 
@@ -81,7 +74,6 @@ export class AuthService {
                 statusCode: 201,
                 message: "Account created successfully.",
                 data: createdUser,
-                // redirectURL: `http://localhost:8080/api/auth/${role}/static/login`
             };
 
         } catch (error: any) {
@@ -89,21 +81,14 @@ export class AuthService {
         }
     };
 
-    loginUser = async (
-        loginInfo: ILoginDto,
-        role: string
-    ): Promise<IApiResponse> => {
+    loginUser = async (loginInfo: ILoginDto,role: string): Promise<IApiResponse> => {
 
         try {
-
             // Here if user on ${role} cumplusory login if it contain email and password
             // possibilities : 1 user have email and password for this role - Give login to that user
             // possibilities : 2 user have email and password but not have role on this url than assign that role
 
-            const existUser =
-                await this.authRepo.findUserByEmail(
-                    loginInfo.email
-                );
+            const existUser = await this.authRepo.findUserByEmail( loginInfo.email);
 
             // Email exists or not...
             if (!existUser) {
@@ -127,7 +112,6 @@ export class AuthService {
                     message: "Invalid Credentials..."
                 };
             }
-
 
             const accessToken: string = generateAccessToken({ userId: existUser.id, role: role, email: existUser.email });
             const refreshToken: string = generateRefreshToken(existUser.id, loginInfo.rememberMe);
@@ -187,9 +171,7 @@ export class AuthService {
     };
 
 
-    refreshToken = async (
-        refreshToken: string
-    ): Promise<IApiResponse> => {
+    refreshToken = async (refreshToken: string): Promise<IApiResponse> => {
 
         try {
 
@@ -209,7 +191,7 @@ export class AuthService {
                     process.env.JWT_REFRESH_SECRET!
                 );
 
-            console.log("Decoded Token :", decoded)
+            // console.log("Decoded Token :", decoded)
 
             // Find refereshtoken from db
             const tokenRecord =
@@ -217,7 +199,6 @@ export class AuthService {
                     refreshToken
                 );
 
-            console.log(tokenRecord)
             // token inside databse might be revoked or not exists
             if (!tokenRecord) {
 
@@ -229,13 +210,8 @@ export class AuthService {
                 };
             }
 
-
             // still live that token 
-            if (
-                tokenRecord.expiresAt <
-                new Date()
-            ) {
-
+            if (tokenRecord.expiresAt < new Date()) {
                 return {
                     status: "Error",
                     statusCode: 401,
@@ -244,14 +220,12 @@ export class AuthService {
                 };
             }
 
-            const user =
-                await this.authRepo.findUserById(
-                    decoded.payload.userId
-                );
+            const user = await this.authRepo.findUserById(
+                    decoded.userId
+            );
 
-            console.log(user)
+            // console.log(user)
             if (!user) {
-
                 return {
                     status: "Error",
                     statusCode: 401,
@@ -261,20 +235,19 @@ export class AuthService {
             }
 
             const accessToken: string = generateAccessToken({ userId: user.id, role: decoded.role, email: decoded.email });
+
             return {
                 status: "Success",
                 statusCode: 200,
                 message:
                     "Access token generated",
                 data: {
-                    accessToken
+                    accessToken,
+                    refreshToken
                 }
             };
 
         } catch (error: any) {
-
-            console.log(error.message, error)
-
             return {
                 status: "Error",
                 statusCode: 400,
@@ -303,25 +276,24 @@ export class AuthService {
         const bcryptOTP = await hashPassword(otp);
 
         // store OTP in Redis for 5 minutes
-        await redisClient.setEx(`otp:${email}`, 5 * 60, bcryptOTP);
+        await redisClient.setEx(`otp:${email}`, 2 * 60, otp);
 
         // generate JWT token
         const resetToken = generateResetToken({
-            user_id: existUser.id,
+            userId: existUser.id,
             email: existUser.email,
             otp: bcryptOTP,
         })
-
-        // const 
 
         const otpLink = 'http://localhost:8080/api/auth/static/inbox'; // you can replace with real email link
 
         return {
             status: 'Success',
             statusCode: 200,
-            message: 'OTP sent to registered email',
+            message: 'OTP sent on Email',
             data: {
                 otpLink,
+                resetToken
             }
         };
     };
@@ -348,7 +320,7 @@ export class AuthService {
         // Increment the counter right here. This kills the loop instantly!
         const attempts = await redisClient.incr(attemptKey);
         if (attempts === 1) {
-            await redisClient.expire(attemptKey, 5 * 60); // 5-minute timeout window
+            await redisClient.expire(attemptKey, 2 * 60); // 5-minute timeout window
         }
 
         // Check if the loop script has breached the safety limit
@@ -363,7 +335,7 @@ export class AuthService {
         }
 
         // Check if the user's submitted entry is correct
-        if (await comparePassword(otp, systemOtp)) {
+        if (otp === systemOtp) {
             await redisClient.del(otpKey); // Cleanup
             await redisClient.del(attemptKey);
             return {
@@ -384,20 +356,29 @@ export class AuthService {
     updateUserPasswordService = async (email: string, password: string): Promise<IApiResponse> => {
 
         try {
-            const result = await this.authRepo.findUserByEmail(email)
-            if (result && await comparePassword(password, result?.passwordHash)) {
+            const hashedPassword =
+                await hashPassword(password);
+                console.log(hashPassword)
+
+            const user = await this.authRepo.updatePasswordByEmail(
+                email,
+                hashedPassword
+            );
+
+            if (user) {
                 return {
                     status: 'Success',
                     statusCode: 200,
-                    message: 'Password Updated Successfully..',
-                }
-            } else {
-                return {
-                    status: 'Error',
-                    statusCode: 400,
-                    message: 'Password not Updated Successfully..',
-                }
+                    message: `Password Updated Successfully`
+                };
             }
+
+            return {
+                status: 'Error',
+                statusCode: 401,
+                message: `Password Updatation Failed`
+            };
+
 
         } catch (e: any) {
             throw new Error(e.message)

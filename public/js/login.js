@@ -1,67 +1,7 @@
 console.log("Register JS Loaded");
 console.log(role);
 
-/* ==========================
-   PASSWORD TOGGLE
-========================== */
 
-const toggle =
-    document.querySelector(".toggle");
-
-const passwordInput =
-    document.getElementById("password");
-
-if (toggle) {
-
-    toggle.addEventListener("click", () => {
-
-        if (passwordInput.type === "password") {
-
-            passwordInput.type = "text";
-
-            toggle.classList.replace(
-                "fa-eye",
-                "fa-eye-slash"
-            );
-
-        } else {
-
-            passwordInput.type = "password";
-
-            toggle.classList.replace(
-                "fa-eye-slash",
-                "fa-eye"
-            );
-
-        }
-
-    });
-
-}
-
-/* ==========================
-   TOAST FUNCTION
-========================== */
-
-function showToast(message, type = "success") {
-
-    const toast =
-        document.getElementById("toast");
-
-    toast.textContent = message;
-
-    toast.className = "";
-
-    toast.classList.add(type);
-
-    setTimeout(() => {
-        toast.classList.add("show");
-    }, 100);
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 3000);
-}
 
 /* ==========================
    REGEX
@@ -168,18 +108,7 @@ loginForm.addEventListener(
                     "accessToken",
                     result.data.accessToken
                 );
-
-                setTimeout(() => {
-                    const token =
-                        localStorage.getItem("accessToken");
-
-                    fetch("http://localhost:8080/api/auth/dashboard", {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    });
-
-                }, 1500);
+                window.location.href = "http://localhost:8080/api/auth/customer/static/dashboard";
 
             } else {
 
