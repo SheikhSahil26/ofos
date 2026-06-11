@@ -1,5 +1,60 @@
 import Joi from "joi";
 
+export const createMenuItemSchema = Joi.object({
+    branchId: Joi.string()
+        .uuid()
+        .required()
+        .messages({
+            "string.guid": "Invalid branch ID",
+            "any.required": "Branch ID is required",
+        }),
+
+    categoryId: Joi.string()
+        .uuid()
+        .required()
+        .messages({
+            "string.guid": "Invalid category ID",
+            "any.required": "Category ID is required",
+        }),
+
+    name: Joi.string()
+        .trim()
+        .max(255)
+        .required()
+        .messages({
+            "string.empty": "Menu item name is required",
+            "any.required": "Menu item name is required",
+        }),
+
+    description: Joi.string()
+        .allow("")
+        .optional(),
+
+    price: Joi.number()
+        .positive()
+        .required()
+        .messages({
+            "number.base": "Price must be a number",
+            "number.positive": "Price must be greater than 0",
+            "any.required": "Price is required",
+        }),
+
+    isVeg: Joi.boolean()
+        .optional(),
+
+    imageUrl: Joi.string()
+        .uri()
+        .optional(),
+
+    tagIds: Joi.array()
+        .items(
+            Joi.string().uuid().messages({
+                "string.guid": "Invalid dietary tag ID",
+            })
+        )
+        .optional(),
+});
+
 export const updateMenuItemSchema = Joi.object({
     name: Joi.string()
         .trim()

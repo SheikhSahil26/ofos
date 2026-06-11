@@ -147,6 +147,8 @@ export class MenuItemService{
             );
         }
 
+
+
         const updatedMenuItem =
             await this.menuItemRepository.updateMenuItemImage(
                 id,
@@ -264,4 +266,45 @@ export class MenuItemService{
             statusCode: 200,
         };
     }
+
+    async removeDietaryTag(menuItemId: string,tagId: string): Promise<ServiceResponse<any>> {
+
+        const menuItem = await this.menuItemRepository.getMenuItemById(menuItemId);
+
+        if (!menuItem) {
+            throw new AppError(
+                "Menu item not found",
+                404
+            );
+        }
+
+        const menuItemTag = await this.menuItemRepository.getMenuItemTag(menuItemId, tagId);
+
+        if (!menuItemTag) {
+            throw new AppError(
+                "Dietary tag is not associated with this menu item",
+                404
+            );
+        }
+
+        await this.menuItemRepository.removeDietaryTag(menuItemId,tagId);
+
+        return {
+            success: true,
+            message: "Dietary tag removed successfully",
+            statusCode: 200,
+        };
+    }
+
+    async searchMenuItems(searchTerm: string): Promise<ServiceResponse<MenuItem[]>> {
+
+    const menuItems = await this.menuItemRepository.searchMenuItems(searchTerm);
+
+    return {
+        success: true,
+        data: menuItems,
+        message: "Menu items fetched successfully",
+        statusCode: 200,
+    };
+}
 }

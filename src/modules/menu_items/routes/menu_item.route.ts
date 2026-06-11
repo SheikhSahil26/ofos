@@ -14,7 +14,8 @@ export class MenuItemRoutes implements IRoutes{
 
     private initializeRoutes() : void{
         this.router.get("/categories/:categoryId/items", this.controller.getMenuItemsByCategory);
-        this.router.post("/categories/:categoryId/items", this.controller.createMenuItem); /* Create a new menu item */
+        this.router.post("/categories/:categoryId/items", upload.single("image"), this.controller.createMenuItem); /* Create a new menu item */
+        this.router.get("/search", this.controller.searchMenuItems); /*  Search menu items by name across branches */
         this.router.get("/:id",this.controller.getMenuItemById); /* Get menu item details with modifiers and tags */
         this.router.put("/:id", this.controller.updateMenuItem); /* Update menu item details */
         this.router.patch("/:id/image",upload.single("image"), this.controller.updateMenuItemImage);
@@ -22,5 +23,6 @@ export class MenuItemRoutes implements IRoutes{
         this.router.patch("/:id/bestseller", this.controller.updateBestseller); /* Toggle bestseller flag */
         this.router.delete("/:id", this.controller.deleteMenuItem); /* Soft delete a menu item */
         this.router.post("/:id/tags", this.controller.addDietaryTags); /*  Add dietary tags to a menu item */
+        this.router.delete("/:id/tags/:tagId", this.controller.removeDietaryTag); /*  Remove dietary tags to a menu item */
     }
 }

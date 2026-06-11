@@ -137,4 +137,40 @@ export class MenuItemRepository{
         });
     }
 
+    async removeDietaryTag(menuItemId: string, tagId: string) {
+        return prisma.menuItemTag.delete({
+            where: {
+                menuItemId_tagId: {
+                    menuItemId,
+                    tagId,
+                },
+            },
+        });
+    }
+
+    async getMenuItemTag(menuItemId: string,tagId: string) {
+        return prisma.menuItemTag.findUnique({
+            where: {
+                menuItemId_tagId: {
+                    menuItemId,
+                    tagId,
+                },
+            },
+        });
+    }
+
+    async searchMenuItems(searchTerm: string) {
+        return prisma.menuItem.findMany({
+            where: {
+                name: {
+                    contains: searchTerm,
+                },
+                isDeleted: false,
+            },
+            include: {
+                category: true,
+            },
+        });
+    }
+
 }
