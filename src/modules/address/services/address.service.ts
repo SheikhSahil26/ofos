@@ -1,3 +1,5 @@
+import { ServiceResponse } from "../../../common/types/service-response.type";
+import { AppError } from "../../../utils/appError";
 import { IAddress, ICreateAddress, IUpdateAddress } from "../interfaces/address.interface";
 import { AddressRepository } from "../repositories/address.repository";
 
@@ -5,83 +7,110 @@ export class AddressService{
 
     private addressRepo = new AddressRepository();
 
-    //get all addresses of users
-    async getAddresses(userId: string): Promise<IAddress[]>{
-        try{
-            return this.addressRepo.getAddresses(userId);
+    //check if address exist or not
+    async validateAddress(addressId: string, userId : string): Promise<boolean>{
+        
+        const address = await this.addressRepo.getAddressById(addressId, userId);
+    
+        if(!address){
+            throw new AppError("Address not found");
         }
-        catch(err){
-            throw err;
+
+        return true;
+    }
+
+    //get all addresses of users
+    async getAddresses(userId: string): Promise<ServiceResponse<IAddress[]>>{
+
+        const addresses = await this.addressRepo.getAddresses(userId);
+
+        return {
+            success: true,
+            data: addresses,
+            message: "Addresses fetched successfully",
+            statusCode: 200,
         }
     }
 
     //get address by id
-    async getAddressById(addressId: string, userId: string){
-        try{
-            //check if address exist or not 
-            await this.addressRepo.validateAddress(addressId, userId);
+    async getAddressById(addressId: string, userId: string): Promise<ServiceResponse<IAddress | null>>{
 
-            return await this.addressRepo.getAddressById(addressId, userId);
-        }
-        catch(err){
-            throw err;
+        //check if address exist or not 
+        await this.validateAddress(addressId, userId);
+
+        const address = await this.addressRepo.getAddressById(addressId, userId);
+
+        return {
+            success: true,
+            data: address,
+            message: "Address fetched successfully",
+            statusCode: 200
         }
     }
 
     //create new address for user
-    async createAddress(data: ICreateAddress, userId: string): Promise<IAddress>{
-        try{
-            if(data.isDefault){
-                await this.addressRepo.resetDefaultAddress(userId);
-            }
+    async createAddress(data: ICreateAddress, userId: string): Promise<ServiceResponse<IAddress>>{
 
-            return this.addressRepo.createAddress(data, userId);
+        if(data.isDefault){
+            await this.addressRepo.resetDefaultAddress(userId);
         }
-        catch(err){
-            throw err;
+
+        const address = await this.addressRepo.createAddress(data, userId);
+
+        return {
+            success: true,
+            data: address,
+            message: "Address created successfully",
+            statusCode: 200
         }
     }
 
     //update address by id
-    async updateAddressById(addressId: string, data: IUpdateAddress, userId: string): Promise<IAddress>{
-        try{
-            //check if address exist or not
-            await this.addressRepo.validateAddress(addressId, userId);
+    async updateAddressById(addressId: string, data: IUpdateAddress, userId: string): Promise<ServiceResponse<IAddress>>{
 
-            return await this.addressRepo.updateAddressById(addressId, data, userId);
-        }
-        catch(err){
-            throw err;
+        //check if address exist or not
+        await this.validateAddress(addressId, userId);
+
+        const address = await this.addressRepo.updateAddressById(addressId, data, userId);
+
+        return {
+            success: true,
+            data: address,
+            message: "Address updated successfully",
+            statusCode: 200
         }
     }
 
     //delete address by id
-    async deleteAddressById(addressId: string, userId: string){
-        try{
-            //check if address exist or not
-            await this.addressRepo.validateAddress(addressId, userId);
+    async deleteAddressById(addressId: string, userId: string): Promise<ServiceResponse<null>>{
 
-            await this.addressRepo.deleteAddressById(addressId, userId);
-        }
-        catch(err){
-            throw err;
+        //check if address exist or not
+        await this.validateAddress(addressId, userId);
+
+        await this.addressRepo.deleteAddressById(addressId, userId);
+
+        return {
+            success: true,
+            message: "Address deleted successfully",
+            statusCode: 200,
         }
     }
 
     //set default address
-    async setDefaultAddress(addressId: string, userId: string): Promise<void>{
-        try{
-            //check if address exist or not
-            await this.addressRepo.validateAddress(addressId, userId);
-    
-            //reset addresses
-            await this.addressRepo.resetDefaultAddress(userId);
-    
-            //set default address
-            await this.addressRepo.setDefaultAddress(addressId, userId);
-        }
-        catch(err){
-            throw err;
+    async setDefaultAddress(addressId: string, userId: string): Promise<ServiceResponse<null>>{
+        //check if address exist or not
+        await this.validateAddress(addressId, userId);
+
+        //reset addresses
+        await this.addressRepo.resetDefaultAddress(userId);
+
+        //set default address
+        await this.addressRepo.setDefaultAddress(addressId, userId);
+
+        return {
+            success: true,
+            message: "Default address set successfully",
+            statusCode: 200
         }
     }
 }

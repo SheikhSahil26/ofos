@@ -2,7 +2,7 @@ import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { AddressController } from "../controllers/address.controller";
 
-export class AddressRoute implements IRoutes{
+export class AddressRoutes implements IRoutes{
     path =  "/addresses";
     router = Router();
     controller = new AddressController();

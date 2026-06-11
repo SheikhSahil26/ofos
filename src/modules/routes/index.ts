@@ -5,6 +5,7 @@ import { AuthRoutes } from "../auth/routes/auth.route.js";
 import { MenuRoutes } from "../menu/routes/menu.route.js";
 import { DietaryTagsRoute } from "../dietaryTags/routes/dietaryTag.route.js";
 import { AddressRoute } from "../address/routes/address.route.js";
+import "../../config/jwtAuth.js";
 
 export function buildApiRouter(): Router{
     const router = Router();

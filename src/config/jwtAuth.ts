@@ -1,30 +1,36 @@
-import { type Request, type Response, type NextFunction } from 'express';
-import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
-import { configDotenv } from 'dotenv';
-configDotenv();
+import { ExtractJwt, Strategy as JwtStrategy, StrategyOptions } from 'passport-jwt';
+import passport from 'passport';
+import { Request } from 'express';
+import { AuthRepository } from '../modules/auth/repositories/auth.repository';
+import { PrismaClient } from '@prisma/client';
 
 
-export default function (passport: any) {
-
-    let cookieExtractor = function (req: Request) {
-        let token = null;
-        if (req && req.cookies) {
-            token = req.cookies['token'];
-        }
-        return token;
-    };
-  
-    let opts: any = {
-        jwtFromRequest: cookieExtractor,
-        // jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-        secretOrKey: process.env.SECRET
-    }
-
-    passport.use(new JwtStrategy(opts, (payload, done) => {
-        if (payload) {
-            return done(null, payload);
-        }
-        return done(null, false);
-    }));
-
+const opts: StrategyOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: String(process.env.JWT_ACCESS_SECRET) || "access_token_secret",
 }
+
+
+
+const authRepo = new AuthRepository();
+
+passport.use(
+    new JwtStrategy(opts, async (jwt_payload, done) => {
+        try {
+            // console.log("Helooooo***************8")
+            // console.log(jwt_payload)
+            const user = await authRepo.getUserByEmailAndRole(jwt_payload.email, jwt_payload.role);
+
+            if (user) {
+                return done(null, jwt_payload);
+            }
+            else {
+                return done(null, false);
+            }
+        }
+        catch (err) {
+            console.log(err);
+            return done(err, false);
+        }
+    })
+)
