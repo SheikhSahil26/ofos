@@ -4,6 +4,7 @@ import { AuthRoutes } from "../modules/auth/routes/auth.route.js";
 import { CartRoutes } from "../modules/cart/routes/cart.routes.js";
 import { MenuRoutes } from "../modules/menu/routes/menu.route.js";
 import { MenuItemRoutes } from "../modules/menu_items/routes/menu_item.route.js";
+import { ModifierRoutes } from "../modules/modifier/routes/modifier.route.js";
 
 export function buildApiRouter(): Router{
     const router = Router();
@@ -12,7 +13,8 @@ export function buildApiRouter(): Router{
      new AuthRoutes(),
      new CartRoutes(),
      new MenuRoutes(),
-     new MenuItemRoutes()
+     new MenuItemRoutes(),
+     new ModifierRoutes(),
     ]
 
     routes.forEach((route) => {

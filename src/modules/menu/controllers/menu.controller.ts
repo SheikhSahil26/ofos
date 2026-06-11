@@ -73,4 +73,17 @@ export class MenuController{
 
         res.status(response.statusCode || 200).json(response);
     });
+
+    getFullMenu = asyncHandler(async (req: Request, res: Response) => {
+
+        const branchId = req.params.branchId;
+        if(typeof branchId != 'string'){
+            throw new AppError("Branch ID is required", 400);
+        }
+
+        const response = await this.menuService.getFullMenu(branchId);
+
+        res.status(response.statusCode || 200).json(response);
+    }
+);
 }

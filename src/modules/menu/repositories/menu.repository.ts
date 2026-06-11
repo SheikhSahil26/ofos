@@ -67,4 +67,42 @@ export class MenuRepository{
             )
         );
     }
+
+    async getFullMenu(branchId: string) {
+        return prisma.category.findMany({
+            where: {
+                branchId,
+                isDeleted: false,
+            },
+            orderBy: {
+                displayOrder: "asc",
+            },
+            include: {
+                menuItems: {
+                    where: {
+                        isDeleted: false,
+                    },
+                    include: {
+                        tags: {
+                            include: {
+                                dietaryTag: true,
+                            },
+                        },
+                        modifierGroups: {
+                            where: {
+                                isDeleted: false,
+                            },
+                            include: {
+                                options: {
+                                    where: {
+                                        isDeleted: false,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
 }
