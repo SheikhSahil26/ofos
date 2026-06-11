@@ -13,7 +13,7 @@ export class OrdersRoutes implements IRoutes {
 
   private initializeRoutes(): void {
     // this.router.get("/", this.controller.getRestaurants);
-    // this.router.get("/place-order", this.controller.placeOrder);
-   
+    this.router.get("/place-order", this.controller.createOrder);
+    this.router.post("/list-orders", this.controller.listOrders); // lists all orders of authenticated user
   }
 }

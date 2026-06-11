@@ -60,7 +60,15 @@ export class OrdersControllers {
 }
       )
 
+      listOrders = asyncHandler(
+        async(req: Request, res: Response) => {
+          const userId = 1; // dummy
 
+          const result = await this.ordersService.listOrders(userId);
+
+          return res.status(result.statusCode).json(result);
+        }
+      )
   
  
 }

@@ -334,4 +334,13 @@ export class OrderService {
       };
     }
   }
+
+  
+
+  async listOrders(userId: number): Promise<ServiceResponse<any>>{
+    
+  }
+
+
+
 }
