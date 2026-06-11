@@ -12,11 +12,13 @@ export class UserController{
     //get profile of authenticated user
     getProfile = asyncHandler(async(req: Request, res: Response) => {
 
-        const userId =req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof userId !== "string"){
+        if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
 
         UserValidation.validateUserId(userId);
 
@@ -28,11 +30,13 @@ export class UserController{
     //edit user profile 
     updateProfile = asyncHandler( async(req: Request, res: Response) => {
 
-        const userId =req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof userId !== "string"){
+        if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
        
         UserValidation.validateUserId(userId);
 
@@ -65,11 +69,13 @@ export class UserController{
     //delete profile photo
     deleteProfilePhoto = asyncHandler(async(req: Request, res: Response) => {
         
-        const userId =req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof userId !== "string"){
+        if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
 
         UserValidation.validateUserId(userId);
 
@@ -81,11 +87,13 @@ export class UserController{
     //delete user account
     deleteUserAccount = asyncHandler(async(req: Request, res: Response) => {
 
-        const userId =req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof userId !== "string"){
+        if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
  
         UserValidation.validateUserId(userId);
 

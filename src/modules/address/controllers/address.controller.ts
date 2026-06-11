@@ -12,11 +12,13 @@ export class AddressController{
     //get all addresses of users
     getAddresses = asyncHandler( async(req: Request, res: Response) => {
 
-        const userId = req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof userId !== "string"){
+        if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
 
         AddressValidation.validateId(userId, "user id");
 
@@ -29,10 +31,16 @@ export class AddressController{
     getAddressById = asyncHandler( async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof addressId !== "string" || typeof userId !== "string"){
-            throw new AppError("Invalid address id or user id", 400);
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
+        const userId = user.userId;
+
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
 
         AddressValidation.validateId(userId, "user id");
@@ -46,11 +54,13 @@ export class AddressController{
     //create new address for user
     createAddress = asyncHandler(async(req: Request, res: Response) => {
 
-        const userId = req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof userId !== "string"){
+        if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
 
         AddressValidation.validateId(userId, "user id");
 
@@ -67,12 +77,18 @@ export class AddressController{
     updateAddressById = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user?.id;
+        const user = req.user as Express.payload | undefined;
+
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
+        const userId = user.userId;
 
         const data: IUpdateAddress = req.body;
 
-        if(typeof addressId !== "string" || typeof userId !== "string"){
-            throw new AppError("Invalid address id or user id", 400);
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
 
         AddressValidation.validateId(userId, "user id");
@@ -88,10 +104,16 @@ export class AddressController{
     deleteAddressById = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user?.id;
+        const user = req.user as Express.payload | undefined;
 
-        if(typeof addressId !== "string" || typeof userId !== "string"){
-            throw new AppError("Invalid address id or user id", 400);
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
+        const userId = user.userId;
+
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
 
         AddressValidation.validateId(userId, "user id");
@@ -106,11 +128,17 @@ export class AddressController{
     setDefaultAddress = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const userId = req.user?.id;
+        const user = req.user as Express.payload | undefined;
+
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
+        const userId = user.userId;
 
         //validating address id and user id
-        if(typeof addressId !== "string" || typeof userId !== "string"){
-            throw new AppError("Invalid address id or user id", 400);
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
 
         AddressValidation.validateId(userId, "user id");
