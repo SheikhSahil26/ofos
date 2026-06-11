@@ -13,6 +13,7 @@ import redisClient from "./config/redis";
 import cookieParser from 'cookie-parser';
 import "./config/jwtAuth";
 import passport from "passport";
+import { Request, Response } from "express";
 
 
 const PORT = process.env.PORT;
@@ -54,9 +55,9 @@ app.get("/redis-test",async(req:any,res:any)=>{
 })
 
 
-// app.get("/",(req:Request, res:Response) => {
-//    res.render("home")
-// })
+app.get("/",(req:Request, res:Response) => {
+   res.render("customer/dashboard");
+});
 
 
 

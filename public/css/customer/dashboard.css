@@ -1,0 +1,42 @@
+body {
+    background: #f8f9fa;
+    color: #222;
+}
+
+.dashboard-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    transition: .3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-card h5 {
+    color: #014f38;
+    font-weight: 600;
+}
+
+.btn-brand {
+    background: #014f38;
+    border: none;
+    color: #fff;
+}
+
+.btn-brand:hover {
+    background: #ff7a00;
+    color: #fff;
+}
+
+.quick-action-btn {
+    background: #ff7a00;
+    color: #fff;
+    border: none;
+}
+
+.quick-action-btn:hover {
+    background: #014f38;
+    color: #fff;
+}
