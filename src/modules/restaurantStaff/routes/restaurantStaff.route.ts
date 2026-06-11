@@ -8,6 +8,7 @@ export class RestaurantStaffRoutes implements IRoutes{
     controller = new RestaurantStaffController();
 
     constructor(){
+        
         this.initializeRoutes();
     }
 
