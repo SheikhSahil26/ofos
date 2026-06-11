@@ -7,14 +7,13 @@ export class RestaurantStaffRoutes implements IRoutes{
     router = Router();
     controller = new RestaurantStaffController();
 
-    constructor(){
-        
+    constructor(){   
         this.initializeRoutes();
     }
 
     private initializeRoutes(){
-        this.router.get("/staff/:branchId", this.controller.getStaffByBranch);
-        this.router.post("/staff/:branchId", this.controller.addStaff);
-        this.router.delete("/staff/:branchId/:userId", this.controller.removeStaff);
+        this.router.get("/:branchId", this.controller.getStaffByBranch);
+        this.router.post("/:branchId", this.controller.addStaff);
+        this.router.delete("/:branchId/:userId", this.controller.removeStaff);
     }
 }

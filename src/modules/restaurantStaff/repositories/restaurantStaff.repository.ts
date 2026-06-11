@@ -16,7 +16,7 @@ export class RestaurantStaffRepository{
     async getStaffByBranch(branchId: string){
         return await prisma.restaurantStaff.findMany({
             where: {
-                id: branchId,
+                branchId: branchId,
                 isActive: true,
                 isDeleted: false
             },
