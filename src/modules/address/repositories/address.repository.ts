@@ -51,7 +51,7 @@ export class AddressRepository{
         if (data.addressLine2 != null) payload.addressLine2 = data.addressLine2;
         if (data.city != null) payload.city = data.city;
         if (data.state != null) payload.state = data.state;
-        if (data.pinCode != null) payload.pincode = data.pinCode;
+        if (data.pincode != null) payload.pincode = data.pincode;
         if (data.latitude != null) payload.latitude = data.latitude as any;
         if (data.longitude != null) payload.longitude = data.longitude as any;
         if (data.isDefault != null) payload.isDefault = data.isDefault;

@@ -102,6 +102,8 @@ export class AuthRepository {
       }
     });
 
+    console.log("roleData: ", roleData);
+
     if (!roleData) {
       throw new Error("Role not found");
     }
