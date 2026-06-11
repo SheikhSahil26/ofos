@@ -3,19 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let token = localStorage.getItem("accessToken");
-console.log(token);
 
 async function loadDashboard() {
   try {
-    const profileResponse = await fetch("/api/users/profile", {
-      method: "get",
-      credentials: "include",
-
-      headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-        },
-    });
+    const profileResponse = await fetch("/api/users/profile");
 
     const profileData = await profileResponse.json();
 
