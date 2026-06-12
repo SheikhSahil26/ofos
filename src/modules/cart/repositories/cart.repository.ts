@@ -4,8 +4,8 @@ import redisClient from "../../../config/redis";
 import { Cart } from "../interfaces/cart.interface";
 
 export class CartRepository {
-  // get cart details by id
-  private getCartKey(userId: number): string {
+    // get cart details by id
+    private getCartKey(userId: number): string {
         return `cart:${userId}`;
     }
 
@@ -45,25 +45,25 @@ export class CartRepository {
         );
     }
 
-  async getMenuItemsByIds(
-    menuItemIds: string[]
-) {
+    async getMenuItemsByIds(
+        menuItemIds: string[]
+    ) {
 
-    return prisma.menuItem.findMany({
-        where: {
-            id: {
-                in: menuItemIds,
+        return prisma.menuItem.findMany({
+            where: {
+                id: {
+                    in: menuItemIds,
+                },
             },
-        },
-        select: {
-            id: true,
-            name: true,
-            price: true,
-            isAvailable: true,
-            isDeleted: true,
-            branch_id: true,
-        },
-    });
-}
-    
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                isAvailable: true,
+                isDeleted: true,
+                branch_id: true,
+            },
+        });
+    }
+
 }

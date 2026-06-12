@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { RestaurantController } from "../../restaurant/controlllers/restaurant.controller";
 import { signupSchema } from "../validators/register.validator";
 import { ICreateUserDto, ISignupDto } from "../interfaces/auth.interface";
 import { use } from "passport";
@@ -152,7 +151,7 @@ export class AuthRepository {
 
     return await prisma.refreshToken.create({
       data: {
-        user_id: userId,
+        userId: userId,
         token: refreshToken,
         expiresAt
       }

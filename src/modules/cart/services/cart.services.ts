@@ -40,11 +40,11 @@ export class CartService {
 
         quantity = Number(quantity);
 
-        console.log(menuItemId, quantity) ;
+        console.log(menuItemId, quantity);
         console.log(
-    "typeof:",
-    typeof menuItemId
-);
+            "typeof:",
+            typeof menuItemId
+        );
 
         const menuItem =
             await prisma.menuItem.findUnique({
@@ -56,7 +56,7 @@ export class CartService {
                     price: true,
                 },
             });
-            console.log("Menu item details:", menuItem);
+        console.log("Menu item details:", menuItem);
 
         if (!menuItem) {
             throw new Error("Menu item not found");
@@ -171,102 +171,102 @@ export class CartService {
     }
 
     //will fix later and make + - button and if item quantity is 0 then only delete it from cart 
-  async removeCartItem(
-    userId: number,
-    itemId: string
-): Promise<ServiceResponse<any>> {
+    async removeCartItem(
+        userId: number,
+        itemId: string
+    ): Promise<ServiceResponse<any>> {
 
-    const existingCart =
-        await this.cartRepo.getCart(userId);
+        const existingCart =
+            await this.cartRepo.getCart(userId);
 
-    if (!existingCart) {
-        throw new Error(
-            "Cart not found"
-        );
-    }
-
-    const item =
-        existingCart.items.find(
-            (item: any) =>
-                item.menuItemId === itemId
-        );
-
-    if (!item) {
-        throw new Error(
-            "Item not found in cart"
-        );
-    }
-
-    // Decrement quantity
-
-    item.quantity =
-        Number(item.quantity) - 1;
-
-    // Remove item only when quantity becomes 0
-
-    if (item.quantity <= 0) {
-
-        existingCart.items =
-            existingCart.items.filter(
-                (cartItem: any) =>
-                    cartItem.menuItemId !== itemId
+        if (!existingCart) {
+            throw new Error(
+                "Cart not found"
             );
-    }
+        }
 
-    // Recalculate subtotal
+        const item =
+            existingCart.items.find(
+                (item: any) =>
+                    item.menuItemId === itemId
+            );
 
-    existingCart.subtotal =
-        existingCart.items.reduce(
-            (
-                sum: number,
-                item: any
-            ) =>
-                sum +
-                Number(item.quantity) *
-                Number(item.unitPrice),
-            0
-        );
+        if (!item) {
+            throw new Error(
+                "Item not found in cart"
+            );
+        }
 
-    // If cart becomes empty
+        // Decrement quantity
 
-    if (
-        existingCart.items.length === 0
-    ) {
+        item.quantity =
+            Number(item.quantity) - 1;
 
-        await this.cartRepo.deleteCart(
-            userId
+        // Remove item only when quantity becomes 0
+
+        if (item.quantity <= 0) {
+
+            existingCart.items =
+                existingCart.items.filter(
+                    (cartItem: any) =>
+                        cartItem.menuItemId !== itemId
+                );
+        }
+
+        // Recalculate subtotal
+
+        existingCart.subtotal =
+            existingCart.items.reduce(
+                (
+                    sum: number,
+                    item: any
+                ) =>
+                    sum +
+                    Number(item.quantity) *
+                    Number(item.unitPrice),
+                0
+            );
+
+        // If cart becomes empty
+
+        if (
+            existingCart.items.length === 0
+        ) {
+
+            await this.cartRepo.deleteCart(
+                userId
+            );
+
+            return {
+                success: true,
+                message:
+                    "Cart deleted successfully",
+                statusCode: 200,
+            };
+        }
+
+        // Save updated cart
+
+        await this.cartRepo.saveCart(
+            userId,
+            existingCart
         );
 
         return {
             success: true,
             message:
-                "Cart deleted successfully",
+                "Item quantity updated successfully",
+            data: existingCart,
             statusCode: 200,
         };
     }
-
-    // Save updated cart
-
-    await this.cartRepo.saveCart(
-        userId,
-        existingCart
-    );
-
-    return {
-        success: true,
-        message:
-            "Item quantity updated successfully",
-        data: existingCart,
-        statusCode: 200,
-    };
-}
 
     //delete entire cart 
 
     async clearCart(
         userId: number
     ): Promise<ServiceResponse<any>> {
-        const existingCart =  await this.cartRepo.getCart(userId);
+        const existingCart = await this.cartRepo.getCart(userId);
 
         if (!existingCart) {
             throw new Error(
@@ -282,183 +282,183 @@ export class CartService {
             statusCode: 200,
         };
 
-     }
-
-     async validateCart(
-    userId: number
-): Promise<ServiceResponse<any>> {
-
-    const cart =
-        await this.cartRepo.getCart(
-            userId
-        );
-
-    if (!cart) {
-        throw new Error(
-            "Cart not found"
-        );
     }
 
-    const menuItemIds =
-        cart.items.map(
-            (item: any) =>
-                item.menuItemId
-        );
+    async validateCart(
+        userId: number
+    ): Promise<ServiceResponse<any>> {
 
-    const menuItems =
-        await this.cartRepo.getMenuItemsByIds(
-            menuItemIds
-        );
-
-    const issues: any[] = [];
-
-    for (const cartItem of cart.items) {
-
-        const dbItem =
-            menuItems.find(
-                (item: any) =>
-                    item.id ===
-                    cartItem.menuItemId
+        const cart =
+            await this.cartRepo.getCart(
+                userId
             );
 
-        // Item deleted
-
-        if (!dbItem) {
-
-            issues.push({
-                menuItemId:
-                    cartItem.menuItemId,
-                issue:
-                    "Menu item not found",
-            });
-
-            continue;
+        if (!cart) {
+            throw new Error(
+                "Cart not found"
+            );
         }
 
-        // Soft deleted
+        const menuItemIds =
+            cart.items.map(
+                (item: any) =>
+                    item.menuItemId
+            );
 
-        if (dbItem.isDeleted) {
+        const menuItems =
+            await this.cartRepo.getMenuItemsByIds(
+                menuItemIds
+            );
 
-            issues.push({
-                menuItemId:
-                    cartItem.menuItemId,
-                issue:
-                    "Menu item deleted",
-            });
+        const issues: any[] = [];
 
-            continue;
+        for (const cartItem of cart.items) {
+
+            const dbItem =
+                menuItems.find(
+                    (item: any) =>
+                        item.id ===
+                        cartItem.menuItemId
+                );
+
+            // Item deleted
+
+            if (!dbItem) {
+
+                issues.push({
+                    menuItemId:
+                        cartItem.menuItemId,
+                    issue:
+                        "Menu item not found",
+                });
+
+                continue;
+            }
+
+            // Soft deleted
+
+            if (dbItem.isDeleted) {
+
+                issues.push({
+                    menuItemId:
+                        cartItem.menuItemId,
+                    issue:
+                        "Menu item deleted",
+                });
+
+                continue;
+            }
+
+            // Unavailable
+
+            if (!dbItem.isAvailable) {
+
+                issues.push({
+                    menuItemId:
+                        cartItem.menuItemId,
+                    issue:
+                        "Item unavailable",
+                });
+
+                continue;
+            }
+
+            // Price changed
+
+            if (
+                Number(
+                    dbItem.price
+                ) !==
+                Number(
+                    cartItem.unitPrice
+                )
+            ) {
+
+                issues.push({
+                    menuItemId:
+                        cartItem.menuItemId,
+                    issue:
+                        `Price changed from ₹${cartItem.unitPrice} to ₹${dbItem.price}`,
+                });
+            }
         }
 
-        // Unavailable
+        if (issues.length > 0) {
 
-        if (!dbItem.isAvailable) {
-
-            issues.push({
-                menuItemId:
-                    cartItem.menuItemId,
-                issue:
-                    "Item unavailable",
-            });
-
-            continue;
+            return {
+                success: false,
+                message:
+                    "Cart validation failed",
+                data: {
+                    valid: false,
+                    issues,
+                },
+                statusCode: 400,
+            };
         }
-
-        // Price changed
-
-        if (
-            Number(
-                dbItem.price
-            ) !==
-            Number(
-                cartItem.unitPrice
-            )
-        ) {
-
-            issues.push({
-                menuItemId:
-                    cartItem.menuItemId,
-                issue:
-                    `Price changed from ₹${cartItem.unitPrice} to ₹${dbItem.price}`,
-            });
-        }
-    }
-
-    if (issues.length > 0) {
 
         return {
-            success: false,
+            success: true,
             message:
-                "Cart validation failed",
+                "Cart validation successful",
             data: {
-                valid: false,
-                issues,
+                valid: true,
             },
-            statusCode: 400,
+            statusCode: 200,
         };
     }
 
-    return {
-        success: true,
-        message:
-            "Cart validation successful",
-        data: {
-            valid: true,
-        },
-        statusCode: 200,
-    };
-}
-
     async getCartSummary(
-    userId: number
-): Promise<ServiceResponse<any>> {
+        userId: number
+    ): Promise<ServiceResponse<any>> {
 
-    const cart =
-        await this.cartRepo.getCart(
-            userId
-        );
+        const cart =
+            await this.cartRepo.getCart(
+                userId
+            );
 
-    if (!cart) {
-        throw new Error(
-            "Cart not found"
-        );
+        if (!cart) {
+            throw new Error(
+                "Cart not found"
+            );
+        }
+
+        const subtotal =
+            Number(cart.subtotal);
+
+        // Example calculations
+        const tax =
+            Number(
+                (subtotal * 0.05).toFixed(2)
+            );
+
+        const deliveryFee =
+            subtotal >= 500
+                ? 0
+                : 40;
+
+        const discount = 0;
+
+        const total =
+            subtotal +
+            tax +
+            deliveryFee -
+            discount;
+
+        return {
+            success: true,
+            message:
+                "Cart summary fetched successfully",
+            data: {
+                subtotal,
+                tax,
+                deliveryFee,
+                discount,
+                total,
+            },
+            statusCode: 200,
+        };
     }
-
-    const subtotal =
-        Number(cart.subtotal);
-
-    // Example calculations
-    const tax =
-        Number(
-            (subtotal * 0.05).toFixed(2)
-        );
-
-    const deliveryFee =
-        subtotal >= 500
-            ? 0
-            : 40;
-
-    const discount = 0;
-
-    const total =
-        subtotal +
-        tax +
-        deliveryFee -
-        discount;
-
-    return {
-        success: true,
-        message:
-            "Cart summary fetched successfully",
-        data: {
-            subtotal,
-            tax,
-            deliveryFee,
-            discount,
-            total,
-        },
-        statusCode: 200,
-    };
-}
 
 
 }
