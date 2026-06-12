@@ -13,6 +13,7 @@ export class RestaurantRoutes implements IRoutes {
 
   private initializeRoutes(): void {
     this.router.get("/", this.controller.getRestaurants);
+    this.router.post("/", this.controller.createRestaurant);
     this.router.get("/nearby", this.controller.getNearbyRestaurants);
     this.router.get("/owner/my-restaurants", this.controller.getMyRestaurants);
     this.router.put("/:id", this.controller.updateRestaurant);
@@ -20,4 +21,4 @@ export class RestaurantRoutes implements IRoutes {
     this.router.delete("/:id", this.controller.deleteRestaurant);
     this.router.get("/:id/reviews", this.controller.getRestaurantReviews);
   }
-}   
+} 

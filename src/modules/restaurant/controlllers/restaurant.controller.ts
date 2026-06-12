@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { RestaurantService } from "../services/restaurant.service";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { AppError } from "../../../utils/appError";
 
 export class RestaurantController {
   private restaurantService = new RestaurantService();
@@ -26,7 +27,7 @@ export class RestaurantController {
 
   //get restaurant by owner
   getMyRestaurants = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.userId;
+    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
 
       const page = Number(req.query.page) || 1;
 
@@ -74,7 +75,7 @@ export class RestaurantController {
 
   // create restaurant
   createRestaurant = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.userId;
+    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
 
       const restaurant = await this.restaurantService.createRestaurant(
         userId,
@@ -90,7 +91,12 @@ export class RestaurantController {
 
   // Update restaurant details
   updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.userId;
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
 
       const restaurantIdRaw = req.params.id;
       const restaurantId = Array.isArray(restaurantIdRaw)
@@ -103,8 +109,6 @@ export class RestaurantController {
           message: "Restaurant id is required",
         });
       }
-
-      const userId = req.user!.userId;
 
       const restaurant = await this.restaurantService.updateRestaurant(
         restaurantId,
@@ -120,7 +124,6 @@ export class RestaurantController {
     });
 
   // update restaurant status
-  // restaurant.controller.ts
 
   updateRestaurantStatus = asyncHandler(async (req: Request, res: Response) => {
       const rawId = req.params.id;
@@ -134,7 +137,12 @@ export class RestaurantController {
 
       const restaurantId: string = rawId;
 
-      const userId = req.user!.userId;
+      const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
 
       const { isActive } = req.body;
 
@@ -163,7 +171,12 @@ export class RestaurantController {
   // delete restaurant
 
   deleteRestaurant = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.userId;
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
 
       const rawId = req.params.id;
 
@@ -176,7 +189,6 @@ export class RestaurantController {
 
       const restaurantId: string = rawId;
 
-      const userId = req.user!.userId;
 
       await this.restaurantService.deleteRestaurant(restaurantId, userId);
 
@@ -216,8 +228,12 @@ export class RestaurantController {
   createReview = asyncHandler(async (req: Request, res: Response) => {
       const restaurantId = req.params.id as string;
 
-      const userId = req.user!.userId;
+      const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
+    const userId = user.userId;
       const review = await this.restaurantService.createReview(
         restaurantId,
         userId,

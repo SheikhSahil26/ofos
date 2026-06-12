@@ -17,7 +17,7 @@ export class AuthRoutes implements IRoutes {
   private initializeRoutes(): void {
 
     this.router.get(
-      "/:role/static/register",
+      "/:role/static/register", 
       this.controller.registerPage
     );
 
@@ -30,7 +30,7 @@ export class AuthRoutes implements IRoutes {
       "/:role/api/register",
       validate(signupSchema),
       this.controller.register
-    );
+    );   
 
     this.router.post(
       "/:role/api/login",
