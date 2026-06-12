@@ -7,8 +7,7 @@ export class RestaurantController {
   private restaurantService = new RestaurantService();
 
   //get all restaurants
-  getRestaurants = async (req: Request, res: Response) => {
-    try {
+  getRestaurants = asyncHandler(async(req: Request, res: Response) => {
       const page = Number(req.query.page) || 1;
 
       const limit = Number(req.query.limit) || 10;
@@ -22,18 +21,10 @@ export class RestaurantController {
       );
 
       return res.status(200).json({
-        success: true,
         ...data,
+        success: true,
       });
-    } catch (err) {
-      console.log(err);
-
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching restaurants",
-      });
-    }
-  };
+  });
 
   //get restaurant by owner
   getMyRestaurants = asyncHandler(async (req: Request, res: Response) => {
@@ -50,18 +41,17 @@ export class RestaurantController {
       );
 
       return res.status(200).json({
-        success: true,
         ...data,
+        success: true,
       });
     })
 
   //GET nearby restaurants
 
-getNearbyRestaurants = async(
+getNearbyRestaurants = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
-    try{
 
         const latitude = Number(req.query.latitude);
         const longitude = Number(req.query.longitude);
@@ -90,16 +80,7 @@ getNearbyRestaurants = async(
             data: restaurants
         });
 
-    }
-    catch(err){
-        console.log(err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Error fetching nearby restaurants"
-        });
-    }
-}
+});
 
   // create restaurant
   createRestaurant = asyncHandler(async (req: Request, res: Response) => {
@@ -118,21 +99,7 @@ getNearbyRestaurants = async(
                 "Restaurant created successfully",
                 data:restaurant
             });
-
-        }
-        catch(err){
-
-            console.log(err);
-
-            return res.status(400).json({
-                success:false,
-                message:
-                    err instanceof Error
-                    ? err.message
-                    : "Error creating restaurant"
-            });
-        }
-    };
+    });
 
   // Update restaurant details
   updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
@@ -170,30 +137,14 @@ getNearbyRestaurants = async(
             data:restaurant
         });
 
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-            err instanceof Error
-            ? err.message
-            : "Error updating restaurant"
-        });
-    }
-}
+});
 
   // update restaurant status
 
-updateRestaurantStatus = async(
+updateRestaurantStatus = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
-
-    try{
-
         const rawId = req.params.id;
 
         if (!rawId || Array.isArray(rawId)) {
@@ -241,21 +192,7 @@ updateRestaurantStatus = async(
                 : "Restaurant deactivated successfully",
             data: restaurant
         });
-
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error updating status"
-        });
-    }
-}
+});
 
 // delete restaurant
 
@@ -290,21 +227,7 @@ updateRestaurantStatus = async(
             message:
                 "Restaurant deleted successfully"
         });
-
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error deleting restaurant"
-        });
-    }
-}
+});
 
 // GET restaurant reviews 
 getRestaurantReviews = async(
@@ -323,7 +246,7 @@ getRestaurantReviews = async(
         const limit =
         Number(req.query.limit) || 10;
 
-        const reviews =
+        const reviewsResponse =
         await this.restaurantService
         .getRestaurantReviews(
             restaurantId,
@@ -331,15 +254,21 @@ getRestaurantReviews = async(
             limit
         );
 
+        const reviewsData = reviewsResponse.data;
+
         return res.status(200).json({
             success:true,
-            data:reviews.reviews,
+            data: reviewsData?.reviews ?? [],
 
             averageRating:
-            reviews.averageRating,
+            reviewsData?.averageRating ?? 0,
 
             pagination:
-            reviews.pagination
+            reviewsData?.pagination ?? {
+                page,
+                limit,
+                total: 0
+            }
         });
 
     }

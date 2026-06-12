@@ -686,18 +686,6 @@ model Notification {
   @@map("notifications")
 }
 
-model RefreshToken {
-  id        BigInt   @id @default(autoincrement())
-  token     String   @db.Text
-  user_id   String
-  isRevoked Boolean  @default(false)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  users     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id])
-}
-
 enum DayOfWeek {
   MON
   TUE
