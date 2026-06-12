@@ -68,7 +68,12 @@ app.get("/redis-test",async(req:any,res:any)=>{
 
 
 
+<<<<<<< HEAD
 app.listen(PORT,()=>{
     console.log(`server is running on http://localhost:${PORT}`);
+=======
+app.listen(8080,()=>{
+    console.log(`server started at port : ${PORT}`);
+>>>>>>> e7fc97f (link dashbord for test purpose)
 });
 
