@@ -5,6 +5,8 @@ import { CartRoutes } from "../modules/cart/routes/cart.routes.js";
 import { MenuRoutes } from "../modules/menu/routes/menu.route.js";
 import { MenuItemRoutes } from "../modules/menu_items/routes/menu_item.route.js";
 import { ModifierRoutes } from "../modules/modifier/routes/modifier.route.js";
+import { CouponRoutes } from "../modules/coupons/routes/coupon.route.js";
+import { DietaryTagsRoute } from "../modules/dietaryTags/routes/dietaryTag.route.js";
 
 export function buildApiRouter(): Router{
     const router = Router();
@@ -15,6 +17,8 @@ export function buildApiRouter(): Router{
      new MenuRoutes(),
      new MenuItemRoutes(),
      new ModifierRoutes(),
+     new CouponRoutes(),
+     new DietaryTagsRoute(),
     ]
 
     routes.forEach((route) => {
