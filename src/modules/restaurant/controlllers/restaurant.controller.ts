@@ -230,12 +230,11 @@ updateRestaurantStatus = asyncHandler(async(
 });
 
 // GET restaurant reviews 
-getRestaurantReviews = async(
+getRestaurantReviews = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
 
-    try{
 
         const restaurantId =
         req.params.id as string;
@@ -271,28 +270,15 @@ getRestaurantReviews = async(
             }
         });
 
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error fetching reviews"
-        });
-    }
-}
+});
 
 // Create review
-createReview = async(
+createReview = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
 
-    try{
+
 
         const restaurantId =
         req.params.id as string;
@@ -315,19 +301,5 @@ createReview = async(
                 "Review submitted successfully",
             data:review
         });
-
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error creating review"
-        });
-    }
-}
+});
 }
