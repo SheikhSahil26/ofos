@@ -38,5 +38,6 @@ export interface IUpdateAddress{
     state?: string | null;
     pincode?: string | null;
     latitude?: Decimal | null;
-    longitude?: number | null;
+    longitude?: Decimal | null;
+    isDefault?: boolean;
 }
