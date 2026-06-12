@@ -164,7 +164,7 @@ model RestaurantBranch {
 model OperatingHour {
   id        String           @id @default(uuid())
   branchId  String           @map("branch_id")
-  dayOfWeek DayOfWeek        @map("day_of_week")
+  dayOfWeek DayOfWeek        @map("day_of_week")  
   openTime  DateTime?        @map("open_time") @db.Time(0)
   closeTime DateTime?        @map("close_time") @db.Time(0)
   isClosed  Boolean          @default(false) @map("is_closed")
@@ -684,6 +684,18 @@ model Notification {
   @@index([status])
   @@index([notificationType])
   @@map("notifications")
+}
+
+model RefreshToken {
+  id        BigInt   @id @default(autoincrement())
+  token     String   @db.Text
+  user_id   String
+  isRevoked Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  users     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 enum DayOfWeek {

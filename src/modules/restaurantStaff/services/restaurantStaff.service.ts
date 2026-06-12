@@ -105,6 +105,9 @@ export class RestaurantStaffService{
         //add staff to restaurantStaff table
         const staff = await this.staffRepo.addStaff(branchId, user.id);
 
+        //add restaurant_staff role and userId to user role table
+        await this.authRepo.assignRole(staff.user.id, role);
+
         //mapping staff result to Interface IBranchStaff
         const result : IBranchStaff = {
             id: staff.user.id,

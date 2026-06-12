@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { RestaurantService } from "../services/restaurant.service";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { AppError } from "../../../utils/appError";
 
 export class RestaurantController {
   private restaurantService = new RestaurantService();
@@ -34,9 +36,8 @@ export class RestaurantController {
   };
 
   //get restaurant by owner
-  getMyRestaurants = async (req: Request, res: Response) => {
-    try {
-      const userId = req.user.userId ;
+  getMyRestaurants = asyncHandler(async (req: Request, res: Response) => {
+    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
 
       const page = Number(req.query.page) || 1;
 
@@ -106,16 +107,9 @@ getNearbyRestaurants = async(
     }
 }
 
-     // create restaurant
-      createRestaurant = async(
-        req: Request,
-        res: Response
-    ) => {
-
-        try{
-
-            const userId =
-                req.user!.userId;
+  // create restaurant
+  createRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
 
             const restaurant =
                 await this.restaurantService
@@ -146,27 +140,26 @@ getNearbyRestaurants = async(
         }
     };
 
-    // Update restaurant details
-    updateRestaurant = async(
-    req: Request,
-    res: Response
-) => {
+  // Update restaurant details
+  updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-    try{
+    const userId = user.userId;
 
         const restaurantIdRaw = req.params.id;
         const restaurantId = Array.isArray(restaurantIdRaw)
           ? restaurantIdRaw[0]
           : restaurantIdRaw;
 
-        if (!restaurantId) {
-          return res.status(400).json({
-            success: false,
-            message: "Restaurant id is required",
-          });
-        }
-
-        const userId = req.user!.userId;
+      if (!restaurantId) {
+        return res.status(400).json({
+          success: false,
+          message: "Restaurant id is required",
+        });
+      }
 
         const restaurant =
         await this.restaurantService
@@ -198,8 +191,7 @@ getNearbyRestaurants = async(
     }
 }
 
-// update restaurant status
-// restaurant.controller.ts
+  // update restaurant status
 
 updateRestaurantStatus = async(
     req: Request,
@@ -219,8 +211,12 @@ updateRestaurantStatus = async(
 
         const restaurantId: string = rawId;
 
-        const userId =
-        req.user!.userId;
+      const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
 
         const { isActive } =
         req.body;
@@ -269,12 +265,13 @@ updateRestaurantStatus = async(
 
 // delete restaurant
 
-deleteRestaurant = async(
-    req: Request,
-    res: Response
-) => {
+  deleteRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-    try{
+    const userId = user.userId;
 
         const rawId = req.params.id;
 
@@ -287,8 +284,6 @@ deleteRestaurant = async(
 
         const restaurantId: string = rawId;
 
-        const userId =
-        req.user!.userId;
 
         await this.restaurantService
         .deleteRestaurant(
@@ -379,16 +374,17 @@ createReview = async(
         const restaurantId =
         req.params.id as string;
 
-        const userId =
-        req.user!.userId;
+      const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-        const review =
-        await this.restaurantService
-        .createReview(
-            restaurantId,
-            userId,
-            req.body
-        );
+    const userId = user.userId;
+      const review = await this.restaurantService.createReview(
+        restaurantId,
+        userId,
+        req.body,
+      );
 
         return res.status(201).json({
             success:true,

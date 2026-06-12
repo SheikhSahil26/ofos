@@ -4,6 +4,7 @@ import { IRestaurantValidation, INearbyItem, IPagination, IRestaurantsResult, IB
 import { prisma } from "../../../config/prisma";
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
+import { isBranchOpenNow } from "../../restaurant-branch/utils/branch-open-status.util"
 
 
 export class RestaurantService{
@@ -33,13 +34,30 @@ export class RestaurantService{
         search
     );
 
+    const transformedRestaurants =
+        data.restaurants.map(
+            restaurant => ({
+                ...restaurant,
+                branches:
+                    restaurant.branches.map(
+                        (branch: IBranch) => ({
+                            ...branch,
+                            isOpenNow:
+                                isBranchOpenNow(
+                                    branch.operatingHours
+                                )
+                        })
+                    )
+            })
+        );
+
     return {
         success: true,
-        data:data.restaurants,
-        pagination:{
+        data: transformedRestaurants,
+        pagination: {
             page,
             limit,
-            total:data.total
+            total: data.total
         },
         message: "Restaurants fetched successfully",
         statusCode: 200
@@ -71,6 +89,23 @@ export class RestaurantService{
         page,
         limit
     );
+
+    const transformedRestaurants =
+        data.restaurants.map(
+            restaurant => ({
+                ...restaurant,
+                branches:
+                    restaurant.branches.map(
+                        (branch: IBranch) => ({
+                            ...branch,
+                            isOpenNow:
+                                isBranchOpenNow(
+                                    branch.operatingHours
+                                )
+                        })
+                    )
+            })
+        );
 
     return {
         success: true,
@@ -115,6 +150,7 @@ export class RestaurantService{
             branchLongitude
         );
 
+    
         return {
             success: true,
             statusCode: 200,
