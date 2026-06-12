@@ -14,8 +14,8 @@ export function buildApiRouter(): Router{
     const routes: IRoutes[] = [
         new AuthRoutes(),
         new CartRoutes(),
-     new RestaurantRoutes(),
-     new OrdersRoutes(),
+        new RestaurantRoutes(),
+        new OrdersRoutes(),
         new UserRoutes(),
         new AddressRoutes(),
         new RestaurantStaffRoutes(),
