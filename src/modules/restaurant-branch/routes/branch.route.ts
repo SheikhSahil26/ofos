@@ -1,15 +1,15 @@
-import { Router } from "express";
-import { IRoutes } from "../../../common/interfaces/route.interface";
-import { BranchController } from "../controllers/branch.controller";
+import { Router } from 'express';
+import { IRoutes } from '../../../common/interfaces/route.interface';
+import { BranchController } from '../controllers/branch.controller';
 
 export class BranchRoutes implements IRoutes {
-  path = "/restaurant/branch";
+  path = '/branches';
   router = Router();
   controller = new BranchController();
 
-  constructor() {
-    this.initializeRoutes();
-  }
+    constructor() {
+        this.initializeRoutes();
+    }
 
   private initializeRoutes(): void {
     this.router.post("/add/:restaurantId", this.controller.createBranch); // Create a new Branch

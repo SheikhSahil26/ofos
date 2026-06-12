@@ -1,64 +1,162 @@
 import { Request, Response } from "express";
 import { CartService } from "../services/cart.services";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { AddToCartDTO } from "../dto/add-to-cart.dto";
+import { RemoveCartItemDTO } from "../dto/remove-cart-item.dto";
+import { ValidateCartResponseDTO } from "../dto/validate-cart.dto";
+import { CartSummaryDTO } from "../dto/cart-summary.dto";
 
 export class CartController {
-  private cartService = new CartService();
 
-  //this controller will get the cart details of the loggedin user!!
-   getCart = async (req: Request, res: Response) => {
-    try {
+    private cartService = new CartService();
 
-        // const userId :any = req.user.userId
-        const userId = 1; //dummy id for test 
+    getCart = asyncHandler(
+        async (
+            req: Request,
+            res: Response
+        ) => {
 
-        const data = await this.cartService.getCart(userId);
+            const userId = 1; // dummy
 
-        res.send("hello")
-        
-        
+            const data =
+                await this.cartService.getCart(
+                    userId
+                );
 
+            return res
+                .status(
+                    data.statusCode || 200
+                )
+                .json(data);
+        }
+    );
 
-      
-    } catch (err) {
-     
+    addToCart = asyncHandler(
+        async (
+            req: Request,
+            res: Response
+        ) => {
+
+            const userId = 1; // dummy
+
+            const {
+    menuItemId,
+    quantity,
+}: AddToCartDTO = req.body;
+
+            const data =
+                await this.cartService.addToCart(
+                    userId,
+                    menuItemId,
+                    Number(quantity)
+                );
+
+            return res
+                .status(
+                    data.statusCode || 200
+                )
+                .json(data);
+        }
+    );
+
+    removeCartItem = asyncHandler(
+        async (
+            req: Request,
+            res: Response
+        ) => {
+
+            const userId = 1; // dummy
+
+           const params: RemoveCartItemDTO = {
+    itemId: req.params.itemId as string,
+};
+
+            const data =
+                await this.cartService.removeCartItem(
+                    userId,
+                    params.itemId
+                );
+
+            return res
+                .status(
+                    data.statusCode || 200
+                )
+                .json(data);
+        }
+    );
+
+   clearCart = asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const userId = 1; // Replace with req.user.userId
+
+        const result =
+            await this.cartService.clearCart(
+                userId
+            );
+
+        return res
+            .status(
+                result.statusCode || 200
+            )
+            .json(result);
     }
-  };
+);
 
-  addToCart = async (req: Request, res: Response) => {
-    try {
-        const userId = 1; //dummy id for test 
-        const { menuItemId, quantity} = req.body;
+    validateCart = asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
 
-        console.log(menuItemId, quantity, "this is menu item id and quantity from req body")
+        const userId = 1; // replace with req.user.userId
 
-        const data = await this.cartService.addToCart(userId, menuItemId, quantity);
-        console.log("Cart after adding item:", data);
-        
-        res.status(200).json({
-            success: true,
-            message: "Item added to cart successfully",
-            data
-        })
+        const result =
+            await this.cartService.validateCart(
+                userId
+            );
 
-    } catch (err) {
-        
-    }
-    }
+               const response: ValidateCartResponseDTO =
+            result.data!;
 
-    removeCartItem = async (req: Request, res: Response) => {
-        try {
-            const userId = 1; //dummy id for test 
-            const itemId = req.params.itemId as string;
-
-            await this.cartService.removeCartItem(userId, itemId);
-
-            res.status(200).json({
-                success: true,
-                message: "Item removed from cart successfully",
+        return res
+            .status(
+                result.statusCode || 200
+            )
+            .json({
+                ...result,
+                data: response,
             });
-        }   catch (err) {      
+    }
+);
 
-        }    }             
+    getCartSummary = asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
 
-    
+        const userId = 1; // replace with req.user.userId
+
+        const result =
+            await this.cartService.getCartSummary(
+                userId
+            );
+
+       const response: CartSummaryDTO =
+            result.data!;
+
+        return res
+            .status(
+                result.statusCode || 200
+            )
+            .json({
+                ...result,
+                data: response,
+            });
+    }
+);
 }

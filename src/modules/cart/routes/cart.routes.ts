@@ -29,16 +29,16 @@ this.router.post("/add-to-cart", this.controller.addToCart);
 // this.router.put("/items/:itemId", this.controller.updateCartItem);
 
 // Remove item from cart
-this.router.delete("/items/:itemId", this.controller.removeCartItem);
+this.router.delete("/remove-item/:itemId", this.controller.removeCartItem); //delete the item's quantity first and if zero then remove the item entirely from cart
 
 // // Clear entire cart
-// this.router.delete("/", this.controller.clearCart);
+this.router.delete("/delete-cart", this.controller.clearCart);
 
 // // Validate cart before checkout
-// this.router.post("/validate", this.controller.validateCart);
+  this.router.post("/validate",this.controller.validateCart);
 
 // // Get cart summary
-// this.router.get("/summary", this.controller.getCartSummary);
+this.router.get("/summary", this.controller.getCartSummary);
 
 
   }

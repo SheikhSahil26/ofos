@@ -10,6 +10,9 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { buildApiRouter } from "./routes";
 import redisClient from "./config/redis";
+import cookieParser from 'cookie-parser';
+import "./config/jwtAuth";
+import passport from "passport";
 
 
 const PORT = process.env.PORT;
@@ -35,6 +38,8 @@ app.use(express.static(path.join(__dirname,"../public")))
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
+app.use(cookieParser())
+app.use(passport.initialize());
 
 //this will initiate all the routes 
 app.use("/api", buildApiRouter());
@@ -63,7 +68,7 @@ app.get("/redis-test",async(req:any,res:any)=>{
 
 
 
-app.listen(8080,()=>{
-    console.log("server started at port 8080");
+app.listen(PORT,()=>{
+    console.log(`server is running on http://localhost:${PORT}`);
 });
 

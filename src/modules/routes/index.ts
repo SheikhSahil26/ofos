@@ -8,6 +8,7 @@ import { AddressRoute } from "../address/routes/address.route.js";
 import { RestaurantRoutes } from "../restaurant/routes/restaurant.route.js";
 import { BranchRoutes } from "../restaurant-branch/routes/branch.route.js";
 import { OperatingHourRoutes } from "../operatingHours/route/operating-hour.route.js";
+import "../../config/jwtAuth.js";
 
 export function buildApiRouter(): Router{
     const router = Router();

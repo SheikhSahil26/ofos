@@ -12,7 +12,11 @@
 </head>
 
 <body>
+<<<<<<< HEAD
 
+=======
+    <div id="toast"></div>
+>>>>>>> origin
     <div class="container">
 
         <!-- LEFT PANEL -->
@@ -55,7 +59,11 @@
                 </span>
 
                 <form action="/delivery/login" method="POST">
+<<<<<<< HEAD
                     
+=======
+
+>>>>>>> origin
                     <div class="input-group">
 
                         <label>Email Address</label>
@@ -86,9 +94,26 @@
 
                     </div>
 
+<<<<<<< HEAD
                     <div class="forgot-password">
 
                         <a href="/delivery/forgot-password">
+=======
+
+                    <div class="terms">
+
+                        <input type="checkbox" name="rememberMe" required>
+
+                        <p>
+                            Remember Me
+                        </p>
+
+                    </div>
+
+                    <div class="forgot-password">
+
+                        <a href="/api/auth/forget-password">
+>>>>>>> origin
                             Forgot Password?
                         </a>
 
@@ -116,6 +141,7 @@
 
     </div>
 
+<<<<<<< HEAD
     <script>
         function togglePassword() {
             const password = document.getElementById("password");
@@ -126,6 +152,12 @@
                     : "password";
         }
     </script>
+=======
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/togglePassword.js"></script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/login.js"></script>
+>>>>>>> origin
 
 </body>
 
