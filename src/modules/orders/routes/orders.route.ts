@@ -12,7 +12,7 @@ export class OrdersRoutes implements IRoutes {
   }
 
   private initializeRoutes(): void {
-    // this.router.get("/", this.controller.getRestaurants);
+  
     this.router.post("/place-order", this.controller.createOrder);
     this.router.get("/list-orders", this.controller.listOrders); // lists all orders of authenticated user
     this.router.get("/get-order/:id", this.controller.getOrder); // fetch a specific order by ID
