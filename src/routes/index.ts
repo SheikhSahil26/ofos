@@ -7,6 +7,7 @@ import { UserRoutes } from "../modules/user/routes/user.route.js";
 import { AddressRoutes } from "../modules/address/routes/address.route.js";
 import { RestaurantStaffRoutes } from "../modules/restaurantStaff/routes/restaurantStaff.route.js";
 import { OrdersRoutes } from "../modules/orders/routes/orders.route.js";
+import { BranchRoutes } from "../modules/restaurant-branch/routes/branch.route.js";
 
 export function buildApiRouter(): Router{
     const router = Router();
@@ -18,6 +19,7 @@ export function buildApiRouter(): Router{
         new OrdersRoutes(),
         new UserRoutes(),
         new AddressRoutes(),
+        new BranchRoutes(),
         new RestaurantStaffRoutes(),
     ]
 

@@ -29,6 +29,5 @@ export function buildApiRouter(): Router{
     routes.forEach((route) => {
         router.use(route.path, route.router);
     });
-
     return router;
 }

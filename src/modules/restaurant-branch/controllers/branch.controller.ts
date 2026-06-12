@@ -81,7 +81,9 @@ export class BranchController {
 
   // Get branch details
   getBranchDetails = asyncHandler(async (req: Request, res: Response) => {
-    const branchIdParam = req.params.userId;
+    console.log(req.params.branchId);
+    
+    const branchIdParam = req.params.branchId;
     const branchId = Array.isArray(branchIdParam)
       ? branchIdParam[0]
       : branchIdParam;
