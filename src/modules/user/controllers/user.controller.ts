@@ -9,6 +9,11 @@ import { AppError } from "../../../utils/appError";
 export class UserController{                                                                                 
     private userService = new UserService();
 
+    //dashboard page
+    dashboardPage = asyncHandler( async(req: Request, res: Response) => {
+        res.status(200).render("customer/dashboard");
+    });
+
     //get profile page
     getProfilePage = asyncHandler(async(req: Request, res: Response) => {
         res.status(200).render("customer/profile");
