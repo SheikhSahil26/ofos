@@ -14,13 +14,3 @@ declare global {
         }
     }
 }
-
-declare global {
-    namespace Express {
-        interface otpPayload {
-            userId: string;
-            email:string;
-            otp:string;
-        }
-    }
-}
