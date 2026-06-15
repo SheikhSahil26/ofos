@@ -4,7 +4,7 @@ import { IRestaurantValidation, INearbyItem, IPagination, IRestaurantsResult, IB
 import { prisma } from "../../../config/prisma";
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
-import { isBranchOpenNow } from "../../restaurant-branch/utils/branch-open-status.util"
+import { isBranchOpenNow } from "../../restaurantBranch/utils/branch-open-status.util"
 
 
 export class RestaurantService{

@@ -342,36 +342,23 @@ model CouponUsage {
 
 model RestaurantPromotion {
   id String @id @default(uuid())
-
   restaurantId String @map("restaurant_id")
-
   title String @db.VarChar(255)
-
-  code String? @unique @db.VarChar(50)
-
+  code String? @db.VarChar(50)
   type PromotionType
-
   discountValue Decimal? @map("discount_value") @db.Decimal(10, 2)
-
   minimumOrderAmount Decimal? @map("minimum_order_amount") @db.Decimal(10, 2)
-
   maximumDiscountAmount Decimal? @map("maximum_discount_amount") @db.Decimal(10, 2)
-
   startDate DateTime @map("start_date") @db.Date
-
   endDate DateTime @map("end_date") @db.Date
-
   isActive Boolean @default(true)
-
   isDeleted Boolean @default(false)
-
   deletedAt DateTime?
-
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-
   promotionMenuItems PromotionMenuItem[]
-
+  
   @@map("restaurant_promotions")
+  @@unique([restaurantId,code])
 }
 
 model PromotionMenuItem {

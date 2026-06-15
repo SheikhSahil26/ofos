@@ -6,7 +6,7 @@ import { AppError } from "../../../utils/appError";
 
 
 export class OperatingHourController {
-    private operatingHourService = new OperatingHourService();
+    private operatingHourService : OperatingHourService = new OperatingHourService();
 
     updateOperatingHour = asyncHandler(
     async(

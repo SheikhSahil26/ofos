@@ -30,7 +30,7 @@ export class RestaurantRepository {
         isDeleted: true,
 
         branches: {
-          where: {
+          where: {       
             isDeleted: false,
             isActive: true,
           },
