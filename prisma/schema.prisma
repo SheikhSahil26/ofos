@@ -236,6 +236,7 @@ model MenuItem {
   category       Category        @relation(fields: [categoryId], references: [id])
   modifierGroups ModifierGroup[]
   orderItems     OrderItem[]
+  promotionMenuItems PromotionMenuItem[]
 
   @@index([categoryId])
   @@index([name])
@@ -339,22 +340,42 @@ model CouponUsage {
   @@map("coupon_usages")
 }
 
-/// Restaurant-specific promotions
 model RestaurantPromotion {
-  id            String        @id @default(uuid())
-  restaurantId  String        @map("restaurant_id")
-  title         String        @db.VarChar(255)
-  type          PromotionType
-  discountValue Decimal       @map("discount_value") @db.Decimal(10, 2)
-  startDate     DateTime      @map("start_date") @db.Date
-  endDate       DateTime      @map("end_date") @db.Date
-  isDeleted     Boolean       @default(false) @map("is_deleted")
-  deletedAt     DateTime?     @map("deleted_at")
-  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
-
-  @@index([restaurantId])
+  id String @id @default(uuid())
+  restaurantId String @map("restaurant_id")
+  title String @db.VarChar(255)
+  code String? @db.VarChar(50)
+  type PromotionType
+  discountValue Decimal? @map("discount_value") @db.Decimal(10, 2)
+  minimumOrderAmount Decimal? @map("minimum_order_amount") @db.Decimal(10, 2)
+  maximumDiscountAmount Decimal? @map("maximum_discount_amount") @db.Decimal(10, 2)
+  startDate DateTime @map("start_date") @db.Date
+  endDate DateTime @map("end_date") @db.Date
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
+  deletedAt DateTime?
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  promotionMenuItems PromotionMenuItem[]
+  
   @@map("restaurant_promotions")
+  @@unique([restaurantId,code])
 }
+
+model PromotionMenuItem {
+  id String @id @default(uuid())
+
+  promotionId String @map("promotion_id")
+
+  menuItemId String @map("menu_item_id")
+
+  promotion  RestaurantPromotion @relation(fields: [promotionId], references: [id])
+
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@unique([promotionId, menuItemId])
+  @@map("promotion_menu_items")
+}
+
 
 /// Tracks current loyalty points balance for a customer (never delete)
 model LoyaltyAccount {
@@ -684,18 +705,6 @@ model Notification {
   @@index([status])
   @@index([notificationType])
   @@map("notifications")
-}
-
-model RefreshToken {
-  id        BigInt   @id @default(autoincrement())
-  token     String   @db.Text
-  user_id   String
-  isRevoked Boolean  @default(false)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  users     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id])
 }
 
 enum DayOfWeek {

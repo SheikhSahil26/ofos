@@ -513,3 +513,4 @@ curl http://localhost:3000/api/v1/products
 > **Tip for trainees:** Open each file and read the description comment at the top.
 > Every file in this boilerplate has a detailed explanation of what it does,
 > when to use it, and how it connects to other parts of the system.
+# OFOS Project Schema

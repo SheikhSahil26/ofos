@@ -13,7 +13,7 @@ export class AddressService{
         const address = await this.addressRepo.getAddressById(addressId, userId);
     
         if(!address){
-            throw new AppError("Address not found");
+            throw new AppError("Address not found", 404);
         }
 
         return true;
@@ -61,7 +61,7 @@ export class AddressService{
             success: true,
             data: address,
             message: "Address created successfully",
-            statusCode: 200
+            statusCode: 201
         }
     }
 
@@ -70,6 +70,10 @@ export class AddressService{
 
         //check if address exist or not
         await this.validateAddress(addressId, userId);
+
+        if(data.isDefault){
+            await this.addressRepo.resetDefaultAddress(userId);
+        }
 
         const address = await this.addressRepo.updateAddressById(addressId, data, userId);
 

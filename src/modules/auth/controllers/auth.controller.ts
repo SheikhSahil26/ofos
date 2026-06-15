@@ -27,7 +27,6 @@ export class AuthController {
     return res.render(`auth/${role}/login`, { role: role });
   };
 
-
   // Register user who does not have already Accounts....
   register = async (req: Request, res: Response) => {
     const userInfo: ISignupDto = req.body
@@ -50,7 +49,7 @@ export class AuthController {
     const role: string =
       String(req.params.role).toUpperCase();
 
-    console.log(loginInfo)
+    console.log(loginInfo);
 
     try {
       const response: IApiResponse = await this.authService.loginUser(loginInfo, role);
@@ -122,7 +121,7 @@ export class AuthController {
   ) => {
 
 
-    console.log(req.cookies.refreshToken)
+    console.log("refresh token", req.cookies.refreshToken)
 
     const refreshToken =
       req.cookies.refreshToken;
@@ -147,7 +146,7 @@ export class AuthController {
 
   getDashboard = (req: Request, res: Response) => {
     const role: string = String(req.params.role);
-    res.render(`auth/${role.toLowerCase()}/dashboard`, { role: role });
+    res.render(`${role.toLowerCase()}/dashboard`, { role: role });
   }
 
 

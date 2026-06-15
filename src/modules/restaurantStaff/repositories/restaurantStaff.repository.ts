@@ -16,7 +16,7 @@ export class RestaurantStaffRepository{
     async getStaffByBranch(branchId: string){
         return await prisma.restaurantStaff.findMany({
             where: {
-                branchId: branchId,
+                id: branchId,
                 isActive: true,
                 isDeleted: false
             },
@@ -34,7 +34,7 @@ export class RestaurantStaffRepository{
     }
 
     //checking staff is assigned to particular branch 
-    async findStaffAssignment(userId: string, branchId: string){
+    async findStaffAssignment(branchId: string, userId: string){
         return await prisma.restaurantStaff.findUnique({
             where: {
                 userId_branchId: {
@@ -51,6 +51,26 @@ export class RestaurantStaffRepository{
             data: {
                 branchId,
                 userId
+            },
+            include: {
+                user: true
+            }
+        });
+    }
+
+    //reactive staff
+    async reactiveStaff(branchId: string, userId: string){
+        return await prisma.restaurantStaff.update({
+            where: {
+                userId_branchId: {
+                    userId,
+                    branchId
+                }
+            },
+            data: {
+                isDeleted: false,
+                isActive: true,
+                deletedAt: null
             },
             include: {
                 user: true
