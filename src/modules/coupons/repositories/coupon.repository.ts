@@ -1,5 +1,5 @@
 import { prisma } from "../../../config/prisma";
-import { ICreateCoupon, IUpdateCoupon } from "../interfaces/coupon.interface";
+import { ICreateCoupon, IGetCouponsFilters, IUpdateCoupon } from "../interfaces/coupon.interface";
 
 export class CouponRepository{
     //create coupon by admin
@@ -105,6 +105,72 @@ export class CouponRepository{
             where: {
             customerId,
             couponId,
+            },
+        });
+    }
+
+    //add in coupon usage table after order is placed
+    async createCouponUsage(data: {
+        couponId: string;
+        customerId: string;
+        orderId: string;
+    }) {
+        return prisma.couponUsage.create({
+            data: {
+                couponId: data.couponId,
+                customerId: data.customerId,
+                orderId: data.orderId,
+                usedAt: new Date(),
+            },
+        });
+    }
+
+    //get the coupon usage stats (admin)
+    async getCouponUsageStats(couponId: string) {
+        return prisma.coupon.findUnique({
+            where: { id: couponId },
+            include: {
+            couponUsages: {
+                include: {
+                order: true,
+                customer: {
+                    select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    },
+                },
+                },
+            },
+            },
+        });
+    }
+
+    //list coupons with filters
+    async getCoupons(filters: IGetCouponsFilters) {
+        const { code, type, isActive, isDeleted } = filters;
+
+        return prisma.coupon.findMany({
+            where: {
+                ...(code && {
+                    code: {
+                        contains: code,
+                    },
+                }),
+
+                ...(type && { type }),
+
+                ...(typeof isActive === "boolean" && {
+                    isActive,
+                }),
+
+                ...(typeof isDeleted === "boolean" && {
+                    isDeleted,
+                }),
+            },
+
+            orderBy: {
+                createdAt: "desc",
             },
         });
     }

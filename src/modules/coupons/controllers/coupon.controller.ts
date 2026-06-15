@@ -3,6 +3,8 @@ import { AppError } from "../../../utils/appError";
 import { CouponService } from "../services/coupon.service";
 import { Request, Response } from "express";
 import { createCouponSchema, updateCouponSchema, updateCouponStatusSchema, validateCouponSchema } from "../validations/coupon.validation";
+import { IGetCouponsFilters } from "../interfaces/coupon.interface";
+import { CouponType } from "@prisma/client";
 
 export class CouponController{
 
@@ -98,6 +100,7 @@ export class CouponController{
         res.status(response.statusCode || 200).json(response);
     });
 
+    //validate coupon
     validateCoupon = asyncHandler(async (req, res) => {
 
         const { error } = validateCouponSchema.validate(req.body);
@@ -107,6 +110,43 @@ export class CouponController{
         }
 
         const response = await this.couponService.validateCoupon(req.body);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //coupon usage stats (admin)
+    getCouponUsageStats = asyncHandler(async (req, res) => {
+
+        const id = req.params.id;
+        if(typeof id != 'string'){
+            throw new AppError("ID is required", 400);
+        }
+
+        const response = await this.couponService.getCouponUsageStats(id);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    // list coupons with filters(admin)
+    getCoupons = asyncHandler(async (req, res) => {
+
+        const filters: IGetCouponsFilters = {
+            code: req.query.code as string,
+            type: req.query.type as CouponType,
+
+            isActive:
+                req.query.isActive !== undefined
+                    ? req.query.isActive === "true"
+                    : undefined,
+
+            isDeleted:
+                req.query.isDeleted !== undefined
+                    ? req.query.isDeleted === "true"
+                    : undefined,
+        };
+
+        const response =
+            await this.couponService.getCoupons(filters);
 
         res.status(response.statusCode || 200).json(response);
     });

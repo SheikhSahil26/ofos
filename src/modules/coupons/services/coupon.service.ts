@@ -1,5 +1,5 @@
-import { Coupon } from "@prisma/client";
-import { ICreateCoupon, IUpdateCoupon, IUpdateCouponStatus, IValidateCoupon } from "../interfaces/coupon.interface";
+import { Coupon, CouponType } from "@prisma/client";
+import { ICouponUsageStats, ICreateCoupon, IGetCouponsFilters, IUpdateCoupon, IUpdateCouponStatus, IValidateCoupon, IValidateCouponResponse } from "../interfaces/coupon.interface";
 import { CouponRepository } from "../repositories/coupon.repository";
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
@@ -144,7 +144,7 @@ export class CouponService{
     }
 
     //validate coupon with the order 
-    async validateCoupon(data: IValidateCoupon): Promise<ServiceResponse<any>> {
+    async validateCoupon(data: IValidateCoupon): Promise<ServiceResponse<IValidateCouponResponse>> {
         const coupon = await this.couponRepository.getCouponByCode(
             data.couponCode
         );
@@ -167,9 +167,9 @@ export class CouponService{
             throw new AppError("Coupon has expired", 400);
         }
 
-        //no customer id taken
-        const alreadyUsed =
-        await this.couponRepository.hasCustomerUsedCoupon(customerId,coupon.id);
+        //customer id will come from the athentication middleware
+        let customerId = "1";
+        const alreadyUsed = await this.couponRepository.hasCustomerUsedCoupon(customerId,coupon.id);
 
         if (alreadyUsed) {
             throw new AppError(
@@ -198,36 +198,111 @@ export class CouponService{
 
         let discount = 0;
 
-        if (coupon.type === "FIXED") {
+        if (coupon.type === CouponType.FLAT) {
             discount = Number(coupon.discountValue);
         }
 
-        if (coupon.type === "PERCENTAGE") {
-            discount =
-            (data.orderAmount *
-                Number(coupon.discountValue)) /
-            100;
+        if (coupon.type === CouponType.PERCENTAGE) {
+            discount = (data.orderAmount * Number(coupon.discountValue)) / 100;
 
-            if (
-            coupon.maxDiscount &&
-            discount > Number(coupon.maxDiscount)
-            ) {
-            discount = Number(coupon.maxDiscount);
+            if (coupon.maxDiscount && discount > Number(coupon.maxDiscount)) {
+                discount = Number(coupon.maxDiscount);
             }
         }
 
-        const finalAmount =
-            data.orderAmount - discount;
+        if (coupon.type === CouponType.FREE_DELIVERY) {
+            discount = data.deliveryFee;
+        }
+
+        const finalAmount = data.orderAmount - discount;
 
         return {
             success: true,
             message: "Coupon applied successfully",
             data: {
+                couponId: coupon.id,
+                couponCode: coupon.code,
+                couponType: coupon.type,
+                discount,
+                finalAmount,
+                freeDelivery: coupon.type === CouponType.FREE_DELIVERY,
+            },
+            statusCode: 200,
+        };
+    }
+
+    //coupon usage stats (admin)
+    async getCouponUsageStats(couponId: string): Promise<ServiceResponse<ICouponUsageStats>> {
+
+        const coupon =
+            await this.couponRepository.getCouponUsageStats(couponId);
+
+        if (!coupon || coupon.isDeleted) {
+            throw new AppError("Coupon not found", 404);
+        }
+
+        const totalUsageCount = coupon.couponUsages.length;
+
+        const uniqueCustomers = new Set(
+            coupon.couponUsages.map(
+            usage => usage.customerId
+            )
+        ).size;
+
+        const totalRevenueGenerated = coupon.couponUsages.reduce(
+            (sum, usage) => sum + Number(usage.order.totalAmount),
+            0
+        );
+
+        const totalDiscountGiven =
+            coupon.couponUsages.reduce((sum, usage) => {
+
+            if (coupon.type === CouponType.FLAT) {
+                return sum + Number(coupon.discountValue);
+            }
+
+            return sum;
+            }, 0);
+
+        return {
+            success: true,
+            message: "Coupon usage statistics fetched successfully",
+            data: {
             couponId: coupon.id,
             couponCode: coupon.code,
-            discount,
-            finalAmount,
+            usageLimit: coupon.usageLimit,
+            totalUsageCount,
+            uniqueCustomers,
+            remainingUsage:
+                coupon.usageLimit
+                ? coupon.usageLimit - totalUsageCount
+                : null,
+            totalRevenueGenerated,
+            totalDiscountGiven,
+            recentUsages: coupon.couponUsages
+                .slice(-10)
+                .reverse()
+                .map(usage => ({
+                orderId: usage.orderId,
+                customerName: usage.customer.fullName,
+                usedAt: usage.usedAt,
+                })),
             },
+            statusCode: 200,
+        };
+    }
+
+    async getCoupons(
+        filters: IGetCouponsFilters
+    ): Promise<ServiceResponse<Coupon[]>> {
+
+        const coupons =
+            await this.couponRepository.getCoupons(filters);
+
+        return {
+            success: true,
+            message: "Coupons fetched successfully",
+            data: coupons,
             statusCode: 200,
         };
     }
