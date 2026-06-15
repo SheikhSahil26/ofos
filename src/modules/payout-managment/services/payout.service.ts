@@ -56,7 +56,7 @@ export class PayoutService {
         if (!order.branch?.headId) {
             return {
                 success: false,
-                error: "Restaurant owner not found",
+                error: "Branch owner not found",
                 statusCode: 400
             };
         }
@@ -64,7 +64,7 @@ export class PayoutService {
         if (!order.delivery?.id) {
             return {
                 success: false,
-                error: "Delivery partner not assigned",
+                error: "Delivery Partner not found",
                 statusCode: 400
             };
         }
@@ -72,7 +72,7 @@ export class PayoutService {
         const grossAmount =
             Number(order.totalAmount);
 
-        const restaurantAmount =
+        const branchAmount =
             Number((grossAmount * 0.80).toFixed(2));
 
         const deliveryAmount =
@@ -84,7 +84,7 @@ export class PayoutService {
         const totalSplit =
             Number(
                 (
-                    restaurantAmount +
+                    branchAmount +
                     deliveryAmount +
                     platformFee
                 ).toFixed(2)
@@ -96,12 +96,13 @@ export class PayoutService {
             );
         }
 
+
         const payout =
             await this.prisma.$transaction(
                 async (tx) => {
 
                     /*
-                    Create payout record
+                    Main payout record
                     */
 
                     const payoutRecord =
@@ -109,115 +110,61 @@ export class PayoutService {
                             data: {
                                 orderId,
                                 grossAmount,
-                                restaurantAmount,
+                                branchAmount,
                                 deliveryAmount,
                                 platformFee,
+                                status: PayoutStatus.COMPLETED,
+                                processedAt: new Date()
+                            }
+                        });
+
+                    /*
+                    Restaurant payout record
+                    */
+
+                    const restaurantPayout =
+                        await tx.restaurantPayout.create({
+                            data: {
+                                payoutTransactionId:
+                                    payoutRecord.id,
+
+                                branchHeadId:
+                                    order.branch.headId,
+
+                                amount:
+                                    branchAmount,
+
                                 status:
-                                    PayoutStatus.COMPLETED,
-                                processedAt:
-                                    new Date()
+                                    SettlementStatus.PENDING
                             }
                         });
 
                     /*
-                    Restaurant Wallet
+                    Delivery payout record
                     */
 
-                    const restaurantWallet =
-                        await tx.wallet.findUnique({
-                            where: {
-                                userId:
-                                    order.branch.restaurant.ownerId
+                    const deliveryPayout =
+                        await tx.deliveryPartnerPayout.create({
+                            data: {
+                                payoutTransactionId:
+                                    payoutRecord.id,
+
+                                deliveryPartnerId:
+                                    order.delivery?.currentPartnerId,
+
+                                amount:
+                                    deliveryAmount,
+
+                                status:
+                                    SettlementStatus.PENDING
                             }
                         });
 
-                    if (!restaurantWallet) {
-                        throw new Error(
-                            "Restaurant wallet not found"
-                        );
-                    }
-
-                    await tx.wallet.update({
-                        where: {
-                            id: restaurantWallet.id
-                        },
-                        data: {
-                            balance: {
-                                increment:
-                                    restaurantAmount
-                            }
-                        }
-                    });
-
-                    await tx.walletTransaction.create({
-                        data: {
-                            walletId:
-                                restaurantWallet.id,
-
-                            payoutTransactionId:
-                                payoutRecord.id,
-
-                            transactionType:
-                                WalletTransactionType.CREDIT,
-
-                            amount:
-                                restaurantAmount,
-
-                            description:
-                                "Restaurant earnings from order payout"
-                        }
-                    });
-
-                    /*
-                    Rider Wallet
-                    */
-
-                    const riderWallet =
-                        await tx.wallet.findUnique({
-                            where: {
-                                userId:
-                                    order.delivery.deliveryPartnerId
-                            }
-                        });
-
-                    if (!riderWallet) {
-                        throw new Error(
-                            "Delivery partner wallet not found"
-                        );
-                    }
-
-                    await tx.wallet.update({
-                        where: {
-                            id: riderWallet.id
-                        },
-                        data: {
-                            balance: {
-                                increment:
-                                    deliveryAmount
-                            }
-                        }
-                    });
-
-                    await tx.walletTransaction.create({
-                        data: {
-                            walletId:
-                                riderWallet.id,
-
-                            payoutTransactionId:
-                                payoutRecord.id,
-
-                            transactionType:
-                                WalletTransactionType.CREDIT,
-
-                            amount:
-                                deliveryAmount,
-
-                            description:
-                                "Delivery earnings from order payout"
-                        }
-                    });
-
-                    return payoutRecord;
+                    return {
+                        payoutRecord,
+                        restaurantPayout,
+                        deliveryPayout
+                    };
                 }
             );
 
@@ -250,4 +197,110 @@ export class PayoutService {
             statusCode: 200,
         };
     }
+
+
+    
+    async getRestaurantPendingSummary(
+        branchHeadId: string
+    ) {
+
+        const summary =
+            await this.payoutRepo.getRestaurantPendingSummary(
+                branchHeadId
+            );
+
+        return summary;
+    }
+
+    // payout.service.ts
+
+    async getRestaurantHistory(
+        branchHeadId: string,
+        page: number,
+        limit: number
+    ) {
+
+        return await this.payoutRepo.getRestaurantHistory(
+            branchHeadId,
+            page,
+            limit
+        );
+    }
+
+
+    async getDeliveryPendingSummary(
+        deliveryPartnerId: string
+    ) {
+
+        return await this.payoutRepo.getDeliveryPendingSummary(
+            deliveryPartnerId
+        );
+    }
+
+
+    async getDeliveryHistory(
+        deliveryPartnerId: string,
+        page: number,
+        limit: number
+    ) {
+
+        return await this.payoutRepo.getDeliveryHistory(
+            deliveryPartnerId,
+            page,
+            limit
+        );
+    }
+
+
+    async createRestaurantSettlement(
+        branchHeadId: string
+    ) {
+
+        return await this.payoutRepo.createRestaurantSettlement(
+            branchHeadId
+        );
+    }
+
+    async getSettlementById(
+        settlementId: string
+    ) {
+        return await this.payoutRepo.getSettlementById(
+            settlementId
+        );
+    }
+
+    async completeSettlement(
+        settlementId: string
+    ) {
+        return await this.payoutRepo.completeSettlement(
+            settlementId
+        );
+    }
+
+    async getPendingSettlements(
+        page: number,
+        limit: number
+    ) {
+        return await this.payoutRepo.getPendingSettlements(
+            page,
+            limit
+        );
+    }
+
+    async getSettlementHistory(
+        page: number,
+        limit: number,
+        status?: SettlementStatus,
+        type?: SettlementType
+    ) {
+
+        return await this.payoutRepo.getSettlementHistory(
+            page,
+            limit,
+            status,
+            type
+        );
+    }
+
+
 }
