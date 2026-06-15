@@ -9,13 +9,21 @@ import {
 } from "../types/delivery.types";
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { prisma } from "../../../config/prisma";
+import { OrderService } from "../../orders/services/orders.service";
+import { CartService } from "../../cart/services/cart.services";
+import { AddressService } from "../../address/services/address.service";
 
 export class DeliveryService{
   private deliveryrepo = new DeliveryRepository(prisma);
   constructor(
    
   ) {}
-
+ private orderService =
+    new OrderService(
+        prisma,
+        new CartService(),
+        new AddressService()
+    );
   async updatePartnerLocation(
    partnerId: string,
    latitude: number,
@@ -33,8 +41,18 @@ export class DeliveryService{
   }
 
   async assignNearestPartner(
-    input: AssignPartnerInput
+    orderId:string
   ): Promise<ServiceResponse<any>> {
+    //here
+    //the nearest partner with the status active in the platform and free to take delivery are being searched and the best match gets assigned the delivery!!!
+
+    //find the order from order service 
+
+    const order = await this.orderService.getOrderById(orderId)
+    //now from this have to fetch the branchId and from that we wil get the lat and long of the branch.
+
+
+
 
     return {
         success: true,
@@ -48,5 +66,15 @@ export class DeliveryService{
     orderId: string,
     maxRetries: number = 3,
     delayMs: number = 10000,
-  ): Promise<void> {}
+  ): Promise<void> {
+
+
+
+
+
+
+
+
+
+  }
 }

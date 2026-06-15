@@ -353,6 +353,7 @@ export class OrderService {
       },
       statusCode: 201,
     };
+
   }
 
 
@@ -369,7 +370,9 @@ export class OrderService {
     }
   }
 
-  async getOrderById(orderId: string, userId: string): Promise<ServiceResponse<any>> {
+
+
+  async getOrderById(orderId: string): Promise<ServiceResponse<any>> {
     //fetch order details from DB
     //validate order belongs to user
     //return order details along with items, modifiers, status history etc.
@@ -383,13 +386,13 @@ export class OrderService {
       };
     }
 
-    if (order.customerId !== userId) {
-      return {
-        success: false,
-        error: "Unauthorized access to this order",
-        statusCode: 403,
-      };
-    }
+    // if (order.customerId !== userId) {
+    //   return {
+    //     success: false,
+    //     error: "Unauthorized access to this order",
+    //     statusCode: 403,
+    //   };
+    // }
 
     return {
       success: true,

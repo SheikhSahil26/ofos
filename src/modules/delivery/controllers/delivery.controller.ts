@@ -24,7 +24,22 @@ export class DeliveryController {
     }
   );
 
-  assignNearestPartner = asyncHandler(
-    async (req: Request, res: Response) => {}
-  );
+assignNearestPartner = asyncHandler(
+  async (req: Request, res: Response) => {
+    const orderId = req.params.orderId as string
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "orderId is required",
+      });
+    }
+
+    const result = await this.deliveryService.assignNearestPartner(
+      orderId,
+    );
+
+    return res.status(result.statusCode).json(result);
+  }
+);
 }

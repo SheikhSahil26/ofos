@@ -56,7 +56,7 @@ export class OrdersControllers {
           const orderId = req.params.id as string;
           const userId = "385d5013-c0c3-4add-972d-e8179f4b9566"; // dummy
 
-          const result : any = await this.ordersService.getOrderById(orderId, userId);
+          const result : any = await this.ordersService.getOrderById(orderId);
 
           console.log("Order details:", result);
 
