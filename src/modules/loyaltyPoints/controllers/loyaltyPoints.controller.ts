@@ -50,12 +50,20 @@ export class LoyaltyPointsController{
 
         const customerId = user.userId;
 
-        const { points } = req.body;
+        const points = Number(req.query.points);
         
         const response = await this.loyaltyPointService.calculateDiscount(customerId, points);
 
         res.status(response.statusCode || 200).json(response);
     });
 
-    //
+    //earn estimate (how many points user will get when he place an order)
+    earnEstimate = asyncHandler( async(req: Request, res: Response) => {
+
+        const amount = Number(req.query.amount);
+
+        const response = await this.loyaltyPointService.earnEstimate(amount);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 }

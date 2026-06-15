@@ -170,4 +170,83 @@ export class LoyaltyPointsService{
             statusCode: 200
         }
     }
+
+    //calculate earn estimate
+    async earnEstimate(amount: number): Promise<ServiceResponse<number>>{
+
+        const estimatedPoints = Math.floor(amount / 10);
+
+        return {
+            success: true,
+            data: estimatedPoints,
+            message: "Estimated points calculated successfully",
+            statusCode: 200
+        }
+    }
+
+    //reverse points by refund
+    async reversePointsByRefund(orderId: string, refundAmount: number): Promise<ServiceResponse<null>>{
+
+        //check if order exist or not
+        const order = await this.orderRepo.getOrderById(orderId);
+
+        if(!order){
+            return {
+                success: false,
+                message: "order doesn't exist",
+                statusCode: 404
+            }
+        }
+
+        //check if transaction of loyalty point exist or not
+        const earnedTransaction = await this.loyaltyPointRepo.findEarnedTransactionByOrderId(orderId);
+
+        if(!earnedTransaction){
+            return {
+                success: false,
+                message: "no points earned by this order",
+                statusCode: 404
+            }
+        }
+
+
+        const account = await this.loyaltyPointRepo.getBalanceByCustomerId(order.customerId);
+
+        if(!account){
+            return {
+                success: false,
+                message: "loyalty point account doesn't exist",
+                statusCode: 404
+            }
+        }
+
+        const earnedPoints = earnedTransaction.points;
+
+        const reversePoints = Math.floor(refundAmount / Number(order.totalAmount) * earnedPoints);
+
+        if(reversePoints <= 0){
+            return {
+                success: false,
+                message: "no points can be refunded",
+                statusCode: 400
+            }
+        }
+
+        await this.loyaltyPointRepo.updatePoints(account.id, Math.max(0, account.currentPoints - reversePoints));
+
+        const transaction: ILoyaltyTransaction = {
+            accountId: account.id,
+            points: -reversePoints,
+            transactionType: LoyaltyTransactionType.REDEEM,
+            referenceOrderId: orderId
+        }
+
+        await this.loyaltyPointRepo.createTransaction(transaction);
+
+        return {
+            success: true,
+            message: "Points returned successfully",
+            statusCode: 200
+        }
+    }
 }

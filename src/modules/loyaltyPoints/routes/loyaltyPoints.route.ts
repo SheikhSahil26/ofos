@@ -16,7 +16,7 @@ export class LoyaltyPointsRoutes implements IRoutes{
     private initializeRoutes(){
         this.router.get("/balance", isAuthenticated, this.controller.getBalance);
         this.router.get("/transactions", isAuthenticated, this.controller.getTransactions);
-        this.router.post("/redeem-preview", isAuthenticated, this.controller.getDiscount); //it will calculate discount for an order
-        //redeem-preview (it will calculate how many points user gets when he places an order)
+        this.router.get("/redeem-preview", isAuthenticated, this.controller.getDiscount); //it will calculate discount for an order
+        this.router.get("/earn-estimate", isAuthenticated, this.controller.earnEstimate); //it will calculate how many points user gets when he places an order)
     }
 }
