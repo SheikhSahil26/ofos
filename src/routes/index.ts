@@ -21,6 +21,7 @@ export function buildApiRouter(): Router{
         new OrdersRoutes(),
         new UserRoutes(),
         new AddressRoutes(),
+        new BranchRoutes(),
         new RestaurantStaffRoutes(),
         new BranchRoutes(),
         new DietaryTagsRoutes(),
