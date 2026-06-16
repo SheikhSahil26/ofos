@@ -90,4 +90,15 @@ export class DietaryTagRepository{
             throw err;
         }
     }
+
+    //to get the diatary tags of corresponding ids
+    async getDietaryTagsByIds(tagIds: string[]) {
+        return prisma.dietaryTag.findMany({
+            where: {
+            id: {
+                in: tagIds,
+            },
+            },
+        });
+    }
 }

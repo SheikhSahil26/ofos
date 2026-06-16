@@ -4,10 +4,15 @@
   "description": "> A production-ready folder structure guide for backend applications. > This boilerplate demonstrates best practices used in real production systems.",
   "main": "index.js",
   "scripts": {
+    "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css",
+    "watch:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "dev": "nodemon --watch src --exec tsx src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+
+    "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css",
+    "watch:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -21,6 +26,7 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.1",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
@@ -31,6 +37,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
     "prisma": "^6.19.3",
+    "tailwindcss": "^4.3.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"

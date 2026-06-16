@@ -18,5 +18,6 @@ export class MenuRoutes implements IRoutes{
         this.router.put("/categories/:id", this.controller.updateCategory); /* Update category name or display order */
         this.router.delete("/categories/:id", this.controller.deleteCategory); /* Soft delete a category */
         this.router.patch("/categories/reorder",this.controller.reorderCategories); /* Reorder categories (bulk update display_order) */
+        this.router.get( "/full/:branchId",this.controller.getFullMenu); /* get full menu from the branch */
     }
 }

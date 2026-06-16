@@ -11,6 +11,11 @@ import { DeliveryRoutes } from "../modules/delivery/routes/delivery.route.js";
 import { BranchRoutes } from "../modules/restaurantBranch/routes/branch.route.js";
 import { DietaryTagsRoutes } from "../modules/dietaryTags/routes/dietaryTag.route.js";
 import { OperatingHourRoutes } from "../modules/operatingHours/route/operating-hour.route.js";
+import { MenuRoutes } from "../modules/menu/routes/menu.route.js";
+import { MenuItemRoutes } from "../modules/menu_items/routes/menu_item.route.js";
+import { ModifierRoutes } from "../modules/modifier/routes/modifier.route.js";
+import { CouponRoutes } from "../modules/coupons/routes/coupon.route.js";
+
 
 export function buildApiRouter(): Router {
     const router = Router();
@@ -24,7 +29,11 @@ export function buildApiRouter(): Router {
         new DeliveryRoutes(),
         new BranchRoutes(),
         new DietaryTagsRoutes(),
-        new OperatingHourRoutes()
+        new OperatingHourRoutes(),
+        new MenuRoutes(),
+        new MenuItemRoutes(),
+        new ModifierRoutes(),
+        new CouponRoutes(),
     ]
 
     routes.forEach((route) => {
