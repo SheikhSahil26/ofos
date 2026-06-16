@@ -59,8 +59,9 @@ app.use(errorHandler);
 app.use(notFoundMiddleware);
 
 app.get("/",(req:Request, res:Response) => {
-   res.render("customer/dashboard");
+    res.render("index");
 });
+
 
 
 
