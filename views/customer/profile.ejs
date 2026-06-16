@@ -6,7 +6,7 @@
 </head>
 
 <body>
-
+<p id="toast"></p>
 <div class="flex min-h-screen bg-[#f8f7f4]">
 
     <%- include('../partials/customer-sidebar') %>
@@ -34,15 +34,15 @@
                     <img
                         src="https://ui-avatars.com/api/?name=Diya+Vora&background=ff7a00&color=fff&size=256"
                         alt="Profile"
-                        class="w-28 h-28 rounded-full border-4 border-white object-cover">
+                        class="w-28 h-28 rounded-full border-4 border-white object-cover" id="profileImage">
 
                     <div class="text-white">
 
-                        <h2 class="text-3xl font-semibold">
+                        <h2 class="text-3xl font-semibold" id="profileName">
                             Diya Vora
                         </h2>
 
-                        <p class="opacity-90 mt-1">
+                        <p class="opacity-90 mt-1" id="profileEmail">
                             diya@gmail.com
                         </p>
 
@@ -74,7 +74,7 @@
                             Full Name
                         </label>
 
-                        <p class="font-medium mt-1">
+                        <p class="font-medium mt-1" id="fullName">
                             Diya Vora
                         </p>
                     </div>
@@ -84,7 +84,7 @@
                             Email
                         </label>
 
-                        <p class="font-medium mt-1">
+                        <p class="font-medium mt-1" id="email">
                             diya@gmail.com
                         </p>
                     </div>
@@ -94,12 +94,12 @@
                             Mobile Number
                         </label>
 
-                        <p class="font-medium mt-1">
+                        <p class="font-medium mt-1" id="mobile">
                             +91 9876543210
                         </p>
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label class="text-sm text-gray-500">
                             User ID
                         </label>
@@ -107,7 +107,7 @@
                         <p class="font-medium mt-1">
                             #USR001
                         </p>
-                    </div>
+                    </div> -->
 
                 </div>
 
@@ -120,12 +120,12 @@
 
                     <div class="flex flex-wrap gap-4">
 
-                        <span class="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                        <span class="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium" id="verifiedStatus">
                             <i class="fa-solid fa-circle-check mr-2"></i>
                             Verified
                         </span>
 
-                        <span class="px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                        <span class="px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium" id="activeStatus">
                             <i class="fa-solid fa-user-check mr-2"></i>
                             Active
                         </span>
@@ -142,7 +142,7 @@
                             Member Since
                         </label>
 
-                        <p class="font-medium mt-1">
+                        <p class="font-medium mt-1" id="memberSince">
                             12 January 2025
                         </p>
                     </div>
@@ -152,7 +152,7 @@
                             Last Updated
                         </label>
 
-                        <p class="font-medium mt-1">
+                        <p class="font-medium mt-1" id="lastUpdated">
                             20 June 2025
                         </p>
                     </div>
@@ -196,7 +196,7 @@
             </p>
 
             <button
-                class="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition">
+                class="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition" id="deleteAccountBtn">
 
                 <i class="fa-solid fa-trash mr-2"></i>
                 Delete Ziggy Account
@@ -212,6 +212,10 @@
 <!-- Include Modal -->
 <%- include('./helper/edit-profile-modal') %>
 
+<script src="/js/common/api.js"></script>
+<script src="/js/common/auth.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/customer/profile.js"></script>
 <script src="/js/customer/edit-profile-modal.js"></script>
 </body>
 </html>
