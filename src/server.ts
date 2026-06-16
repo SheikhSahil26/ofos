@@ -56,8 +56,9 @@ app.get("/redis-test",async(req:any,res:any)=>{
 
 
 app.get("/",(req:Request, res:Response) => {
-   res.render("customer/dashboard");
+    res.render("index");
 });
+
 
 
 
