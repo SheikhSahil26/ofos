@@ -4,6 +4,8 @@
   "description": "> A production-ready folder structure guide for backend applications. > This boilerplate demonstrates best practices used in real production systems.",
   "main": "index.js",
   "scripts": {
+    "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css",
+    "watch:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "dev": "nodemon --watch src --exec tsx src/server.ts",
