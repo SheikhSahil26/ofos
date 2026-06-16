@@ -8,16 +8,6 @@ import { AppError } from "../../../utils/appError";
 
 export class UserController{                                                                                 
     private userService = new UserService();
-
-    //dashboard page
-    dashboardPage = asyncHandler( async(req: Request, res: Response) => {
-        res.status(200).render("customer/dashboard");
-    });
-
-    //get profile page
-    profilePage = asyncHandler(async(req: Request, res: Response) => {
-        res.status(200).render("customer/profile");
-    });
     
     //get profile of authenticated user
     getProfile = asyncHandler(async(req: Request, res: Response) => {
@@ -27,7 +17,7 @@ export class UserController{
         if(!user || typeof user.userId !== "string"){
             throw new AppError("Invalid user id", 409);
         }
-
+        
         const userId = user.userId;
 
         UserValidation.validateUserId(userId);

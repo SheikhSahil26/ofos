@@ -44,7 +44,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 app.use(cookieParser())
 app.use(passport.initialize());
-// app.use(notFoundMiddleware);
 app.use(errorHandler);
 
 //this will initiate all frontend routes
@@ -63,9 +62,10 @@ app.get("/redis-test",async(req:any,res:any)=>{
 });
 
 app.get("/",(req:Request, res:Response) => {
-   res.render("customer/profile");
+    res.render("customer/profile");
 });
 
+app.use(notFoundMiddleware);
 
 
 

@@ -1,5 +1,5 @@
 import { IRoutes } from "../../../common/interfaces/route.interface";
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import { UserController } from "../controllers/user.controller";
 
 export class UserWebRoutes implements IRoutes{
@@ -12,7 +12,13 @@ export class UserWebRoutes implements IRoutes{
     }
 
     private initializeRoutes(){
-        this.router.get("/profile", this.controller.profilePage);
-        this.router.get("/dashboard", this.controller.dashboardPage);
+        
+        this.router.get("/profile", (req: Request, res: Response) => {
+            res.status(200).render("customer/profile");
+        });
+
+        this.router.get("/dashboard", (req: Request, res: Response) => {
+            res.status(200).render("customer/dashboard");
+        });
     }
 }
