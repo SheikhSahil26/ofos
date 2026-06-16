@@ -27,6 +27,11 @@ export class AuthController {
     return res.render(`auth/${role}/login`, { role: role });
   };
 
+  roleSelectionPage = async (req: Request, res: Response) => {
+    console.log("Helooo")
+    return res.render(`auth/role-selection`);
+  };
+
 
   // Register user who does not have already Accounts....
   register = async (req: Request, res: Response) => {

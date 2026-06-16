@@ -29,7 +29,7 @@ async function fetchOTP(e) {
             emailLink.style.display = 'flex'
 
             document.getElementById("otpSection").style.display = "block";
-            startTimer(120);
+            startTimer(10);
         }
         else {
             showToast(
@@ -168,5 +168,91 @@ function startTimer(duration) {
         time--;
 
     }, 1000);
+
+
+
+    // Resend OTP .............
+
+    const resendOtp =
+        document.getElementById("resendOtp");
+
+    resendOtp.addEventListener(
+        "click",
+        async (e) => {
+
+            e.preventDefault();
+
+            const email =
+                document.getElementById("email").value;
+
+            if (!email) {
+
+                showToast(
+                    "Please enter email first",
+                    "error"
+                );
+
+                return;
+            }
+
+            try {
+
+                resendOtp.style.pointerEvents = "none";
+                resendOtp.style.color = "#999";
+
+                const response =
+                    await fetch(
+                        `http://localhost:8080/api/auth/forget-password/${email}`
+                    );
+
+                const result =
+                    await response.json();
+
+                if (response.ok) {
+
+                    showToast(
+                        result.message ||
+                        "OTP resent successfully",
+                        "success"
+                    );
+
+                    const emailLink =
+                        document.getElementById("emailLink");
+
+                    if (result.data?.otpLink) {
+
+                        emailLink.innerHTML =
+                            `OTP Link : <a href="${result.data.otpLink}" target="_blank">Email</a>`;
+                    }
+
+                    // Start timer again
+                    startTimer(10);
+
+                } else {
+
+                    showToast(
+                        result.message ||
+                        "Failed to resend OTP",
+                        "error"
+                    );
+
+                    resendOtp.style.pointerEvents = "auto";
+                    resendOtp.style.color = "#ff6b00";
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Unable to resend OTP",
+                    "error"
+                );
+
+                resendOtp.style.pointerEvents = "auto";
+                resendOtp.style.color = "#ff6b00";
+            }
+        }
+    );
 }
 

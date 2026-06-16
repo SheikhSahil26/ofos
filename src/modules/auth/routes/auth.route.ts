@@ -51,6 +51,7 @@ export class AuthRoutes implements IRoutes {
       this.controller.login
     );
 
+    this.router.get('/static/role-selection',this.controller.roleSelectionPage)
 
     this.router.post('/refresh-token', this.controller.refreshToken);
     this.router.post('/logout', this.controller.logout)

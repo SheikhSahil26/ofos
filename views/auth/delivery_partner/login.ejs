@@ -12,11 +12,7 @@
 </head>
 
 <body>
-<<<<<<< HEAD
-
-=======
     <div id="toast"></div>
->>>>>>> origin
     <div class="container">
 
         <!-- LEFT PANEL -->
@@ -58,12 +54,7 @@
                     Login to access your delivery dashboard
                 </span>
 
-                <form action="/delivery/login" method="POST">
-<<<<<<< HEAD
-                    
-=======
-
->>>>>>> origin
+                <form id="loginForm">
                     <div class="input-group">
 
                         <label>Email Address</label>
@@ -94,15 +85,10 @@
 
                     </div>
 
-<<<<<<< HEAD
-                    <div class="forgot-password">
-
-                        <a href="/delivery/forgot-password">
-=======
 
                     <div class="terms">
 
-                        <input type="checkbox" name="rememberMe" required>
+                        <input type="checkbox" name="rememberMe">
 
                         <p>
                             Remember Me
@@ -113,7 +99,6 @@
                     <div class="forgot-password">
 
                         <a href="/api/auth/forget-password">
->>>>>>> origin
                             Forgot Password?
                         </a>
 
@@ -141,23 +126,10 @@
 
     </div>
 
-<<<<<<< HEAD
-    <script>
-        function togglePassword() {
-            const password = document.getElementById("password");
-
-            password.type =
-                password.type === "password"
-                    ? "text"
-                    : "password";
-        }
-    </script>
-=======
     <script>const role = "<%= role %>";</script>
     <script src="/js/common/togglePassword.js"></script>
     <script src="/js/common/toast.js"></script>
     <script src="/js/login.js"></script>
->>>>>>> origin
 
 </body>
 

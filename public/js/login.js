@@ -20,8 +20,7 @@ const passwordRegex =
 const loginForm =
     document.getElementById("loginForm");
 
-loginForm.addEventListener(
-    "submit",
+loginForm.addEventListener('submit',
     async (e) => {
 
         console.log("Submit btn Cliked")
@@ -101,7 +100,7 @@ loginForm.addEventListener(
 
                 showToast(
                     result.message ||
-                    "Registration Successful",
+                    "Login Successful",
                     "success"
                 );
                 localStorage.setItem(
