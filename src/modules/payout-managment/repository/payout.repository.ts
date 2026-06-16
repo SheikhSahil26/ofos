@@ -1,4 +1,4 @@
-import { PrismaClient, PayoutStatus, RestaurantPayout, SettlementStatus, SettlementType } from "@prisma/client";
+import { PrismaClient, PayoutStatus, RestaurantPayout, SettlementStatus, SettlementType, DeliveryPartnerPayout } from "@prisma/client";
 import { any } from "joi";
 
 export class PayoutRepository {
@@ -271,7 +271,7 @@ export class PayoutRepository {
                         0
                     );
 
-                
+
                 // Create settlemanet with pending status of that payouts
                 const settlement =
                     await tx.settlement.create({
@@ -285,13 +285,77 @@ export class PayoutRepository {
                         }
                     });
 
-                
+
                 // Assign the  settlment id to the each restaurantPayout 
                 await tx.restaurantPayout.updateMany({
                     where: {
                         id: {
                             in: pendingPayouts.map(
                                 (payout: RestaurantPayout) => payout.id
+                            )
+                        }
+                    },
+                    data: {
+                        settlementId: settlement.id
+                    }
+
+                });
+
+                return settlement;
+            }
+        );
+    }
+
+    async createDeliveryPartnerSettlement(
+        deliveryPartnerId: string
+    ) {
+
+        return await this.prisma.$transaction(
+            async (tx) => {
+
+                //Finding Restaurant pending payouts..
+                const pendingPayouts =
+                    await tx.deliveryPartnerPayout.findMany({
+                        where: {
+                            deliveryPartnerId,
+                            status: "PENDING",
+                            settlementId: null
+                        }
+                    });
+
+                if (!pendingPayouts.length) {
+                    throw new Error(
+                        "No pending payouts found"
+                    );
+                }
+
+                // Reduce pending ayouts total amounts
+                const totalAmount = pendingPayouts.reduce((sum: number,
+                        payout: DeliveryPartnerPayout) =>sum + Number(payout.amount),
+                        0
+                    );
+
+
+                // Create settlemanet with pending status of that payouts
+                const settlement =
+                    await tx.settlement.create({
+                        data: {
+                            settlementType: SettlementType.DELIVERY_PARTNER,
+                            beneficiaryId: deliveryPartnerId,
+                            totalAmount,
+                            payoutCount:
+                                pendingPayouts.length,
+                            status: "PENDING"
+                        }
+                    });
+
+
+                // Assign the  settlment id to the each restaurantPayout 
+                await tx.restaurantPayout.updateMany({
+                    where: {
+                        id: {
+                            in: pendingPayouts.map(
+                                (payout: DeliveryPartnerPayout) => payout.id
                             )
                         }
                     },

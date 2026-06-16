@@ -15,6 +15,8 @@ import { MenuRoutes } from "../modules/menu/routes/menu.route.js";
 import { MenuItemRoutes } from "../modules/menu_items/routes/menu_item.route.js";
 import { ModifierRoutes } from "../modules/modifier/routes/modifier.route.js";
 import { CouponRoutes } from "../modules/coupons/routes/coupon.route.js";
+import { PayoutRoutes } from "../modules/payout-managment/route/payout.route.js";
+import { PaymentsRoutes } from "../modules/payment-managment/routes/payment.route.js";
 
 
 export function buildApiRouter(): Router {
@@ -34,6 +36,8 @@ export function buildApiRouter(): Router {
         new MenuItemRoutes(),
         new ModifierRoutes(),
         new CouponRoutes(),
+        new PayoutRoutes(),
+        new PaymentsRoutes()
     ]
 
     routes.forEach((route) => {

@@ -138,6 +138,10 @@ export class PayoutController {
         async (req: Request, res: Response) => {
 
             const { branchHeadId } = req.body;
+            if (!branchHeadId) {
+                throw new AppError("Branch Head id must be Required...", 409)
+            }
+
 
             const result =
                 await this.payoutService.createRestaurantSettlement(
@@ -147,6 +151,29 @@ export class PayoutController {
             return res.status(201).json({
                 success: true,
                 message: "Restaurant settlement created successfully",
+                data: result
+            });
+        }
+    );
+
+
+    createDeliveryPartnerSettlement = asyncHandler(
+        async (req: Request, res: Response) => {
+
+            const { deliveryPartnerId } = req.body;
+            if (!deliveryPartnerId) {
+                throw new AppError("Delivery Partner  id must be Required...", 409)
+            }
+
+
+            const result =
+                await this.payoutService.createDeliveryPartnerSettlement(
+                    deliveryPartnerId
+                );
+
+            return res.status(201).json({
+                success: true,
+                message: "Delivery Partner settlment created successfully",
                 data: result
             });
         }

@@ -17,6 +17,7 @@ export class PayoutService {
 
         const order =
             await this.payoutRepo.getOrderById(orderId);
+        console.log(order)
 
         if (!order) {
             return {
@@ -62,7 +63,7 @@ export class PayoutService {
             };
         }
 
-        const deliveryPartnerId = order.delivery?.id
+        const deliveryPartnerId = order.delivery?.currentPartnerId
         if (!deliveryPartnerId) {
             return {
                 success: false,
@@ -70,6 +71,10 @@ export class PayoutService {
                 statusCode: 400
             };
         }
+
+
+        console.log(deliveryPartnerId, " ID ", branchOwnerId)
+
 
         const grossAmount =
             Number(order.totalAmount);
@@ -97,7 +102,6 @@ export class PayoutService {
                 "Invalid payout split calculation"
             );
         }
-
 
         const payout =
             await this.prisma.$transaction(
@@ -262,6 +266,17 @@ export class PayoutService {
             branchHeadId
         );
     }
+
+
+    async createDeliveryPartnerSettlement(
+        deliveryPartnerId: string
+    ) {
+
+        return await this.payoutRepo.createDeliveryPartnerSettlement(
+            deliveryPartnerId
+        );
+    }
+
 
     async getSettlementById(
         settlementId: string

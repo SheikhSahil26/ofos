@@ -6,7 +6,7 @@ import { prisma } from "../../../config/prisma";
 
 
 
-export class PaymentsRoutes implements IRoutes {
+export class PayoutRoutes implements IRoutes {
     path = "/payouts";
     router = Router();
     payoutService = new PayoutService(prisma);
@@ -69,7 +69,13 @@ export class PaymentsRoutes implements IRoutes {
             this.controller.createRestaurantSettlement
         );
 
-        //
+        this.router.post(
+            "/settlements/restaurants",
+            this.controller.createDeliveryPartnerSettlement
+        );
+
+
+        // Get settlement By id
         this.router.get(
             "/settlements/:settlementId",
             this.controller.getSettlementById
