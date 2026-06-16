@@ -1,127 +1,151 @@
 import { Request, Response } from "express";
 import { AddressService } from "../services/address.service";
 import { ICreateAddress, IUpdateAddress } from "../interfaces/address.interface";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { AppError } from "../../../utils/appError";
+import { AddressValidation } from "../validations/address.validation";
 
 export class AddressController{
 
     private addressService = new AddressService();
 
     //get all addresses of users
-    getAddresses = async(req: Request, res: Response) => {
-        try{
-            const userId = req.user.id;
+    getAddresses = asyncHandler( async(req: Request, res: Response) => {
 
-            if(typeof userId !== "string"){
-                throw new Error("Invalid user id");
-            }
+        const user = req.user as Express.payload | undefined;
 
-            const addresses = await this.addressService.getAddresses(userId);
-
-            res.status(200).json({success: true, data: addresses});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "internal server error"});
-        }
-    }
+
+        const userId = user.userId;
+
+        AddressValidation.validateId(userId, "user id");
+
+        const response = await this.addressService.getAddresses(userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //get address by id
-    getAddressById = async(req: Request, res: Response) => {
-        try{
-            const addressId = req.params.id;
-            const userId = req.user.id;
+    getAddressById = asyncHandler( async(req: Request, res: Response) => {
 
-            if(typeof addressId !== "string" || typeof userId !== "string"){
-                throw new Error("Invalid address id or user id");
-            }
+        const addressId = req.params.id;
+        const user = req.user as Express.payload | undefined;
 
-            const address = await this.addressService.getAddressById(addressId, userId);
-
-            res.status(200).json({success: true, data: address});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "internal server error"});
+
+        const userId = user.userId;
+
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
-    }
+
+        AddressValidation.validateId(userId, "user id");
+        AddressValidation.validateId(addressId, "address id");
+
+        const response = await this.addressService.getAddressById(addressId, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //create new address for user
-    createAddress = async(req: Request, res: Response) => {
-        try{
-            const userId = req.user.id;
+    createAddress = asyncHandler(async(req: Request, res: Response) => {
 
-            const data: ICreateAddress = req.body;
+        const user = req.user as Express.payload | undefined;
 
-            const address = await this.addressService.createAddress(data, userId);
-
-            res.status(200).json({success: true, message: "Address created successfully"});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "internal server error"});
-        }
-    }
+
+        const userId = user.userId;
+
+        AddressValidation.validateId(userId, "user id");
+
+        const data: ICreateAddress = req.body;
+
+        AddressValidation.validateCreateAddress(data);
+
+        const response = await this.addressService.createAddress(data, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //update address by id
-    updateAddressById = async(req: Request, res: Response) => {
-        try{
-            const addressId = req.params.id;
-            const userId = req.user.id;
+    updateAddressById = asyncHandler(async(req: Request, res: Response) => {
 
-            const data: IUpdateAddress = req.body;
+        const addressId = req.params.id;
+        const user = req.user as Express.payload | undefined;
 
-            if(typeof addressId !== "string" || typeof userId !== "string"){
-                throw new Error("Invalid address id or user id");
-            }
-
-            const address = await this.addressService.updateAddressById(addressId, data, userId);
-
-            res.status(200).json({success: true, message: "Address updated successfully"});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "internal server error"});
+
+        const userId = user.userId;
+
+        const data: IUpdateAddress = req.body;
+
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
-    }
+
+        AddressValidation.validateId(userId, "user id");
+        AddressValidation.validateId(addressId, "address id");
+        AddressValidation.validateUpdateAddress(data);
+
+        const response = await this.addressService.updateAddressById(addressId, data, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //delete address by id
-    deleteAddressById = async(req: Request, res: Response) => {
-        try{
-            const addressId = req.params.id;
-            const userId = req.user.id;
+    deleteAddressById = asyncHandler(async(req: Request, res: Response) => {
 
-            if(typeof addressId !== "string" || typeof userId !== "string"){
-                throw new Error("Invalid address id or user id");
-            }
+        const addressId = req.params.id;
+        const user = req.user as Express.payload | undefined;
 
-            await this.addressService.deleteAddressById(addressId, userId);
-
-            res.status(200).json({success: true, message: "Address deleted successfully"});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "internal server error"});
+
+        const userId = user.userId;
+
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
-    }
+
+        AddressValidation.validateId(userId, "user id");
+        AddressValidation.validateId(addressId, "address id");
+
+        const response = await this.addressService.deleteAddressById(addressId, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //set default address for user
-    setDefaultAddress = async(req: Request, res: Response) => {
-        try{
-            const addressId = req.params.id;
-            const userId = req.user.id;
-    
-            //validating address id and user id
-            if(typeof addressId !== "string" || typeof userId !== "string"){
-                throw new Error("Invalid address id or user id");
-            }
-    
-            await this.addressService.setDefaultAddress(addressId, userId);
+    setDefaultAddress = asyncHandler(async(req: Request, res: Response) => {
 
-            res.status(200).json({success: true, message: "default address saved"});
+        const addressId = req.params.id;
+        const user = req.user as Express.payload | undefined;
+
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "internal server error"});
+
+        const userId = user.userId;
+
+        //validating address id and user id
+        if(typeof addressId !== "string"){
+            throw new AppError("Invalid address id", 409);
         }
-    }
+
+        AddressValidation.validateId(userId, "user id");
+        AddressValidation.validateId(addressId, "address id");
+
+        const response = await this.addressService.setDefaultAddress(addressId, userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 }

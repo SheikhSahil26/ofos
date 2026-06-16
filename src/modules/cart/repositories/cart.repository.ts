@@ -1,31 +1,69 @@
 // import { IExistingRestaurant, IRestaurantValidation } from "../interfaces/restaurant.interface";
 import { prisma } from "../../../config/prisma";
 import redisClient from "../../../config/redis";
+import { Cart } from "../interfaces/cart.interface";
 
 export class CartRepository {
   // get cart details by id
-    async getCart(userId: number) {
-
-        const userCart = await redisClient.get(`cart:${userId}`);
-
-        //currently avoiding all checks just assuming everythign works fine
-        if(userCart){
-            return JSON.parse(userCart);
-        }
-
-        return null;
-
-      }
-    async saveCart(userId:number, cartData: any) {
-
-        await redisClient.set(`cart:${userId}`, JSON.stringify(cartData));
-
-        const savedCart = await this.getCart(userId);
-        console.log("Saved cart in Redis:", savedCart);
-
-        
-
-        
+  private getCartKey(userId: string): string {
+        return `cart:${userId}`;
     }
 
+    async getCart(
+        userId: string
+    ): Promise<Cart | null> {
+
+        const cart =
+            await redisClient.get(
+                this.getCartKey(userId)
+            );
+
+        if (!cart) {
+            return null;
+        }
+
+        return JSON.parse(cart);
+    }
+
+    async saveCart(
+        userId: string,
+        cartData: Cart
+    ): Promise<void> {
+
+        await redisClient.set(
+            this.getCartKey(userId),
+            JSON.stringify(cartData)
+        );
+    }
+
+    async deleteCart(
+        userId: string
+    ): Promise<void> {
+
+        await redisClient.del(
+            this.getCartKey(userId)
+        );
+    }
+
+  async getMenuItemsByIds(
+    menuItemIds: string[]
+) {
+
+    return prisma.menuItem.findMany({
+        where: {
+            id: {
+                in: menuItemIds,
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+            price: true,
+            isAvailable: true,
+            isDeleted: true,
+            branch_id: true,
+        },
+    });
+}
+    
 }

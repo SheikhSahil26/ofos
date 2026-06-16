@@ -2,7 +2,7 @@ import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { DietaryTagController } from "../controllers/dietaryTag.controller";
 
-export class DietaryTagsRoute implements IRoutes{
+export class DietaryTagsRoutes implements IRoutes{
     path = "/dietary-tags";
     router = Router();
     controller = new DietaryTagController();

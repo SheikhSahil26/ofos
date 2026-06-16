@@ -11,6 +11,11 @@ import { fileURLToPath } from 'url';
 import { buildApiRouter } from "./routes";
 import redisClient from "./config/redis";
 import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
+import cookieParser from 'cookie-parser';
+import "./config/jwtAuth";
+import passport from "passport";
+import { Request, Response } from "express";
+
 
 const PORT = process.env.PORT;
 
@@ -35,6 +40,8 @@ app.use(express.static(path.join(__dirname,"../public")))
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
+app.use(cookieParser())
+app.use(passport.initialize());
 
 //this will initiate all the routes 
 app.use("/api", buildApiRouter());
@@ -51,7 +58,21 @@ app.get("/redis-test",async(req:any,res:any)=>{
 app.use(errorHandler);
 app.use(notFoundMiddleware);
 
-app.listen(8080,()=>{
-    console.log("server started at port 2000");
+app.get("/",(req:Request, res:Response) => {
+   res.render("customer/dashboard");
+});
+
+
+
+
+
+
+
+
+
+
+
+app.listen(PORT,()=>{
+    console.log(`server is running on http://localhost:${PORT}`);
 });
 

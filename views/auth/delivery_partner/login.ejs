@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner Login</title>
+
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+<<<<<<< HEAD
+
+=======
+    <div id="toast"></div>
+>>>>>>> origin
+    <div class="container">
+
+        <!-- LEFT PANEL -->
+
+        <div class="left-panel">
+
+            <div class="brand">Ziggy</div>
+
+            <div class="content">
+
+                <h1>
+                    Deliver Fast,<br>
+                    Earn More
+                </h1>
+
+                <p>
+                    Join Ziggy as a delivery partner and
+                    earn on your own schedule while helping
+                    customers get their favorite meals.
+                </p>
+
+            </div>
+
+            <img src="/images/rider-login.png" alt="Delivery Partner" class="burger">
+
+            <div class="wave">〰</div>
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+
+        <div class="right-panel">
+
+            <div class="form-wrapper">
+
+                <h2>Delivery Partner Login</h2>
+
+                <span>
+                    Login to access your delivery dashboard
+                </span>
+
+                <form action="/delivery/login" method="POST">
+<<<<<<< HEAD
+                    
+=======
+
+>>>>>>> origin
+                    <div class="input-group">
+
+                        <label>Email Address</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-regular fa-envelope"></i>
+
+                            <input type="email" name="email" placeholder="Enter restaurant email" required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Password</label>
+
+                        <div class="input-box">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+                            <i class="fa-regular fa-eye toggle" onclick="togglePassword()"></i>
+
+                        </div>
+
+                    </div>
+
+<<<<<<< HEAD
+                    <div class="forgot-password">
+
+                        <a href="/delivery/forgot-password">
+=======
+
+                    <div class="terms">
+
+                        <input type="checkbox" name="rememberMe" required>
+
+                        <p>
+                            Remember Me
+                        </p>
+
+                    </div>
+
+                    <div class="forgot-password">
+
+                        <a href="/api/auth/forget-password">
+>>>>>>> origin
+                            Forgot Password?
+                        </a>
+
+                    </div>
+
+                    <button type="submit" class="signup-btn">
+                        Login
+                    </button>
+
+                </form>
+
+                <div class="login-link">
+
+                    New Delivery Partner?
+
+                    <a href="/api/auth/delivery_partner/static/register">
+                        Register Now
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<<<<<<< HEAD
+    <script>
+        function togglePassword() {
+            const password = document.getElementById("password");
+
+            password.type =
+                password.type === "password"
+                    ? "text"
+                    : "password";
+        }
+    </script>
+=======
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/togglePassword.js"></script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/login.js"></script>
+>>>>>>> origin
+
+</body>
+
+</html>

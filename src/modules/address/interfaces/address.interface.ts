@@ -8,12 +8,14 @@ export interface IAddress{
     addressLine2?: string | null;
     city?: string | null;
     state?: string | null;
-    pinCode?: string | null;
+    pincode?: string | null;
     latitude?: Decimal | null;
     longitude?: Decimal | null;
     isDefault?: boolean | null;
+    isDeleted?: boolean;
     createdAt: Date;
     updatedAt: Date;
+    deletedAt: Date | null;
 }
 
 export interface ICreateAddress{
@@ -22,7 +24,7 @@ export interface ICreateAddress{
     addressLine2?: string | null;
     city?: string | null;
     state?: string | null;
-    pinCode?: string | null;
+    pincode?: string | null;
     latitude?: Decimal | null;
     longitude?: Decimal | null;
     isDefault?: boolean | null;
@@ -34,7 +36,8 @@ export interface IUpdateAddress{
     addressLine2?: string | null;
     city?: string | null;
     state?: string | null;
-    pinCode?: string | null;
+    pincode?: string | null;
     latitude?: Decimal | null;
-    longitude?: number | null;
+    longitude?: Decimal | null;
+    isDefault?: boolean;
 }

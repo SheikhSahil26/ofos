@@ -6,6 +6,7 @@ import { AppError } from "../../../utils/appError";
 
 export class MenuService{
     private menuRepository = new MenuRepository();
+    
 
     async createCategory(data: ICreateCategory): Promise<ServiceResponse<Category>> {
         const category = await this.menuRepository.createCategory(data);

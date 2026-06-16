@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { RestaurantService } from "../services/restaurant.service";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { AppError } from "../../../utils/appError";
 
 export class RestaurantController {
   private restaurantService = new RestaurantService();
 
   //get all restaurants
-  getRestaurants = async (req: Request, res: Response) => {
-    try {
+  getRestaurants = asyncHandler(async(req: Request, res: Response) => {
       const page = Number(req.query.page) || 1;
 
       const limit = Number(req.query.limit) || 10;
@@ -20,23 +21,14 @@ export class RestaurantController {
       );
 
       return res.status(200).json({
-        success: true,
         ...data,
+        success: true,
       });
-    } catch (err) {
-      console.log(err);
-
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching restaurants",
-      });
-    }
-  };
+  });
 
   //get restaurant by owner
-  getMyRestaurants = async (req: Request, res: Response) => {
-    try {
-      const userId = req.user.userId ;
+  getMyRestaurants = asyncHandler(async (req: Request, res: Response) => {
+    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
 
       const page = Number(req.query.page) || 1;
 
@@ -49,24 +41,17 @@ export class RestaurantController {
       );
 
       return res.status(200).json({
-        success: true,
         ...data,
+        success: true,
       });
-    } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching restaurants",
-      });
-    }
-  };
+    })
 
   //GET nearby restaurants
 
-getNearbyRestaurants = async(
+getNearbyRestaurants = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
-    try{
 
         const latitude = Number(req.query.latitude);
         const longitude = Number(req.query.longitude);
@@ -95,27 +80,11 @@ getNearbyRestaurants = async(
             data: restaurants
         });
 
-    }
-    catch(err){
-        console.log(err);
+});
 
-        return res.status(500).json({
-            success: false,
-            message: "Error fetching nearby restaurants"
-        });
-    }
-}
-
-     // create restaurant
-      createRestaurant = async(
-        req: Request,
-        res: Response
-    ) => {
-
-        try{
-
-            const userId =
-                req.user!.userId;
+  // create restaurant
+  createRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
 
             const restaurant =
                 await this.restaurantService
@@ -130,43 +99,28 @@ getNearbyRestaurants = async(
                 "Restaurant created successfully",
                 data:restaurant
             });
+    });
 
-        }
-        catch(err){
+  // Update restaurant details
+  updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-            console.log(err);
-
-            return res.status(400).json({
-                success:false,
-                message:
-                    err instanceof Error
-                    ? err.message
-                    : "Error creating restaurant"
-            });
-        }
-    };
-
-    // Update restaurant details
-    updateRestaurant = async(
-    req: Request,
-    res: Response
-) => {
-
-    try{
+    const userId = user.userId;
 
         const restaurantIdRaw = req.params.id;
         const restaurantId = Array.isArray(restaurantIdRaw)
           ? restaurantIdRaw[0]
           : restaurantIdRaw;
 
-        if (!restaurantId) {
-          return res.status(400).json({
-            success: false,
-            message: "Restaurant id is required",
-          });
-        }
-
-        const userId = req.user!.userId;
+      if (!restaurantId) {
+        return res.status(400).json({
+          success: false,
+          message: "Restaurant id is required",
+        });
+      }
 
         const restaurant =
         await this.restaurantService
@@ -183,31 +137,14 @@ getNearbyRestaurants = async(
             data:restaurant
         });
 
-    }
-    catch(err){
+});
 
-        console.log(err);
+  // update restaurant status
 
-        return res.status(400).json({
-            success:false,
-            message:
-            err instanceof Error
-            ? err.message
-            : "Error updating restaurant"
-        });
-    }
-}
-
-// update restaurant status
-// restaurant.controller.ts
-
-updateRestaurantStatus = async(
+updateRestaurantStatus = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
-
-    try{
-
         const rawId = req.params.id;
 
         if (!rawId || Array.isArray(rawId)) {
@@ -219,8 +156,12 @@ updateRestaurantStatus = async(
 
         const restaurantId: string = rawId;
 
-        const userId =
-        req.user!.userId;
+      const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
 
         const { isActive } =
         req.body;
@@ -251,30 +192,17 @@ updateRestaurantStatus = async(
                 : "Restaurant deactivated successfully",
             data: restaurant
         });
-
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error updating status"
-        });
-    }
-}
+});
 
 // delete restaurant
 
-deleteRestaurant = async(
-    req: Request,
-    res: Response
-) => {
+  deleteRestaurant = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-    try{
+    const userId = user.userId;
 
         const rawId = req.params.id;
 
@@ -287,8 +215,6 @@ deleteRestaurant = async(
 
         const restaurantId: string = rawId;
 
-        const userId =
-        req.user!.userId;
 
         await this.restaurantService
         .deleteRestaurant(
@@ -301,29 +227,14 @@ deleteRestaurant = async(
             message:
                 "Restaurant deleted successfully"
         });
-
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error deleting restaurant"
-        });
-    }
-}
+});
 
 // GET restaurant reviews 
-getRestaurantReviews = async(
+getRestaurantReviews = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
 
-    try{
 
         const restaurantId =
         req.params.id as string;
@@ -334,7 +245,7 @@ getRestaurantReviews = async(
         const limit =
         Number(req.query.limit) || 10;
 
-        const reviews =
+        const reviewsResponse =
         await this.restaurantService
         .getRestaurantReviews(
             restaurantId,
@@ -342,53 +253,47 @@ getRestaurantReviews = async(
             limit
         );
 
+        const reviewsData = reviewsResponse.data;
+
         return res.status(200).json({
             success:true,
-            data:reviews.reviews,
+            data: reviewsData?.reviews ?? [],
 
             averageRating:
-            reviews.averageRating,
+            reviewsData?.averageRating ?? 0,
 
             pagination:
-            reviews.pagination
+            reviewsData?.pagination ?? {
+                page,
+                limit,
+                total: 0
+            }
         });
 
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error fetching reviews"
-        });
-    }
-}
+});
 
 // Create review
-createReview = async(
+createReview = asyncHandler(async(
     req: Request,
     res: Response
 ) => {
 
-    try{
+
 
         const restaurantId =
         req.params.id as string;
 
-        const userId =
-        req.user!.userId;
+      const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-        const review =
-        await this.restaurantService
-        .createReview(
-            restaurantId,
-            userId,
-            req.body
-        );
+    const userId = user.userId;
+      const review = await this.restaurantService.createReview(
+        restaurantId,
+        userId,
+        req.body,
+      );
 
         return res.status(201).json({
             success:true,
@@ -396,19 +301,5 @@ createReview = async(
                 "Review submitted successfully",
             data:review
         });
-
-    }
-    catch(err){
-
-        console.log(err);
-
-        return res.status(400).json({
-            success:false,
-            message:
-                err instanceof Error
-                ? err.message
-                : "Error creating review"
-        });
-    }
-}
+});
 }

@@ -1,15 +1,37 @@
-import express, { type NextFunction, type Request, type Response } from 'express'
-import passport from 'passport';
-import jwt from 'passport-jwt';
+import { Request, Response, NextFunction } from "express";
+import passport from "passport";
 
-export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate('jwt', { session: false, failureRedirect: '/login' }, (err: any, user: any) => {
-        if (err) return next(err);
+export const isAuthenticated = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
 
-        if (!user) {
-            return res.status(401).redirect('/api/auth/login')
-        }
-        req.user = user;
-        next();
-    })(req, res, next);
-}   
+  passport.authenticate(
+    'jwt',
+    { session: false },
+    (err: any, user: any) => {
+
+      if (err) {
+        return next(err);
+      }
+
+      // console.log("Here use.............")
+      console.log("req.user", user);
+
+      if (!user) {
+        return res.status(401).json({
+          status: "Error",
+          statusCode:401,
+          message: "Unauthorized User"
+        });
+      }
+
+      req.user = user;
+      console.log(req.user);
+
+      next();
+    }
+  )(req, res, next);
+
+};

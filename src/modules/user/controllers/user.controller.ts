@@ -1,89 +1,114 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { IUpdateUser } from "../interfaces/user.interface";
+import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { uploadImage } from "../../../services/multer.service";
+import { UserValidation } from "../validations/user.validation";
+import { AppError } from "../../../utils/appError";
 
-export class UserController{                                                                               
-    
+export class UserController{                                                                                 
     private userService = new UserService();
+
+    //dashboard page
+    dashboardPage = asyncHandler( async(req: Request, res: Response) => {
+        res.status(200).render("customer/dashboard");
+    });
+
+    //get profile page
+    getProfilePage = asyncHandler(async(req: Request, res: Response) => {
+        res.status(200).render("customer/profile");
+    });
     
     //get profile of authenticated user
-    getProfile = async(req: Request, res: Response) => {
-        try{
-            //from token we will get user id
-            const userId = req.user.id;
+    getProfile = asyncHandler(async(req: Request, res: Response) => {
 
-            if(typeof userId !== 'string'){
-                return res.status(400).json({success: false, message: "Invalid user id"});
-            }
+        const user = req.user as Express.payload | undefined;
 
-            const profile = await this.userService.getProfile(userId);
-            res.status(200).json({success: true, data: profile});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "Error getting profile"});
-        }
-    }
+
+        const userId = user.userId;
+
+        UserValidation.validateUserId(userId);
+
+        const response = await this.userService.getProfile(userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //edit user profile 
-    updateProfile = async(req: Request, res: Response) => {
-        try{
-            //from token we will get user id
-            const userId = req.user.id;
+    updateProfile = asyncHandler( async(req: Request, res: Response) => {
 
-            if(typeof userId !== 'string'){
-                return res.status(400).json({success: false, message: "Invalid user id"});
-            }
+        const user = req.user as Express.payload | undefined;
 
-            //mapping data from request body and file to IUpdateUser interface
-            const data: IUpdateUser = {
-                fullName: req.body?.fullName,
-                mobile: req.body?.mobile
-            };
-
-            if(req.file){
-                data.profilePhoto = req.file.path;
-            }
-
-            const profile = await this.userService.updateProfile(userId, data);
-            res.status(200).json({success: true, data: profile});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "Error updating profile"});
+
+        const userId = user.userId;
+       
+        UserValidation.validateUserId(userId);
+
+        //mapping data from request body and file to IUpdateUser interface
+        const data: IUpdateUser = {
+            fullName: req.body?.fullName,
+            mobile: req.body?.mobile
+        };
+
+        //validating fullName and mobile
+        UserValidation.validateUpdateProfile(data);
+
+        let imageurl: string | undefined;
+
+        if (req.file) {
+            imageurl = await uploadImage(
+                req.file.buffer,
+                `profile-${userId}-${Date.now()}`,
+                "/OFOS/profiles",
+            );
+
+            data.profilePhoto = imageurl;
         }
-    }
+
+        const response = await this.userService.updateProfile(userId, data);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //delete profile photo
-    deleteProfilePhoto = async(req: Request, res: Response) => {
-        try{
-            const userId = req.user.id;
+    deleteProfilePhoto = asyncHandler(async(req: Request, res: Response) => {
+        
+        const user = req.user as Express.payload | undefined;
 
-            const user = await this.userService.deletePofilePhoto(userId);
-            res.status(200).json({success: true, data: user});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "Error removing profile photo"});
-        }
-    }
+
+        const userId = user.userId;
+
+        UserValidation.validateUserId(userId);
+
+        const response = await this.userService.deletePofilePhoto(userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 
     //delete user account
-    deleteUserAccount = async(req: Request, res: Response) => {
-        try{
-            //from token we will get user id
-            const userId = req.user.id;
+    deleteUserAccount = asyncHandler(async(req: Request, res: Response) => {
 
-            if(typeof userId !== 'string'){
-                return res.status(400).json({success: false, message: "Invalid user id"});
-            }
+        const user = req.user as Express.payload | undefined;
 
-            await this.userService.deleteProfile(userId);
-            res.status(200).json({success: true, message: "Profile deleted successfully"});
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
-        catch(err){
-            console.log(err);
-            res.status(500).json({success: false, message: "Error deleting profile"});
-        }
-    }
+
+        const userId = user.userId;
+ 
+        UserValidation.validateUserId(userId);
+
+        const response = await this.userService.deleteUserAccount(userId);
+        
+        res.status(response.statusCode || 200).json(response);
+    });
 }

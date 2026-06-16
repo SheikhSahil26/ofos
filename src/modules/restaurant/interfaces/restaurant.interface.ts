@@ -170,3 +170,11 @@ export interface ICreateReview {
   packagingRating: number;
   reviewText?: string;
 }
+
+export interface ICreateRestaurant{
+    name: string;
+    description?: string;
+
+    logoUrl?: string;
+    coverImageUrl?: string;
+}
