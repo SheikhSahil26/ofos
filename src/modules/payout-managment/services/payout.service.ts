@@ -1,4 +1,4 @@
-import { OrderStatus, OrderPaymentStatus, PayoutStatus, WalletTransactionType, PrismaClient } from "@prisma/client";
+import { OrderStatus, OrderPaymentStatus, PayoutStatus, PrismaClient, SettlementStatus, SettlementType } from "@prisma/client";
 
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { PayoutRepository } from "../repository/payout.repository";
@@ -53,7 +53,8 @@ export class PayoutService {
             };
         }
 
-        if (!order.branch?.headId) {
+        const branchOwnerId = order.branch?.headId
+        if (!branchOwnerId) {
             return {
                 success: false,
                 error: "Branch owner not found",
@@ -61,7 +62,8 @@ export class PayoutService {
             };
         }
 
-        if (!order.delivery?.id) {
+        const deliveryPartnerId = order.delivery?.id
+        if (!deliveryPartnerId) {
             return {
                 success: false,
                 error: "Delivery Partner not found",
@@ -129,7 +131,7 @@ export class PayoutService {
                                     payoutRecord.id,
 
                                 branchHeadId:
-                                    order.branch.headId,
+                                    branchOwnerId,
 
                                 amount:
                                     branchAmount,
@@ -150,7 +152,7 @@ export class PayoutService {
                                     payoutRecord.id,
 
                                 deliveryPartnerId:
-                                    order.delivery?.currentPartnerId,
+                                    deliveryPartnerId,
 
                                 amount:
                                     deliveryAmount,
@@ -199,7 +201,7 @@ export class PayoutService {
     }
 
 
-    
+
     async getRestaurantPendingSummary(
         branchHeadId: string
     ) {
@@ -286,6 +288,7 @@ export class PayoutService {
             limit
         );
     }
+
 
     async getSettlementHistory(
         page: number,

@@ -1,4 +1,4 @@
-import { PrismaClient, PayoutStatus } from "@prisma/client";
+import { PrismaClient, PayoutStatus, RestaurantPayout, SettlementStatus, SettlementType } from "@prisma/client";
 import { any } from "joi";
 
 export class PayoutRepository {

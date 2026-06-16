@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PayoutService } from "../services/payout.service";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
 import { AppError } from "../../../utils/appError";
+import { SettlementStatus, SettlementType } from "@prisma/client";
 
 export class PayoutController {
     constructor(
