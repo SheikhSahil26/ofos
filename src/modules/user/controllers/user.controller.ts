@@ -15,7 +15,7 @@ export class UserController{
     });
 
     //get profile page
-    getProfilePage = asyncHandler(async(req: Request, res: Response) => {
+    profilePage = asyncHandler(async(req: Request, res: Response) => {
         res.status(200).render("customer/profile");
     });
     
