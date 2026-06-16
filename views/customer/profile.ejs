@@ -154,7 +154,7 @@
                 <!-- Actions -->
                 <div class="mt-10 flex flex-wrap gap-4">
 
-                    <button
+                    <button id="openEditProfileModal"
                         class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl font-medium hover:bg-orange-600 transition">
 
                         <i class="fa-solid fa-pen-to-square mr-2"></i>
@@ -201,5 +201,9 @@
 
 </div>
 
+<!-- Include Modal -->
+<%- include('./helper/edit-profile-modal') %>
+
+<script src="/js/customer/edit-profile-modal.js"></script>
 </body>
 </html>

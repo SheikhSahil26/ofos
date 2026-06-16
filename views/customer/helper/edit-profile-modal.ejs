@@ -1,0 +1,112 @@
+<div
+    id="editProfileModal"
+    class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-3xl w-full max-w-2xl p-8 mx-4">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+
+            <h2 class="text-2xl font-semibold">
+                Edit Profile
+            </h2>
+
+            <button id="closeEditProfileModal">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+
+        </div>
+
+        <!-- Form -->
+        <form
+            action="/customer/profile"
+            method="POST"
+            enctype="multipart/form-data"
+            class="space-y-6">
+
+            <!-- Profile Photo -->
+            <div>
+
+                <label class="block mb-2 font-medium">
+                    Profile Photo
+                </label>
+
+                <input
+                    type="file"
+                    name="profilePhoto"
+                    class="w-full border rounded-xl p-3">
+
+            </div>
+
+            <!-- Full Name -->
+            <div>
+
+                <label class="block mb-2 font-medium">
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    name="fullName"
+                    value="Diya Vora"
+                    class="w-full border rounded-xl p-3">
+
+            </div>
+
+            <!-- Email -->
+            <div>
+
+                <label class="block mb-2 font-medium">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    value="diya@gmail.com"
+                    readonly
+                    class="w-full border rounded-xl p-3 bg-gray-100 text-gray-500">
+
+            </div>
+
+            <!-- Mobile -->
+            <div>
+
+                <label class="block mb-2 font-medium">
+                    Mobile Number
+                </label>
+
+                <input
+                    type="text"
+                    name="mobile"
+                    value="9874561257"
+                    class="w-full border rounded-xl p-3">
+
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-2">
+
+                <button
+                    type="submit"
+                    class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl">
+
+                    Save Changes
+
+                </button>
+
+                <button
+                    type="button"
+                    id="cancelEditProfileModal"
+                    class="border px-6 py-3 rounded-xl">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

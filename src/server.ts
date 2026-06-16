@@ -59,10 +59,10 @@ app.get("/redis-test",async(req:any,res:any)=>{
 })
 
 app.use(errorHandler);
-app.use(notFoundMiddleware);
+// app.use(notFoundMiddleware);
 
 app.get("/",(req:Request, res:Response) => {
-   res.render("customer/profile");
+   res.render("customer/dashboard");
 });
 
 
