@@ -14,6 +14,7 @@ import cookieParser from 'cookie-parser';
 import "./config/jwtAuth";
 import passport from "passport";
 import { Request, Response } from "express";
+import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
 
 
 const PORT = process.env.PORT;
@@ -41,6 +42,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 app.use(cookieParser())
 app.use(passport.initialize());
+// app.use(notFoundMiddleware);
+app.use(errorHandler);
 
 //this will initiate all the routes 
 app.use("/api", buildApiRouter());
@@ -56,7 +59,7 @@ app.get("/redis-test",async(req:any,res:any)=>{
 
 
 app.get("/",(req:Request, res:Response) => {
-   res.render("customer/dashboard");
+   res.render("customer/profile");
 });
 
 
