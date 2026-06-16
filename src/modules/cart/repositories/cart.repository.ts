@@ -5,12 +5,12 @@ import { Cart } from "../interfaces/cart.interface";
 
 export class CartRepository {
   // get cart details by id
-  private getCartKey(userId: number): string {
+  private getCartKey(userId: string): string {
         return `cart:${userId}`;
     }
 
     async getCart(
-        userId: number
+        userId: string
     ): Promise<Cart | null> {
 
         const cart =
@@ -26,7 +26,7 @@ export class CartRepository {
     }
 
     async saveCart(
-        userId: number,
+        userId: string,
         cartData: Cart
     ): Promise<void> {
 
@@ -37,7 +37,7 @@ export class CartRepository {
     }
 
     async deleteCart(
-        userId: number
+        userId: string
     ): Promise<void> {
 
         await redisClient.del(

@@ -1,7 +1,7 @@
 import { prisma } from "../../../config/prisma";
 import { CartRepository } from "../repositories/cart.repository";
 import { ServiceResponse } from "../../../common/types/service-response.types";
-import { Cart, CartItem } from "../interfaces/cart.interface";
+import { Cart, CartItem, CartModifier } from "../interfaces/cart.interface";
 
 
 
@@ -10,7 +10,7 @@ export class CartService {
     private cartRepo = new CartRepository();
 
     async getCart(
-        userId: number
+        userId: string
     ): Promise<ServiceResponse<Cart>> {
 
         const cart =
@@ -33,9 +33,11 @@ export class CartService {
     }
 
     async addToCart(
-        userId: number,
+        userId: string,
         menuItemId: string,
-        quantity: number
+        quantity: number,
+         modifiers: CartModifier[] = [],        // new param — defaults to empty
+  specialInstruction?: string,   
     ): Promise<ServiceResponse<Cart>> {
 
         quantity = Number(quantity);
@@ -83,6 +85,8 @@ export class CartService {
                             Number(
                                 menuItem.price
                             ),
+                        modifiers,
+                       specialInstruction:specialInstruction as any,
                     },
                 ],
                 subtotal:
@@ -138,6 +142,8 @@ export class CartService {
                     Number(
                         menuItem.price
                     ),
+                modifiers,
+               specialInstruction:specialInstruction as any,
             });
         }
 
@@ -172,7 +178,7 @@ export class CartService {
 
     //will fix later and make + - button and if item quantity is 0 then only delete it from cart 
   async removeCartItem(
-    userId: number,
+    userId: string,
     itemId: string
 ): Promise<ServiceResponse<any>> {
 
@@ -264,7 +270,7 @@ export class CartService {
     //delete entire cart 
 
     async clearCart(
-        userId: number
+        userId: string
     ): Promise<ServiceResponse<any>> {
         const existingCart =  await this.cartRepo.getCart(userId);
 
@@ -285,7 +291,7 @@ export class CartService {
      }
 
      async validateCart(
-    userId: number
+    userId: string
 ): Promise<ServiceResponse<any>> {
 
     const cart =
@@ -409,7 +415,7 @@ export class CartService {
 }
 
     async getCartSummary(
-    userId: number
+    userId: string
 ): Promise<ServiceResponse<any>> {
 
     const cart =

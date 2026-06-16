@@ -1,7 +1,7 @@
 import { ICreateCategory, IReorderCategory, IUpdateCategory } from "../interfaces/menu.interface";
 import { MenuRepository } from "../repositories/menu.repository";
 import { ServiceResponse } from "../../../common/types/service-response.type";
-import { Category } from "@prisma/client";
+import { Category, MenuItem } from "@prisma/client";
 import { AppError } from "../../../utils/appError";
 
 export class MenuService{
@@ -95,6 +95,24 @@ export class MenuService{
             success: true,
             data: updatedDisplayOrders,
             message: "Categories reordered successfully",
+            statusCode: 200,
+        };
+    }
+
+    async getFullMenu(branchId: string): Promise<ServiceResponse<Category[]>> {
+
+        // const branch = await this.Repository.getBranchById(branchId);
+
+        // if (!branch) {
+        //     throw new AppError("Branch not found",404);
+        // }
+
+        const menu = await this.menuRepository.getFullMenu(branchId);
+
+        return {
+            success: true,
+            data: menu,
+            message: "Full menu fetched successfully",
             statusCode: 200,
         };
     }

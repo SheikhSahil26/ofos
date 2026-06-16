@@ -13,32 +13,13 @@ export class OrdersControllers {
 
   );
 
-  getCart = asyncHandler(
-          async (
-              req: Request,
-              res: Response
-          ) => {
   
-              const userId = 1; // dummy
-  
-              const data =
-                  await this.ordersService.createOrder(
-                      userId
-                  );
-  
-              return res
-                  .status(
-                      data.statusCode || 200
-                  )
-                  .json(data);
-          }
-      );
 
       // controllers/order.controller.ts
       createOrder = asyncHandler(
 
-        async(req: Request, res: Response) => {
-  const userId = 1
+      async(req: Request, res: Response) => {
+  const userId = "428f4215-9945-4bda-92fb-6d46ae145955"
   const { addressId, paymentMethod, couponCode, scheduledAt } = req.body;
 
   if (!addressId || !paymentMethod) {
@@ -48,13 +29,13 @@ export class OrdersControllers {
     });
   }
 
-  const result : any = await this.ordersService.createOrder({
+  const result : any = await this.ordersService.createOrder(
     userId,
     addressId,
     paymentMethod,
     couponCode,
     scheduledAt,
-  });
+  );
 
   return res.status(result.statusCode).json(result);
 }
@@ -75,7 +56,7 @@ export class OrdersControllers {
           const orderId = req.params.id as string;
           const userId = "385d5013-c0c3-4add-972d-e8179f4b9566"; // dummy
 
-          const result : any = await this.ordersService.getOrderById(orderId, userId);
+          const result : any = await this.ordersService.getOrderById(orderId);
 
           console.log("Order details:", result);
 

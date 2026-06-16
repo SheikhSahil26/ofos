@@ -10,6 +10,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { buildApiRouter } from "./routes";
 import redisClient from "./config/redis";
+import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
 import cookieParser from 'cookie-parser';
 import "./config/jwtAuth";
 import passport from "passport";
@@ -54,6 +55,8 @@ app.get("/redis-test",async(req:any,res:any)=>{
     console.log(value,"this is redis value")
 })
 
+app.use(errorHandler);
+app.use(notFoundMiddleware);
 
 app.get("/",(req:Request, res:Response) => {
     res.render("index");
