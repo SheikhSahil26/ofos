@@ -16,6 +16,7 @@ import { MenuRoutes } from "../modules/menu/routes/menu.route.js";
 import { MenuItemRoutes } from "../modules/menu_items/routes/menu_item.route.js";
 import { ModifierRoutes } from "../modules/modifier/routes/modifier.route.js";
 import { CouponRoutes } from "../modules/coupons/routes/coupon.route.js";
+import { AdminRoutes } from "../modules/admin/routes/admin.route.js";
 
 
 export function buildApiRouter(): Router{
@@ -38,6 +39,7 @@ export function buildApiRouter(): Router{
         new MenuItemRoutes(),
         new ModifierRoutes(),
         new CouponRoutes(),
+        new AdminRoutes()
     ]
 
     routes.forEach((route) => {
