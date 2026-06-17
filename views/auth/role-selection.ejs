@@ -3,16 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Ziggy - Choose Role</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <style>
@@ -50,12 +47,18 @@
 
     <header class="max-w-7xl mx-auto px-6 pt-8">
 
-        <div class="flex justify-center">
 
-            <img
-                src="/images/ziggy-logo.png"
-                alt="Ziggy"
-                class="h-16 object-contain">
+        <div class="text-center">
+
+            <h1 class="
+        text-5xl
+        font-extrabold
+        text-orange-500
+        tracking-tight">
+
+                Ziggy
+
+            </h1>
 
         </div>
 
@@ -103,8 +106,7 @@
 
     <!-- Role Cards -->
 
-    <section
-        class="
+    <section class="
         max-w-[1600px]
         mx-auto
         px-6
@@ -117,8 +119,7 @@
 
         <!-- CUSTOMER -->
 
-        <div
-            class="
+        <div class="
             bg-white
             rounded-[32px]
             h-[420px]
@@ -134,8 +135,7 @@
             text-center
             p-10">
 
-            <div
-                class="
+            <div class="
                 w-24
                 h-24
                 rounded-full
@@ -149,8 +149,7 @@
 
             </div>
 
-            <h2
-                class="
+            <h2 class="
                 mt-6
                 text-2xl
                 font-bold
@@ -160,8 +159,7 @@
 
             </h2>
 
-            <p
-                class="
+            <p class="
                 mt-4
                 text-gray-500
                 leading-relaxed">
@@ -171,9 +169,7 @@
 
             </p>
 
-            <button
-                data-role="customer"
-                class="
+            <button data-role="customer" class="
                 role-btn
                 mt-8
                 bg-green-900
@@ -193,8 +189,7 @@
 
         <!-- RESTAURANT -->
 
-        <div
-            class="
+        <div class="
             bg-white
             rounded-[32px]
             h-[420px]
@@ -210,8 +205,7 @@
             text-center
             p-10">
 
-            <div
-                class="
+            <div class="
                 w-24
                 h-24
                 rounded-full
@@ -225,8 +219,7 @@
 
             </div>
 
-            <h2
-                class="
+            <h2 class="
                 mt-6
                 text-2xl
                 font-bold
@@ -236,8 +229,7 @@
 
             </h2>
 
-            <p
-                class="
+            <p class="
                 mt-4
                 text-gray-500
                 leading-relaxed">
@@ -247,9 +239,7 @@
 
             </p>
 
-            <button
-                data-role="restaurant_owner"
-                class="
+            <button data-role="restaurant_owner" class="
                 role-btn
                 mt-8
                 bg-green-900
@@ -269,8 +259,7 @@
 
         <!-- DELIVERY -->
 
-        <div
-            class="
+        <div class="
             bg-white
             rounded-[32px]
             h-[420px]
@@ -286,8 +275,7 @@
             text-center
             p-10">
 
-            <div
-                class="
+            <div class="
                 w-24
                 h-24
                 rounded-full
@@ -301,8 +289,7 @@
 
             </div>
 
-            <h2
-                class="
+            <h2 class="
                 mt-6
                 text-2xl
                 font-bold
@@ -312,8 +299,7 @@
 
             </h2>
 
-            <p
-                class="
+            <p class="
                 mt-4
                 text-gray-500
                 leading-relaxed">
@@ -323,9 +309,7 @@
 
             </p>
 
-            <button
-                data-role="delivery_partner"
-                class="
+            <button data-role="delivery_partner" class="
                 role-btn
                 mt-8
                 bg-green-900
@@ -345,8 +329,7 @@
 
         <!-- FLEET -->
 
-        <div
-            class="
+        <div class="
             bg-white
             rounded-[32px]
             h-[420px]
@@ -362,8 +345,7 @@
             text-center
             p-10">
 
-            <div
-                class="
+            <div class="
                 w-24
                 h-24
                 rounded-full
@@ -377,8 +359,7 @@
 
             </div>
 
-            <h2
-                class="
+            <h2 class="
                 mt-6
                 text-2xl
                 font-bold
@@ -388,8 +369,7 @@
 
             </h2>
 
-            <p
-                class="
+            <p class="
                 mt-4
                 text-gray-500
                 leading-relaxed">
@@ -399,9 +379,7 @@
 
             </p>
 
-            <button
-                data-role="fleet_manager"
-                class="
+            <button data-role="fleet_manager" class="
                 role-btn
                 mt-8
                 bg-green-900
@@ -434,8 +412,7 @@
                         const role =
                             button.dataset.role;
 
-                        window.location.href =
-                            `/api/auth/${role}/static/login`;
+                        window.location.href = `http://localhost:8080/api/auth/${role}/static/login`;
 
                     }
                 );
