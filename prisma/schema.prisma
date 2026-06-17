@@ -13,7 +13,6 @@ model User {
   fullName                 String               @map("full_name") @db.VarChar(255)
   email                    String               @unique @db.VarChar(255)
   mobile                   String               @db.VarChar(20)
-  mobile                   String               @db.VarChar(20)
   passwordHash             String               @map("password_hash") @db.VarChar(255)
   profilePhoto             String?              @map("profile_photo") @db.Text
   isVerified               Boolean              @default(false) @map("is_verified")
@@ -29,7 +28,7 @@ model User {
   orderStatusChanges       OrderStatusHistory[]
   orders                   Order[]
   savedPaymentMethods      SavedPaymentMethod[]
-  refresh_token            refresh_token[]
+  refreshToken             RefreshToken[]
   refunds                  Refund[]
   staffAssignments         RestaurantStaff[]
   ownedRestaurants         Restaurant[]

@@ -55,11 +55,11 @@ app.get("/redis-test",async(req:any,res:any)=>{
     console.log(value,"this is redis value")
 })
 
-app.use(errorHandler);
-app.use(notFoundMiddleware);
+// app.use(errorHandler);
+// app.use(notFoundMiddleware);
 
-app.get("/",(req:Request, res:Response) => {
-    res.render("index");
+app.get("/list",(req:Request, res:Response) => {
+    res.render("restaurant/listing");
 });
 
 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Restaurants | Ziggy</title>
+    <%- include('../partials/head.ejs') %>
+</head>
+
+<body>
+
+<div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <%- include('../partials/customer-sidebar.ejs') %>
+
+    <div class="flex-1 flex flex-col">
+
+        <!-- Header -->
+        <header
+            class="bg-[#014f38] text-white px-8 py-4 shadow-md sticky top-0 z-30">
+
+            <div class="flex items-center gap-6">
+
+                <div class="flex-1">
+
+                    <input
+                        id="searchInput"
+                        type="text"
+                        placeholder="Search restaurants..."
+                        class="w-full bg-white text-gray-700 rounded-xl px-4 py-3 outline-none">
+
+                </div>
+
+                <button>
+                    <i class="fa-regular fa-bell text-xl"></i>
+                </button>
+
+                <button>
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                </button>
+
+            </div>
+
+        </header>
+
+        <!-- Content -->
+
+        <main class="flex-1 p-8">
+
+            <div class="mb-8">
+
+                <h1 class="text-4xl font-bold text-[#014f38]">
+                    Restaurants
+                </h1>
+
+                <p class="text-gray-500 mt-2">
+                    Browse available restaurants
+                </p>
+
+            </div>
+
+            <!-- Loading -->
+
+            <div
+                id="loading"
+                class="flex flex-col items-center justify-center py-20">
+
+                <i
+                    class="fa-solid fa-spinner animate-spin text-3xl text-[#014f38]">
+                </i>
+
+                <p class="mt-4 text-gray-500">
+                    Loading restaurants...
+                </p>
+
+            </div>
+
+            <!-- Error -->
+
+            <div
+                id="error"
+                class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6">
+            </div>
+
+            <!-- Restaurants -->
+
+            <div
+                id="restaurantsContainer"
+                class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+<script src="/js/restaurant/listing.js"></script>
+<script src="/js/common/api.js"></script>
+
+</body>
+
+</html>

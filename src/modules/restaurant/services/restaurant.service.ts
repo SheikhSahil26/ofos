@@ -34,7 +34,9 @@ export class RestaurantService{
         search
     );
 
-    const transformedRestaurants =
+    // console.log(data.restaurants[0].branches.operatingHours[0]);
+    
+const transformedRestaurants =
         data.restaurants.map(
             restaurant => ({
                 ...restaurant,
@@ -94,16 +96,21 @@ export class RestaurantService{
         data.restaurants.map(
             restaurant => ({
                 ...restaurant,
-                branches:
-                    restaurant.branches.map(
-                        (branch: IBranch) => ({
-                            ...branch,
-                            isOpenNow:
-                                isBranchOpenNow(
-                                    branch.operatingHours
-                                )
-                        })
-                    )
+                branches: restaurant.branches.map(
+    (branch: IBranch) => {
+        console.log(
+            branch.id,
+            branch.operatingHours
+        );
+
+        return {
+            ...branch,
+            isOpenNow: isBranchOpenNow(
+                branch.operatingHours
+            )
+        };
+    }
+)  
             })
         );
 
