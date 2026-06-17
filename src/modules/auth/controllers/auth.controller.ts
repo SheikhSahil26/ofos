@@ -15,6 +15,12 @@ export class AuthController {
 
   private authRepo = new AuthRepository();
   private authService = new AuthService();
+
+    landingPage = async (req: Request, res: Response) => {
+
+    return res.render(`auth/ziggy`);
+  };
+
   registerPage = async (req: Request, res: Response) => {
 
     const role: string = String(req.params.role).toLowerCase();

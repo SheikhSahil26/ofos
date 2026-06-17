@@ -20,6 +20,8 @@ export class AuthRoutes implements IRoutes {
 
   private initializeRoutes(): void {
 
+    this.router.get('/ziggy',this.controller.landingPage)
+
 
     // Static pages....
     this.router.get(

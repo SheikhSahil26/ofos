@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { RestaurantController } from "../../restaurant/controlllers/restaurant.controller";
+
 import { signupSchema } from "../validators/register.validator";
 import { ICreateUserDto, ISignupDto } from "../interfaces/auth.interface";
 import { use } from "passport";
