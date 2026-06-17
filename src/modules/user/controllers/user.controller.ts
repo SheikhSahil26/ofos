@@ -12,15 +12,13 @@ export class UserController{
     //get profile of authenticated user
     getProfile = asyncHandler(async(req: Request, res: Response) => {
 
-        // const user = req.user as Express.payload | undefined;
+        const user = req.user as Express.payload | undefined;
 
-        // if(!user || typeof user.userId !== "string"){
-        //     throw new AppError("Invalid user id", 409);
-        // }
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
 
-        // const userId = user.userId;
-
-        const userId = "05dc33d4-6713-4f32-a59e-6a50e8420934";
+        const userId = user.userId;
 
         UserValidation.validateUserId(userId);
 

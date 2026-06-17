@@ -24,7 +24,7 @@ async function loadProfile() {
     try {
 
         const response =
-            await fetch(
+            await apiRequest(
                 "/api/users/profile"
             );
 
@@ -77,6 +77,33 @@ function renderProfile(user) {
         profileImage.src =
             imageUrl;
     }
+
+
+    //sidebar user profile
+    const sidebarProfile =
+    document.getElementById(
+        "sidebarProfile"
+    );
+
+    const sidebarProileUrl = user.profilePhoto ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            user.fullName
+        )}&background=ff7a00&color=fff&size=256`;
+
+    if (sidebarProfile) {
+        sidebarProfile.src =
+            sidebarProileUrl;
+    }
+
+    setText(
+        "sidebarName",
+        user.fullName
+    );
+
+    setText(
+        "sidebarRole",
+        "Customer"
+    );
 
     setText(
         "profileName",
@@ -175,7 +202,7 @@ async function deleteAccount() {
 
         const response =
             await apiRequest(
-                "/users/profile",
+                "/api/users/profile",
                 "DELETE"
             );
 
