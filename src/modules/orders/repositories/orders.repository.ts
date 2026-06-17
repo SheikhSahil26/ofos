@@ -81,7 +81,7 @@ export class OrdersRepository {
     }
 
     async getOrdersReadyForPickup(){
-         const orders = await this.prisma.order.findMany({
+         const orders = await prisma.order.findMany({
       where: {
         status: "READY_FOR_PICKUP",
         delivery: {
