@@ -98,16 +98,25 @@ export class RestaurantRepository {
           logoUrl: true,
 
           branches: {
-            where: {
-              isPrimary: true,
-              isDeleted: false,
-            },
-            select: {
-              branchName: true,
-              city: true,
-              state: true,
-            },
-          },
+  where: {
+    isPrimary: true,
+    isDeleted: false,
+  },
+  select: {
+    branchName: true,
+    city: true,
+    state: true,
+
+    operatingHours: {
+      select: {
+        dayOfWeek: true,
+        openTime: true,
+        closeTime: true,
+        isClosed: true,
+      },
+    },
+  },
+},
         },
       }),
 
