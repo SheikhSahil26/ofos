@@ -26,3 +26,43 @@ modal.addEventListener("click", (e) => {
     closeModal();
   }
 });
+
+//updating user profile
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const profileForm =
+            document.getElementById(
+                "editProfileForm"
+            );
+
+        if (profileForm) {
+
+            profileForm.addEventListener(
+                "submit",
+                updateProfile
+            );
+        }
+    }
+);
+
+//delete profile photo
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const deletePhotoBtn =
+            document.getElementById(
+                "deleteProfilePhotoBtn"
+            );
+
+        if (deletePhotoBtn) {
+
+            deletePhotoBtn.addEventListener(
+                "click",
+                deleteProfilePhoto
+            );
+        }
+    }
+);

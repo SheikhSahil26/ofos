@@ -22,7 +22,8 @@
             action="/customer/profile"
             method="POST"
             enctype="multipart/form-data"
-            class="space-y-6">
+            class="space-y-6"
+            id="editProfileForm">
 
             <!-- Profile Photo -->
             <div>
@@ -31,10 +32,23 @@
                     Profile Photo
                 </label>
 
-                <input
+                <div class="flex gap-4">
+
+                    <input
                     type="file"
+                    id="profilePhoto"
                     name="profilePhoto"
                     class="w-full border rounded-xl p-3">
+                    
+                    <button
+                    type="button"
+                    id="deleteProfilePhotoBtn"
+                    class="mt-2 text-red-600 hover:text-red-700">
+                    
+                        <i class="fa-solid fa-trash"></i>
+                    
+                    </button>
+                </div>
 
             </div>
 
@@ -48,6 +62,7 @@
                 <input
                     type="text"
                     name="fullName"
+                    id="editFullName"
                     value="Diya Vora"
                     class="w-full border rounded-xl p-3">
 
@@ -63,6 +78,7 @@
                 <input
                     type="email"
                     value="diya@gmail.com"
+                    id="editEmail"
                     readonly
                     class="w-full border rounded-xl p-3 bg-gray-100 text-gray-500">
 
@@ -78,6 +94,7 @@
                 <input
                     type="text"
                     name="mobile"
+                    id="editMobile"
                     value="9874561257"
                     class="w-full border rounded-xl p-3">
 
@@ -87,6 +104,7 @@
             <div class="flex gap-3 pt-2">
 
                 <button
+                    id="saveProfileBtn"
                     type="submit"
                     class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl">
 

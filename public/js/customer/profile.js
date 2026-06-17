@@ -153,6 +153,34 @@ function renderProfile(user) {
         user.isVerified,
         user.isActive
     );
+
+    //edit profile page
+    const editFullName =
+    document.getElementById(
+        "editFullName"
+    );
+
+    const editEmail =
+        document.getElementById(
+            "editEmail"
+        );
+
+    const editMobile =
+        document.getElementById(
+            "editMobile"
+        );
+
+    if (editFullName)
+        editFullName.value =
+            user.fullName || "";
+
+    if (editEmail)
+        editEmail.value =
+            user.email || "";
+
+    if (editMobile)
+        editMobile.value =
+            user.mobile || "";
 }
 
 function renderStatus(
@@ -221,6 +249,9 @@ async function deleteAccount() {
 
             return;
         }
+
+        window.location.href =
+            "/api/auth/customer/static/login";
 
         showToast(
             result.message ||

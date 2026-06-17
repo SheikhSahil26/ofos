@@ -61,7 +61,7 @@ export class UserService{
         return {
             success: true,
             data: deletedUser,
-            message: "User deleted successfully",
+            message: "User profile deleted successfully",
             statusCode: 200
         }
     }
