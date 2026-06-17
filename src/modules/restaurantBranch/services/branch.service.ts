@@ -169,9 +169,8 @@ export class BranchService {
   // Get branch details by id
   async getBranchDetails(
     branchId: string,
-    userId: string,
   ): Promise<ServiceResponse<IBranchDetails>> {
-    await this.validateBranchOwnership(branchId, userId);
+    await this.branchRepo.validateBranchById(branchId);
 
     const branch = await this.branchRepo.getBranchDetails(branchId);
 

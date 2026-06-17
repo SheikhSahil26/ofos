@@ -12,7 +12,7 @@ model User {
   id                       String               @id @default(uuid())
   fullName                 String               @map("full_name") @db.VarChar(255)
   email                    String               @unique @db.VarChar(255)
-  mobile                   String               @unique @db.VarChar(20)
+  mobile                   String               @db.VarChar(20)
   passwordHash             String               @map("password_hash") @db.VarChar(255)
   profilePhoto             String?              @map("profile_photo") @db.Text
   isVerified               Boolean              @default(false) @map("is_verified")
@@ -21,7 +21,6 @@ model User {
   deletedAt                DateTime?            @map("deleted_at")
   createdAt                DateTime             @default(now()) @map("created_at")
   updatedAt                DateTime             @updatedAt @map("updated_at")
-  refreshTokens            RefreshToken[]
   couponUsages             CouponUsage[]
   deliveryPartner          DeliveryPartner?
   loyaltyAccount           LoyaltyAccount?
@@ -29,6 +28,7 @@ model User {
   orderStatusChanges       OrderStatusHistory[]
   orders                   Order[]
   savedPaymentMethods      SavedPaymentMethod[]
+  refresh_token            refresh_token[]
   refunds                  Refund[]
   staffAssignments         RestaurantStaff[]
   ownedRestaurants         Restaurant[]
@@ -84,18 +84,6 @@ model UserAddress {
 
   @@index([userId])
   @@map("user_addresses")
-}
-
-model RefreshToken {
-  id        BigInt   @id @default(autoincrement())
-  token     String   @db.Text
-  userId    String   @map("user_id")
-  isRevoked Boolean  @default(false)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 /// Restaurant entity owned by a user
@@ -181,17 +169,18 @@ model OperatingHour {
 /// Maps users (staff) to the branches they work at.
 /// Also referenced by RestaurantBranch.head_id to designate the branch head.
 model RestaurantStaff {
-  id             String             @id @default(uuid())
-  userId         String             @map("user_id")
-  branchId       String             @map("branch_id")
-  isActive       Boolean            @default(true) @map("is_active")
-  isDeleted      Boolean            @default(false) @map("is_deleted")
-  deletedAt      DateTime?          @map("deleted_at")
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
-  headOfBranches RestaurantBranch[] @relation("BranchHead")
-  branch         RestaurantBranch   @relation("BranchStaffMembers", fields: [branchId], references: [id])
-  user           User               @relation(fields: [userId], references: [id])
+  id                 String               @id @default(uuid())
+  userId             String               @map("user_id")
+  branchId           String               @map("branch_id")
+  isActive           Boolean              @default(true) @map("is_active")
+  isDeleted          Boolean              @default(false) @map("is_deleted")
+  deletedAt          DateTime?            @map("deleted_at")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  headOfBranches     RestaurantBranch[]   @relation("BranchHead")
+  restaurant_payouts restaurant_payouts[]
+  branch             RestaurantBranch     @relation("BranchStaffMembers", fields: [branchId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
 
   @@unique([userId, branchId])
   @@index([userId])
@@ -218,24 +207,24 @@ model Category {
 
 /// Individual food item on the menu
 model MenuItem {
-  id             String          @id @default(uuid())
-  branchId       String          @map("branch_id")
-  categoryId     String          @map("category_id")
-  name           String?         @db.VarChar(255)
-  description    String?         @db.Text
-  price          Decimal?        @db.Decimal(10, 2)
-  isVeg          Boolean         @default(true) @map("is_veg")
-  imageUrl       String?         @map("image_url") @db.Text
-  isAvailable    Boolean         @default(true) @map("is_available")
-  isBestseller   Boolean         @default(false) @map("is_bestseller")
-  isDeleted      Boolean         @default(false) @map("is_deleted")
-  deletedAt      DateTime?       @map("deleted_at")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  tags           MenuItemTag[]
-  category       Category        @relation(fields: [categoryId], references: [id])
-  modifierGroups ModifierGroup[]
-  orderItems     OrderItem[]
+  id                 String              @id @default(uuid())
+  branchId           String              @map("branch_id")
+  categoryId         String              @map("category_id")
+  name               String?             @db.VarChar(255)
+  description        String?             @db.Text
+  price              Decimal?            @db.Decimal(10, 2)
+  isVeg              Boolean             @default(true) @map("is_veg")
+  imageUrl           String?             @map("image_url") @db.Text
+  isAvailable        Boolean             @default(true) @map("is_available")
+  isBestseller       Boolean             @default(false) @map("is_bestseller")
+  isDeleted          Boolean             @default(false) @map("is_deleted")
+  deletedAt          DateTime?           @map("deleted_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  tags               MenuItemTag[]
+  category           Category            @relation(fields: [categoryId], references: [id])
+  modifierGroups     ModifierGroup[]
+  orderItems         OrderItem[]
   promotionMenuItems PromotionMenuItem[]
 
   @@index([categoryId])
@@ -341,41 +330,38 @@ model CouponUsage {
 }
 
 model RestaurantPromotion {
-  id String @id @default(uuid())
-  restaurantId String @map("restaurant_id")
-  title String @db.VarChar(255)
-  code String? @db.VarChar(50)
-  type PromotionType
-  discountValue Decimal? @map("discount_value") @db.Decimal(10, 2)
-  minimumOrderAmount Decimal? @map("minimum_order_amount") @db.Decimal(10, 2)
-  maximumDiscountAmount Decimal? @map("maximum_discount_amount") @db.Decimal(10, 2)
-  startDate DateTime @map("start_date") @db.Date
-  endDate DateTime @map("end_date") @db.Date
-  isActive Boolean @default(true)
-  isDeleted Boolean @default(false)
-  deletedAt DateTime?
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  promotionMenuItems PromotionMenuItem[]
-  
+  id                    String              @id @default(uuid())
+  restaurantId          String              @map("restaurant_id")
+  title                 String              @db.VarChar(255)
+  type                  PromotionType
+  discountValue         Decimal?            @map("discount_value") @db.Decimal(10, 2)
+  startDate             DateTime            @map("start_date") @db.Date
+  endDate               DateTime            @map("end_date") @db.Date
+  code                  String?             @db.VarChar(50)
+  deletedAt             DateTime?
+  isActive              Boolean             @default(true)
+  isDeleted             Boolean             @default(false)
+  maximumDiscountAmount Decimal?            @map("maximum_discount_amount") @db.Decimal(10, 2)
+  minimumOrderAmount    Decimal?            @map("minimum_order_amount") @db.Decimal(10, 2)
+  promotionMenuItems    PromotionMenuItem[]
+  restaurant            Restaurant          @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, code])
+  @@index([restaurantId])
   @@map("restaurant_promotions")
-  @@unique([restaurantId,code])
 }
 
 model PromotionMenuItem {
-  id String @id @default(uuid())
-
-  promotionId String @map("promotion_id")
-
-  menuItemId String @map("menu_item_id")
-
-  promotion  RestaurantPromotion @relation(fields: [promotionId], references: [id])
-
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  id          String              @id @default(uuid())
+  promotionId String              @map("promotion_id")
+  menuItemId  String              @map("menu_item_id")
+  menuItem    MenuItem            @relation(fields: [menuItemId], references: [id])
+  promotion   RestaurantPromotion @relation(fields: [promotionId], references: [id])
 
   @@unique([promotionId, menuItemId])
+  @@index([menuItemId], map: "promotion_menu_items_menu_item_id_fkey")
   @@map("promotion_menu_items")
 }
-
 
 /// Tracks current loyalty points balance for a customer (never delete)
 model LoyaltyAccount {
@@ -432,6 +418,7 @@ model Order {
   coupon              Coupon?              @relation(fields: [couponId], references: [id])
   customer            User                 @relation(fields: [customerId], references: [id])
   payments            Payment[]
+  payout_transactions payout_transactions?
   review              Review?
   supportTickets      SupportTicket[]
 
@@ -494,20 +481,21 @@ model OrderStatusHistory {
 
 /// Delivery partner profile linked to a user account
 model DeliveryPartner {
-  id            String                @id @default(uuid())
-  userId        String                @unique @map("user_id")
-  vehicleType   VehicleType           @map("vehicle_type")
-  vehicleNumber String                @unique @map("vehicle_number") @db.VarChar(30)
-  governmentId  String                @map("government_id") @db.VarChar(100)
-  status        DeliveryPartnerStatus @default(PENDING_VERIFICATION)
-  isDeleted     Boolean               @default(false) @map("is_deleted")
-  deletedAt     DateTime?             @map("deleted_at")
-  createdAt     DateTime              @default(now()) @map("created_at")
-  updatedAt     DateTime              @updatedAt @map("updated_at")
-  deliveries    Delivery[]            @relation("CurrentPartner")
-  assignments   DeliveryAssignment[]
-  user          User                  @relation(fields: [userId], references: [id])
-  reviews       Review[]
+  id                       String                     @id @default(uuid())
+  userId                   String                     @unique @map("user_id")
+  vehicleType              VehicleType                @map("vehicle_type")
+  vehicleNumber            String                     @unique @map("vehicle_number") @db.VarChar(30)
+  governmentId             String                     @map("government_id") @db.VarChar(100)
+  status                   DeliveryPartnerStatus      @default(PENDING_VERIFICATION)
+  isDeleted                Boolean                    @default(false) @map("is_deleted")
+  deletedAt                DateTime?                  @map("deleted_at")
+  createdAt                DateTime                   @default(now()) @map("created_at")
+  updatedAt                DateTime                   @updatedAt @map("updated_at")
+  deliveries               Delivery[]                 @relation("CurrentPartner")
+  assignments              DeliveryAssignment[]
+  delivery_partner_payouts delivery_partner_payouts[]
+  user                     User                       @relation(fields: [userId], references: [id])
+  reviews                  Review[]
 
   @@index([userId])
   @@index([vehicleNumber])
@@ -707,6 +695,89 @@ model Notification {
   @@map("notifications")
 }
 
+model delivery_partner_payouts {
+  id                    String                          @id
+  payout_transaction_id String
+  delivery_partner_id   String
+  amount                Decimal                         @db.Decimal(10, 2)
+  status                delivery_partner_payouts_status @default(PENDING)
+  settlement_id         String?
+  transferred_at        DateTime?
+  created_at            DateTime                        @default(now())
+  delivery_partners     DeliveryPartner                 @relation(fields: [delivery_partner_id], references: [id])
+  payout_transactions   payout_transactions             @relation(fields: [payout_transaction_id], references: [id])
+  settlements           settlements?                    @relation(fields: [settlement_id], references: [id])
+
+  @@index([delivery_partner_id])
+  @@index([payout_transaction_id], map: "delivery_partner_payouts_payout_transaction_id_fkey")
+  @@index([settlement_id])
+  @@index([status])
+}
+
+model payout_transactions {
+  id                       String                     @id
+  order_id                 String                     @unique
+  gross_amount             Decimal                    @db.Decimal(10, 2)
+  branch_amount            Decimal                    @db.Decimal(10, 2)
+  delivery_amount          Decimal                    @db.Decimal(10, 2)
+  platform_fee             Decimal                    @db.Decimal(10, 2)
+  status                   payout_transactions_status @default(COMPLETED)
+  processed_at             DateTime?
+  created_at               DateTime                   @default(now())
+  delivery_partner_payouts delivery_partner_payouts[]
+  orders                   Order                      @relation(fields: [order_id], references: [id])
+  restaurant_payouts       restaurant_payouts[]
+
+  @@index([order_id])
+}
+
+model refresh_token {
+  id         BigInt   @id @default(autoincrement())
+  token      String   @db.Text
+  user_id    String
+  created_at DateTime @default(now())
+  expires_at DateTime
+  is_revoked Boolean  @default(false)
+  users      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model restaurant_payouts {
+  id                    String                    @id
+  payout_transaction_id String
+  branch_head_id        String
+  amount                Decimal                   @db.Decimal(10, 2)
+  status                restaurant_payouts_status @default(PENDING)
+  settlement_id         String?
+  transferred_at        DateTime?
+  created_at            DateTime                  @default(now())
+  restaurant_staff      RestaurantStaff           @relation(fields: [branch_head_id], references: [id])
+  payout_transactions   payout_transactions       @relation(fields: [payout_transaction_id], references: [id])
+  settlements           settlements?              @relation(fields: [settlement_id], references: [id])
+
+  @@index([branch_head_id])
+  @@index([payout_transaction_id], map: "restaurant_payouts_payout_transaction_id_fkey")
+  @@index([settlement_id])
+  @@index([status])
+}
+
+model settlements {
+  id                       String                      @id
+  settlement_type          settlements_settlement_type
+  beneficiary_id           String
+  total_amount             Decimal                     @db.Decimal(10, 2)
+  payout_count             Int                         @default(0)
+  status                   settlements_status          @default(PENDING)
+  settled_at               DateTime?
+  created_at               DateTime                    @default(now())
+  delivery_partner_payouts delivery_partner_payouts[]
+  restaurant_payouts       restaurant_payouts[]
+
+  @@index([beneficiary_id])
+  @@index([status])
+}
+
 enum DayOfWeek {
   MON
   TUE
@@ -843,4 +914,31 @@ enum NotificationDeliveryStatus {
   PENDING
   SENT
   FAILED
+}
+
+enum settlements_settlement_type {
+  RESTAURANT
+  DELIVERY_PARTNER
+}
+
+enum delivery_partner_payouts_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum restaurant_payouts_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum settlements_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum payout_transactions_status {
+  COMPLETED
 }
