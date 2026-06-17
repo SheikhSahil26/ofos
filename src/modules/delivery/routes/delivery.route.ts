@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { DeliveryController } from "../controllers/delivery.controller";
+import { authorizeRoles } from "../../../middlewares/roleMiddlware";
 
 export class DeliveryRoutes implements IRoutes {
   path = "/delivery";
@@ -24,9 +25,32 @@ export class DeliveryRoutes implements IRoutes {
       this.controller.assignNearestPartner
     );
 
+    this.router.patch(
+      "/toggle-availability",
+      this.controller.toggleAvailability
+    );
     
+    this.router.get(
+      "/profile",
+      
+      this.controller.getPartnerProfile
+    );
 
+    this.router.put(
+      "/profile",
+      
+      this.controller.updatePartnerProfile
+    );
 
+      this.router.get(
+    "/earnings",
+    this.controller.getEarnings
+      );
+
+    this.router.get(
+    "/ratings",
+    this.controller.getPartnerRatings
+      );
 
     
     
