@@ -34,15 +34,15 @@ export interface OrderItem {
 
     quantity: number;
 
-    specialInstruction?: string | null;
+    // specialInstruction?: string | null;
 
     modifiers: OrderItemModifier[];
 }
 
 export interface OrderItemModifier {
-    id: string;
+    id?: string;
 
-    orderItemId: string;
+    orderItemId?: string;
 
     modifierName: string;
 
@@ -61,4 +61,32 @@ export interface OrderStatusHistory {
     changedBy?: string | null;
 
     changedAt?: Date | null;
+}
+
+export enum PaymentMethod {
+    COD = "COD",
+    UPI = "UPI",
+    CARD = "CARD",
+    NET_BANKING = "NET_BANKING",
+    WALLET = "WALLET",
+}
+
+export interface CreateOrderInput {
+    userId: string;
+
+    addressId: string;
+
+    paymentMethod: PaymentMethod;
+
+    couponCode?: string;
+
+    scheduledAt?: Date;
+}
+export interface OrderItemInput {
+    menuItemId: string;
+    quantity: number;
+    unitPrice: number;
+    menuItemName: string;
+    modifiers: OrderItemModifier[];
+    specialInstruction?: string;
 }

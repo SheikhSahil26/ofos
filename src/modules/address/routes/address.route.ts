@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { AddressController } from "../controllers/address.controller";
+import { isAuthenticated } from "../../../middlewares/authenticateMiddlware";
 
 export class AddressRoutes implements IRoutes{
     path =  "/addresses";
@@ -12,11 +13,11 @@ export class AddressRoutes implements IRoutes{
     }
 
     private initializeRoutes(){
-        this.router.get("/", this.controller.getAddresses);
-        this.router.get("/:id", this.controller.getAddressById);
-        this.router.post("/", this.controller.createAddress);
-        this.router.put("/:id", this.controller.updateAddressById);
-        this.router.delete("/:id", this.controller.deleteAddressById);
-        this.router.patch("/default/:id", this.controller.setDefaultAddress);
+        this.router.get("/", isAuthenticated, this.controller.getAddresses);
+        this.router.get("/:id", isAuthenticated, this.controller.getAddressById);
+        this.router.post("/", isAuthenticated, this.controller.createAddress);
+        this.router.put("/:id", isAuthenticated, this.controller.updateAddressById);
+        this.router.delete("/:id", isAuthenticated, this.controller.deleteAddressById);
+        this.router.patch("/default/:id", isAuthenticated, this.controller.setDefaultAddress);
     }
 }

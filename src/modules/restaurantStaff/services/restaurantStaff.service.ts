@@ -1,7 +1,6 @@
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
 import { AuthRepository } from "../../auth/repositories/auth.repository";
-import { UserRepository } from "../../user/repositories/user.repository";
 import { IBranchStaff } from "../interfaces/restaurantStaff.interface";
 import { RestaurantStaffRepository } from "../repositories/restaurantStaff.repository";
 import { hashPassword } from "../../../utils/bcrypt";
@@ -17,18 +16,7 @@ export class RestaurantStaffService{
         const branch = await this.staffRepo.getBranchById(branchId);
 
         if(!branch){
-            throw new AppError("Branch not found");
-        }
-
-        return true;
-    }
-
-    //check if staff alread assigned to particular branch or not
-    async validateStaff(branchId: string, userId: string): Promise<boolean>{
-        const staff = await this.staffRepo.findStaffAssignment(userId, branchId);
-
-        if(staff){
-            throw new AppError("Staff alread exist in branch");
+            throw new AppError("Branch not found", 404);
         }
 
         return true;
@@ -59,21 +47,33 @@ export class RestaurantStaffService{
 
     //add staff
     async addStaff(branchId: string, data: ISignupDto): Promise<ServiceResponse<IBranchStaff>>{
+        
+        const role = "RESTAURANT_STAFF"
+
+        //check if branch exist or not
+        await this.validateBranch(branchId);
 
         //check if user exist or not
         const isExist = await this.authRepo.findUserByEmail(data.email);
-        const role = "RESTAURANT_STAFF"
 
         //user already exists
         if(isExist){
-
-            //check if branch exist or not
-            await this.validateBranch(branchId);
         
             //check if staff exist in particular branch or not
-            await this.validateStaff(isExist.id, branchId);
+            const assigned = await this.staffRepo.findStaffAssignment(branchId, isExist.id);
 
-            await this.staffRepo.addStaff(branchId, isExist.id);
+            if(assigned){
+
+                if(!assigned.isDeleted){
+                    throw new AppError("Staff already exist in branch", 409);
+                }
+
+                await this.staffRepo.reactiveStaff(branchId, isExist.id);
+            }
+            else{
+
+                await this.staffRepo.addStaff(branchId, isExist.id);
+            }
 
             //add restaurant_staff role and userId to user role table
             const hasRole = isExist.userRoles.some(ur => ur.role.role === role);
@@ -89,7 +89,7 @@ export class RestaurantStaffService{
             }
         }
 
-        //user not exist
+        //if user not exist
         const hashedPassword = await hashPassword(data.password);
 
         const userData: ICreateUserDto = {
@@ -131,7 +131,11 @@ export class RestaurantStaffService{
         await this.validateBranch(branchId);
 
         //check if staff exist in particular branch or not
-        await this.validateStaff(userId, branchId);
+        const isExist = await this.staffRepo.findStaffAssignment(branchId, userId);
+
+        if(!isExist || isExist.isDeleted){
+            throw new AppError("Staff doesn't exist", 404);
+        }
 
         await this.staffRepo.removeStaff(branchId, userId);
 

@@ -342,7 +342,6 @@ async function main() {
       { orderId: order.id, oldStatus: "PREPARING",   newStatus: "READY_FOR_PICKUP",changedBy: uStaff.id,    changedAt: new Date("2025-06-01T13:00:00Z") },
       { orderId: order.id, oldStatus: "READY_FOR_PICKUP", newStatus: "DELIVERED",  changedBy: uDriver.id,   changedAt: new Date("2025-06-01T13:10:00Z") },
     ],
-    []
   });
   console.log("✅ OrderStatusHistory seeded");
 

@@ -2,6 +2,7 @@
 async function apiRequest(url,method = "GET",body = null) {
     let token =
         localStorage.getItem("accessToken");
+        console.log(token);
 
     let response = await fetch(url, {
             method,
@@ -17,6 +18,8 @@ async function apiRequest(url,method = "GET",body = null) {
 
             body: body? JSON.stringify(body): null
         });
+
+    console.log(response);
 
     if (response.status === 401) {
 

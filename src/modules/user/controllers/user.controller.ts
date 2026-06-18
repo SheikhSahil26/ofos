@@ -3,20 +3,34 @@ import { UserService } from "../services/user.service";
 import { IUpdateUser } from "../interfaces/user.interface";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
 import { uploadImage } from "../../../services/multer.service";
+import { UserValidation } from "../validations/user.validation";
+import { AppError } from "../../../utils/appError";
 
 export class UserController {
     private userService = new UserService();
 
+    //dashboard page
+    dashboardPage = asyncHandler( async(req: Request, res: Response) => {
+        res.status(200).render("customer/dashboard");
+    });
+
+    //get profile page
+    getProfilePage = asyncHandler(async(req: Request, res: Response) => {
+        res.status(200).render("customer/profile");
+    });
+    
     //get profile of authenticated user
     getProfile = asyncHandler(async (req: Request, res: Response) => {
 
-        //from token we will get user id
-        const user = req.user as Express.payload;
+        const user = req.user as Express.payload | undefined;
+
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
         const userId = user.userId;
 
-        if (typeof userId !== 'string') {
-            return res.status(400).json({ success: false, message: "Invalid user id" });
-        }
+        UserValidation.validateUserId(userId);
 
         const response = await this.userService.getProfile(userId);
 
@@ -26,18 +40,24 @@ export class UserController {
     //edit user profile 
     updateProfile = asyncHandler(async (req: Request, res: Response) => {
 
-        //from token we will get user id
-        const userId = "05dc33d4-6713-4f32-a59e-6a50e8420934";
+        const user = req.user as Express.payload | undefined;
 
-        if (typeof userId !== 'string') {
-            return res.status(400).json({ success: false, message: "Invalid user id" });
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
+       
+        UserValidation.validateUserId(userId);
 
         //mapping data from request body and file to IUpdateUser interface
         const data: IUpdateUser = {
             fullName: req.body?.fullName,
             mobile: req.body?.mobile
         };
+
+        //validating fullName and mobile
+        UserValidation.validateUpdateProfile(data);
 
         let imageurl: string | undefined;
 
@@ -57,9 +77,17 @@ export class UserController {
     });
 
     //delete profile photo
-    deleteProfilePhoto = asyncHandler(async (req: Request, res: Response) => {
+    deleteProfilePhoto = asyncHandler(async(req: Request, res: Response) => {
+        
+        const user = req.user as Express.payload | undefined;
 
-        const userId = req.user.id;
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
+        const userId = user.userId;
+
+        UserValidation.validateUserId(userId);
 
         const response = await this.userService.deletePofilePhoto(userId);
 
@@ -69,12 +97,15 @@ export class UserController {
     //delete user account
     deleteUserAccount = asyncHandler(async (req: Request, res: Response) => {
 
-        //from token we will get user id
-        const userId = req.user.id;
+        const user = req.user as Express.payload | undefined;
 
-        if (typeof userId !== 'string') {
-            return res.status(400).json({ success: false, message: "Invalid user id" });
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
         }
+
+        const userId = user.userId;
+ 
+        UserValidation.validateUserId(userId);
 
         const response = await this.userService.deleteUserAccount(userId);
 

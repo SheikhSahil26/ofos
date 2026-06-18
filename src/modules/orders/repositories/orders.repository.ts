@@ -5,7 +5,7 @@ export class OrdersRepository {
     prisma: any;
   // get restaurant details by id
     async createOrder(
-        userId: number
+        userId: string
     ){
         //order creation logic will be here
         
@@ -65,14 +65,14 @@ export class OrdersRepository {
         // Update the order's current status
         const updatedOrder = await prisma.order.update({
             where: { id: orderId },
-            data: { status: newStatus },
+            data: { status: newStatus as any },
         });
 
         // Log the status change in the history table
         await prisma.orderStatusHistory.create({
             data: {
                 orderId: orderId,
-                status: newStatus,
+                newStatus : newStatus as any,
                 changedAt: new Date(),
             },
         });

@@ -16,7 +16,7 @@ export class CartController {
             res: Response
         ) => {
 
-            const userId = 1; // dummy
+            const userId = "1"; // dummy
 
             const data =
                 await this.cartService.getCart(
@@ -37,7 +37,7 @@ export class CartController {
             res: Response
         ) => {
 
-            const userId = 1; // dummy
+            const userId = "428f4215-9945-4bda-92fb-6d46ae145955"; // dummy
 
             const {
     menuItemId,
@@ -65,7 +65,7 @@ export class CartController {
             res: Response
         ) => {
 
-            const userId = 1; // dummy
+            const userId = "1"; // dummy
 
            const params: RemoveCartItemDTO = {
     itemId: req.params.itemId as string,
@@ -91,7 +91,7 @@ export class CartController {
         res: Response
     ) => {
 
-        const userId = 1; // Replace with req.user.userId
+        const userId = "1"; // Replace with req.user.userId
 
         const result =
             await this.cartService.clearCart(
@@ -112,7 +112,7 @@ export class CartController {
         res: Response
     ) => {
 
-        const userId = 1; // replace with req.user.userId
+        const userId = "1"; // replace with req.user.userId
 
         const result =
             await this.cartService.validateCart(
@@ -139,7 +139,7 @@ export class CartController {
         res: Response
     ) => {
 
-        const userId = 1; // replace with req.user.userId
+        const userId = "1"; // replace with req.user.userId
 
         const result =
             await this.cartService.getCartSummary(

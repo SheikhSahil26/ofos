@@ -3,6 +3,7 @@ import { AppError } from "../../../utils/appError";
 import { ISignupDto } from "../../auth/interfaces/auth.interface";
 import { RestaurantStaffService } from "../services/restaurantStaff.service";
 import { Request, Response } from "express";
+import { RestaurantStaffValidation } from "../validations/restaurantStaff.validation";
 
 export class RestaurantStaffController{
     
@@ -15,6 +16,8 @@ export class RestaurantStaffController{
         if(typeof branchId !== "string"){
             throw new AppError("Invalid branch id");
         }
+
+        RestaurantStaffValidation.validateId(branchId, "branch id");
 
         const response = await this.staffService.getStaffByBranch(branchId);
 
@@ -29,6 +32,8 @@ export class RestaurantStaffController{
             throw new AppError("Invalid branch id");
         }
 
+        RestaurantStaffValidation.validateId(branchId, "branch id");
+
         const data: ISignupDto = {
             fullName: req.body.fullName,
             email: req.body.email,
@@ -36,6 +41,8 @@ export class RestaurantStaffController{
             password: req.body.password,
             confirmPassword: req.body.confirmPassword,
         }
+
+        RestaurantStaffValidation.validateAddStaff(data);
 
         const response = await this.staffService.addStaff(branchId, data);
 
@@ -50,6 +57,9 @@ export class RestaurantStaffController{
         if(typeof branchId !== "string" || typeof userId !== "string"){
             throw new AppError("Invalid user or branch id");
         }
+
+        RestaurantStaffValidation.validateId(branchId, "branch id");
+        RestaurantStaffValidation.validateId(userId, "user id");
 
         const response = await this.staffService.removeStaff(branchId, userId);
 

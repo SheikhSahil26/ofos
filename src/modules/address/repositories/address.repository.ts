@@ -25,7 +25,8 @@ export class AddressRepository{
     async getAddresses(userId: string): Promise<IAddress[]>{
         return prisma.userAddress.findMany({
             where: {
-                userId
+                userId,
+                isDeleted: false,
             },
             select: addressSelect
         });
@@ -36,7 +37,8 @@ export class AddressRepository{
         return await prisma.userAddress.findFirst({
             where: {
                 id: addressId,
-                userId
+                userId,
+                isDeleted: false,
             },
             select: addressSelect
         });

@@ -3,7 +3,7 @@ import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
 import { IOperatingHourResponse, IOperatingHourValidation, IUpdateOperatingHour } from "../interface/operating-hour.interface";
 import { OperatingHourRepositiry } from "../repository/operating-hour.repo";
-import { BranchService } from "../../restaurant-branch/services/branch.service";
+import { BranchService } from "../../restaurantBranch/services/branch.service";
 
 export class OperatingHourService {
 

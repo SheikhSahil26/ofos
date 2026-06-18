@@ -1,7 +1,7 @@
 function showToast(message, type = "success") {
 
     const toast =
-        document.getElementById("toast");
+    document.getElementById("toast");
     console.log(toast)
     toast.textContent = message;
 
