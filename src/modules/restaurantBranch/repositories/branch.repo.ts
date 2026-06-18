@@ -248,7 +248,10 @@ async getBranchDetails(
             restaurant:{
                 select:{
                     id:true,
-                    name:true
+                    name:true,
+                    description:true,
+                    logoUrl:true,
+                    coverImageUrl:true
                 }
             },
 

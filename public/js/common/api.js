@@ -2,7 +2,7 @@
 async function apiRequest(url,method = "GET",body = null) {
     let token =
         localStorage.getItem("accessToken");
-        console.log(token);
+        // console.log(token);
 
     let response = await fetch(url, {
             method,

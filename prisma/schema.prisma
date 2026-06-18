@@ -28,7 +28,7 @@ model User {
   orderStatusChanges       OrderStatusHistory[]
   orders                   Order[]
   savedPaymentMethods      SavedPaymentMethod[]
-  refreshTokens            RefreshToken[]
+  refreshToken             RefreshToken[]
   refunds                  Refund[]
   staffAssignments         RestaurantStaff[]
   ownedRestaurants         Restaurant[]
@@ -934,4 +934,31 @@ enum NotificationDeliveryStatus {
   PENDING
   SENT
   FAILED
+}
+
+enum settlements_settlement_type {
+  RESTAURANT
+  DELIVERY_PARTNER
+}
+
+enum delivery_partner_payouts_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum restaurant_payouts_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum settlements_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum payout_transactions_status {
+  COMPLETED
 }

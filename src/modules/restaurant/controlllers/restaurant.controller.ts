@@ -302,4 +302,33 @@ createReview = asyncHandler(async(
             data:review
         });
 });
+
+getRestaurantPageData =
+asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const branchId =
+            req.params.branchId as string;
+
+        const user =
+            req.user as Express.payload;
+
+        const response =
+            await this.restaurantService
+                .getRestaurantPageData(
+                    branchId,
+                    user.userId
+                );
+
+        return res
+            .status(
+                response.statusCode || 200
+            )
+            .json(response);
+
+    }
+);
 }
