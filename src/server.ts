@@ -61,10 +61,6 @@ app.get("/redis-test",async(req:any,res:any)=>{
     console.log(value,"this is redis value")
 });
 
-app.get("/",(req:Request, res:Response) => {
-    res.render("customer/profile");
-});
-
 app.use(notFoundMiddleware);
 
 
