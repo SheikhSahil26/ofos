@@ -3,7 +3,7 @@ import { AppError } from "../../../utils/appError";
 import { AddressRepository } from "../../address/repositories/address.repository";
 import { LoyaltyPointsRepository } from "../../loyaltyPoints/repositories/loyaltyPoints.repository";
 import { OrdersRepository } from "../../orders/repositories/orders.repository";
-import { IDashboard, IUpdateUser, IUser } from "../interfaces/user.interface";
+import { ICurrentOrder, IDashboard, IRecentRestaurant, IUpdateUser, IUser } from "../interfaces/user.interface";
 import { UserRepository } from "../repositories/user.repository";
 
 export class UserService{
@@ -35,7 +35,10 @@ export class UserService{
             orders,
             addresses,
             loyaltyAccount,
-            reviews
+            reviews,
+            recentRestaurants,
+            currentOrder,
+
         ] = await Promise.all([
             this.orderRepo.getOrderCountById(userId),
 
@@ -43,16 +46,45 @@ export class UserService{
 
             this.loyaltyRepo.getBalanceByCustomerId(userId),
 
-            0
+            0,
+            
+            this.orderRepo.getRecentRestaurants(userId),
+
+            this.orderRepo.getRecentOrder(userId),
         ]);
 
+        //mapping restaurants to IRecentRestaurant interface
+        const mappedRestaurants: IRecentRestaurant[] = recentRestaurants.map(order => ({
+            restaurantId: order.branch.restaurant.id,
+            restaurantName: order.branch.restaurant.name,
+            logoUrl: order.branch.restaurant.logoUrl,
+
+            branchId: order.branch.id,
+            branchName: order.branch.branchName,
+
+            placedAt: order.placedAt,
+        }));
+
+        //mapping current order to ICurrentOrder interface
+        const mappedOrder: ICurrentOrder = {
+            id: currentOrder?.id || null ,
+            orderNumber: currentOrder?.orderNumber || null,
+            status: currentOrder?.status || null,
+            placedAt: currentOrder?.placedAt || null
+        }
+
+        
         const result: IDashboard = {
             id: userId,
             totalOrders: orders,
             savedAddresses: addresses.length || 0,
             loyaltyPoints: loyaltyAccount?.currentPoints || 0,
-            totalReviews: 0
+            totalReviews: reviews,
+            recentRestaurants: mappedRestaurants,
+            currentOrder: mappedOrder
         }
+
+        console.log("user service", result);
 
         return {
             success: true,

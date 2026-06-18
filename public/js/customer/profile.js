@@ -78,6 +78,11 @@ function renderProfile(user) {
             imageUrl;
     }
 
+    //dashboard name
+    setText(
+        "dashboardName",
+        `Hello, ${user.fullName} 👋`
+    )
 
     //sidebar user profile
     const sidebarProfile =
