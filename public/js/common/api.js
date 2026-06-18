@@ -1,4 +1,4 @@
-
+console.log("hello")
 async function apiRequest(url,method = "GET",body = null) {
     let token =
         localStorage.getItem("accessToken");

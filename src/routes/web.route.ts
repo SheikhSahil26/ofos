@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { IRoutes } from "../common/interfaces/route.interface";
 import { AdminWebRoutes } from "../modules/admin/routes/admin.web.route";
+import { MenuWebRoutes } from "../modules/menu/routes/menu.web.route";
 
 export function buildWebRoutes(): Router{
     const router = Router();
@@ -8,6 +9,7 @@ export function buildWebRoutes(): Router{
     const routes: IRoutes[] = [
         //create frontend view routes here
         new AdminWebRoutes(),
+        new MenuWebRoutes(),
     ];
 
     routes.forEach((route) => {

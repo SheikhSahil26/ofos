@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Menu Management</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    <div class="flex min-h-screen bg-[#f5f7f6]">
+
+        <%- include('../partials/restaurant-sidebar') %>
+
+        <main class="flex-1 p-8">
+
+            <!-- Menu Management Content -->
+
+            <div class="flex-1 bg-[#f5f7f6] p-8 overflow-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+
+        <div>
+
+            <h1 class="text-3xl font-bold text-[#014f38]">
+                Menu Management
+            </h1>
+
+            <p class="text-gray-500 mt-1">
+                Manage categories, menu items and modifiers
+            </p>
+
+        </div>
+
+        <div class="flex gap-3">
+
+            <button
+                id="addCategoryBtn"
+                class="bg-white border border-[#014f38] text-[#014f38] px-5 py-3 rounded-xl font-medium">
+
+                + Category
+
+            </button>
+
+            <button
+                id="addItemBtn"
+                class="bg-[#ff7a00] text-white px-5 py-3 rounded-xl font-medium">
+
+                + Item
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Search -->
+    <div class="mb-6">
+
+        <input
+            type="text"
+            placeholder="Search menu items..."
+            class="w-full bg-white rounded-2xl px-5 py-4 outline-none shadow-sm">
+
+    </div>
+
+    <!-- Content -->
+    <div class="grid grid-cols-12 gap-6">
+
+        <!-- Categories -->
+        <div class="col-span-3">
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+
+                <h2 class="font-semibold text-[#014f38] mb-4">
+                    Categories
+                </h2>
+
+                <div id="categoryList" class="space-y-2">
+
+                    
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Menu Items -->
+        <div class="col-span-9">
+
+            <div
+                id="menuItemsContainer"
+                class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            </div>
+
+        </div>
+
+        <!-- template for the menu item card -->
+        <template id="menuItemTemplate">
+
+            <div
+                class="bg-white rounded-2xl shadow-sm overflow-hidden">
+
+                <img
+                    class="item-image w-full h-40 object-cover">
+
+                <div class="p-5">
+
+                    <div class="flex justify-between items-start">
+
+                        <h3
+                            class="item-name font-semibold text-lg">
+                        </h3>
+
+                        <span
+                            class="item-type text-xs px-2 py-1 rounded-full">
+                        </span>
+
+                    </div>
+
+                    <p
+                        class="item-description text-gray-500 text-sm mt-2">
+                    </p>
+
+                    <p
+                        class="item-price text-[#014f38] font-bold text-lg mt-3">
+                    </p>
+
+                    <div
+                        class="item-badges flex flex-wrap gap-2 mt-3">
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+
+                        <button
+                            class="edit-btn flex-1 border border-[#014f38] text-[#014f38] py-2 rounded-lg">
+                            Edit
+                        </button>
+
+                        <button
+                            class="modifier-btn flex-1 bg-[#014f38] text-white py-2 rounded-lg">
+                            Modifiers
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </template>
+
+    </div>
+
+</div>
+
+        </main>
+
+    </div>
+    <script src="/js/restaurant/menu-management.js"></script>
+</body>
+</html>

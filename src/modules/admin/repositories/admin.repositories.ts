@@ -78,4 +78,26 @@ export class AdminRepository{
             },
         });
     }
+
+
+    async getUserById(id: string) {
+        return prisma.user.findFirst({
+            where: {
+                id,
+                isDeleted: false,
+            },
+        });
+    }
+    // to activate and deactivate user
+    async updateUserStatus(
+        id: string,
+        isActive: boolean
+    ) {
+        return prisma.user.update({
+            where: { id },
+            data: {
+                isActive,
+            },
+        });
+    }
 }

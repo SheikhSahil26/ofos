@@ -71,3 +71,14 @@ export interface IRestaurantOwnerDetailsResponse {
 
     createdAt: Date;
 }
+
+//to activate and deactivate user
+export interface IUpdateUserStatus {
+    isActive: boolean;
+    reason: string; // reason is mandatory acc to frd
+}
+
+//assign role
+export interface IAssignRole {
+    roleId: string;
+}

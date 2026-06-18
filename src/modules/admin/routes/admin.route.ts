@@ -15,5 +15,6 @@ export class AdminRoutes implements IRoutes{
         this.router.get("/users/:id",this.controller.getUserDetails); /* get general info of the user */
         this.router.get("/customers/:id",this.controller.getCustomerDetails); /* customer details */
         this.router.get("/restaurant-owners/:id",this.controller.getRestaurantOwnerDetails); /* restaurant owner details */
+        this.router.patch("/users/:id/status", this.controller.updateUserStatus); // activate and deactivate a user
     }
 }

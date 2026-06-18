@@ -19,6 +19,13 @@ export class MenuRepository{
                 branchId,
                 isDeleted: false,
             },
+            include: {
+                _count: {
+                    select: {
+                    menuItems: true
+                    }
+                }
+            },
             orderBy: {
                 displayOrder: "asc",
             },
@@ -30,7 +37,7 @@ export class MenuRepository{
             where: {
                 id,
                 isDeleted: false,
-            },
+            }
         });
     }
 

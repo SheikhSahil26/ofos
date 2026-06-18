@@ -14,7 +14,7 @@ export class AdminWebRoutes implements IRoutes{
     private initializeRoutes(){
         
         this.router.get("/dashboard", (req: Request, res: Response) => {
-            res.status(200).render("customer/dashboard");
+            res.status(200).render("admin/dashboard");
         });
     }
 }
