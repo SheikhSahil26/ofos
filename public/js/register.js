@@ -94,10 +94,10 @@ signupForm.addEventListener(
         }
 
         try {
-            
+
             const response =
                 await fetch(
-                    `http://localhost:8080/api/auth/${role}/api/register`,
+                    `http://localhost:8080/api/auth/${role}/register`,
                     {
                         method: "POST",
 
@@ -118,7 +118,7 @@ signupForm.addEventListener(
             const result =
                 await response.json();
 
-                console.log(result)
+            console.log(result)
 
             if (response.ok) {
 
@@ -131,7 +131,7 @@ signupForm.addEventListener(
                 setTimeout(() => {
 
                     window.location.href =
-                        `http://localhost:8080/api/auth/${role}/static/login`;
+                        `http://localhost:8080/${role}/login`;
 
                 }, 1500);
 

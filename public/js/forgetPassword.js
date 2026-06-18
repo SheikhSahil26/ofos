@@ -105,7 +105,7 @@ submitOTP.addEventListener(
                 setTimeout(() => {
 
                     window.location.href =
-                        "/api/auth/reset-password";
+                        "/reset-password";
 
                 }, 1500);
 

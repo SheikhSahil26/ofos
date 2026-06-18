@@ -13,53 +13,28 @@ export class AuthRoutes implements IRoutes {
   router = Router();
   controller = new AuthController();
 
-
   constructor() {
     this.initializeRoutes();
   }
 
   private initializeRoutes(): void {
 
-    this.router.get('/ziggy',this.controller.landingPage)
-
-
-    // Static pages....
-    this.router.get(
-      "/:role/static/register", 
-      this.controller.registerPage
-    );
-
-    this.router.get(
-      "/:role/static/login",
-      this.controller.loginPage
-    );
-
-
-    this.router.get('/static/inbox', this.controller.mailInboxPage);
-    this.router.get('/forget-password', this.controller.forgetPasswordPage);
-    this.router.get('/reset-password',this.controller.resetPasswordPage)
-
-
     // Api's.....
 
     this.router.post(
-      "/:role/api/register",
+      "/:role/register",
       validate(signupSchema),
       this.controller.register
     );   
 
     this.router.post(
-      "/:role/api/login",
+      "/:role/login",
       this.controller.login
     );
 
-    this.router.get('/static/role-selection',this.controller.roleSelectionPage)
 
     this.router.post('/refresh-token', this.controller.refreshToken);
     this.router.post('/logout', this.controller.logout)
-    
-    //Test the Token
-    this.router.get('/:role/static/dashboard',this.controller.getDashboard)
 
 
     // Forget Password  related Routes...........................
@@ -68,8 +43,8 @@ export class AuthRoutes implements IRoutes {
       .get(this.controller.forgetPassword)
       .post(this.controller.verifyOtp)
 
-    this.router.get('/api/inbox',isAuthenticated,this.controller.sentOtpOnMail);
-    this.router.patch('/api/reset-password', isAuthenticated,this.controller.resetPassword)
+    this.router.get('/inbox',isAuthenticated,this.controller.sentOtpOnMail);
+    this.router.patch('/reset-password', isAuthenticated,this.controller.resetPassword)
 
   }
 }

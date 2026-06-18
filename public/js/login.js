@@ -75,7 +75,7 @@ loginForm.addEventListener('submit',
 
             const response =
                 await fetch(
-                    `http://localhost:8080/api/auth/${role}/api/login`,
+                    `http://localhost:8080/api/auth/${role}/login`,
                     {
                         method: "POST",
 
@@ -107,7 +107,7 @@ loginForm.addEventListener('submit',
                     "accessToken",
                     result.data.accessToken
                 );
-                window.location.href = "http://localhost:8080/api/auth/customer/static/dashboard";
+                window.location.href = `http://localhost:8080/${role}/dashboard`;
 
             } else {
 
