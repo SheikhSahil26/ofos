@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { CartController } from "../controllers/cart.controllers";
+import { isAuthenticated } from "../../../middlewares/authenticateMiddlware";
+import { authorizeRoles } from "../../../middlewares/roleMiddlware";
 
 export class CartRoutes implements IRoutes {
   path = "/cart";
@@ -18,9 +20,9 @@ export class CartRoutes implements IRoutes {
     // this.router.get("/owner/my-restaurants", this.controller.getMyRestaurants);
 console.log("Cart routes initialized");
     // Get current user's cart
-this.router.get("/", this.controller.getCart);
+this.router.get("/", isAuthenticated,authorizeRoles("CUSTOMER") , this.controller.getCart);
 
-this.router.post("/add-to-cart", this.controller.addToCart);
+this.router.post("/add-to-cart",isAuthenticated,authorizeRoles("CUSTOMER") ,this.controller.addToCart);
 
 // // Add item to cart
 // this.router.post("/items", this.controller.addCartItem);
@@ -29,7 +31,7 @@ this.router.post("/add-to-cart", this.controller.addToCart);
 // this.router.put("/items/:itemId", this.controller.updateCartItem);
 
 // Remove item from cart
-this.router.delete("/remove-item/:itemId", this.controller.removeCartItem); //delete the item's quantity first and if zero then remove the item entirely from cart
+this.router.delete("/remove-item/:itemId",isAuthenticated,authorizeRoles("CUSTOMER") , this.controller.removeCartItem); //delete the item's quantity first and if zero then remove the item entirely from cart
 
 // // Clear entire cart
 this.router.delete("/delete-cart", this.controller.clearCart);
@@ -40,6 +42,10 @@ this.router.delete("/delete-cart", this.controller.clearCart);
 // // Get cart summary
 this.router.get("/summary", this.controller.getCartSummary);
 
-
+// this.router.get("/see-cart",(req:any,res:any)=> {
+//   res.send("Cart routes are working");
+//   return res.render("cart/see-cart", { title: "Cart Page" });
+//   })
+// }
   }
 }

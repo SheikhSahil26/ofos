@@ -2,6 +2,7 @@ import { prisma } from "../../../config/prisma";
 import { CartRepository } from "../repositories/cart.repository";
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { Cart, CartItem, CartModifier } from "../interfaces/cart.interface";
+import { EnrichedCart, EnrichedCartItem } from "../types/cart.types";
 
 
 
@@ -11,25 +12,66 @@ export class CartService {
 
     async getCart(
         userId: string
-    ): Promise<ServiceResponse<Cart>> {
+    ): Promise<ServiceResponse<EnrichedCart>> {
 
-        const cart =
+        const cart:any =
             await this.cartRepo.getCart(userId);
 
-        if (!cart) {
-            return {
-                success: false,
-                error: "Cart not found",
-                statusCode: 404,
-            };
-        }
+            console.log("Cart details:", cart);
 
-        return {
-            success: true,
-            message: "Cart fetched successfully",
-            data: cart,
-            statusCode: 200,
-        };
+   const menuItemIds = cart.items.map((item: any) => item.menuItemId);
+
+  const menuItems = await prisma.menuItem.findMany({
+    where: {
+      id: { in: menuItemIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });
+
+  const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  const enrichedItems: EnrichedCartItem[] = cart.items.map((item: any) => {
+    const dbItem = menuItemMap.get(item.menuItemId);
+
+    return {
+      menuItemId: item.menuItemId,
+      name: dbItem?.name ?? "Item unavailable",
+      description: dbItem?.description ?? null,
+      imageUrl: dbItem?.imageUrl ?? null,
+      isVeg: dbItem?.isVeg ?? true,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      modifiers: item.modifiers || [],
+      specialInstruction: item.specialInstruction,
+      itemTotal: item.quantity * item.unitPrice,
+      // Flag if item became unavailable since being added to cart
+      isCurrentlyAvailable: dbItem
+        ? dbItem.isAvailable && !dbItem.isDeleted
+        : false,
+    };
+  });
+
+  const enrichedCart: EnrichedCart = {
+    userId: cart.userId,
+    restaurantBranchId: cart.restaurantBranchId,
+    items: enrichedItems,
+    subtotal: cart.subtotal,
+  };
+
+  return {
+    success: true,
+    message: "Cart fetched successfully",
+    data: enrichedCart,
+    statusCode: 200,
+  };
     }
 
     async addToCart(
@@ -54,7 +96,7 @@ export class CartService {
                     id: menuItemId,
                 },
                 select: {
-                    branch_id: true,
+                    branchId: true,
                     price: true,
                 },
             });
@@ -64,7 +106,7 @@ export class CartService {
             throw new Error("Menu item not found");
         }
 
-        const branchId = menuItem.branch_id;
+        const branchId = menuItem.branchId;
 
         const existingCart =
             await this.cartRepo.getCart(

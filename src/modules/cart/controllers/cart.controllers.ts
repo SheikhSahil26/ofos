@@ -16,12 +16,15 @@ export class CartController {
             res: Response
         ) => {
 
-            const userId = "1"; // dummy
+            const user = req.user as Express.payload  // dummy
 
+            console.log(user,"user in cart controller")
             const data =
                 await this.cartService.getCart(
-                    userId
+                    user.userId
                 );
+
+                console.log(data,"cart data in controller")
 
             return res
                 .status(
@@ -32,40 +35,36 @@ export class CartController {
     );
 
     addToCart = asyncHandler(
-        async (
-            req: Request,
-            res: Response
-        ) => {
+  async (req: Request, res: Response) => {
+    const user = req.user as Express.payload // dummy
 
-            const userId = "428f4215-9945-4bda-92fb-6d46ae145955"; // dummy
+    const {
+      menuItemId,
+      quantity,
+      modifiers,
+      specialInstruction,
+    }: AddToCartDTO = req.body;
 
-            const {
-    menuItemId,
-    quantity,
-}: AddToCartDTO = req.body;
-
-            const data =
-                await this.cartService.addToCart(
-                    userId,
-                    menuItemId,
-                    Number(quantity)
-                );
-
-            return res
-                .status(
-                    data.statusCode || 200
-                )
-                .json(data);
-        }
+    const data = await this.cartService.addToCart(
+      user.userId,
+      menuItemId,
+      Number(quantity),
+      modifiers || [],
+      specialInstruction,
     );
 
+    return res
+      .status(data.statusCode || 200)
+      .json(data);
+  }
+);
     removeCartItem = asyncHandler(
         async (
             req: Request,
             res: Response
         ) => {
 
-            const userId = "1"; // dummy
+            const user = req.user as Express.payload; // dummy
 
            const params: RemoveCartItemDTO = {
     itemId: req.params.itemId as string,
@@ -73,7 +72,7 @@ export class CartController {
 
             const data =
                 await this.cartService.removeCartItem(
-                    userId,
+                    user.userId,
                     params.itemId
                 );
 
