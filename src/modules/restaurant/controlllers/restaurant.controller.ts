@@ -314,13 +314,13 @@ asyncHandler(
             req.params.branchId as string;
 
         const user =
-            req.user as Express.payload;
+            req.user as Express.payload | undefined;
 
         const response =
             await this.restaurantService
                 .getRestaurantPageData(
                     branchId,
-                    user.userId
+                    user?.userId
                 );
 
         return res

@@ -7,6 +7,7 @@ import { AppError } from "../../../utils/appError";
 import { isBranchOpenNow } from "../../restaurantBranch/utils/branch-open-status.util"
 import { RestaurantPromotionRepository } from "../../restaurantPromotion/repository/promotion.repo";
 import { MenuRepository } from "../../menu/repositories/menu.repository";
+import { BranchRepository } from "../../restaurantBranch/repositories/branch.repo";
 
 
 export class RestaurantService{
@@ -15,6 +16,7 @@ export class RestaurantService{
     private userRepo: UserRepository = new UserRepository();
     private promotionRepository : RestaurantPromotionRepository = new RestaurantPromotionRepository();
     private menuRepository : MenuRepository = new MenuRepository();
+    private branchRepo: BranchRepository = new BranchRepository();
 
     //get all restaurants
    async getRestaurants(
@@ -815,7 +817,7 @@ async createReview(
 
 async getRestaurantPageData(
     branchId: string,
-    userId: string
+    userId?: string
 ): Promise<ServiceResponse<any>> {
 
     const branch =
