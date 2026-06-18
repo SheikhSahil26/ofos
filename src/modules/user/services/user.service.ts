@@ -1,11 +1,17 @@
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
-import { IUpdateUser, IUser } from "../interfaces/user.interface";
+import { AddressRepository } from "../../address/repositories/address.repository";
+import { LoyaltyPointsRepository } from "../../loyaltyPoints/repositories/loyaltyPoints.repository";
+import { OrdersRepository } from "../../orders/repositories/orders.repository";
+import { IDashboard, IUpdateUser, IUser } from "../interfaces/user.interface";
 import { UserRepository } from "../repositories/user.repository";
 
 export class UserService{
 
     private userRepo = new UserRepository();
+    private orderRepo = new OrdersRepository();
+    private addressRepo = new AddressRepository();
+    private loyaltyRepo = new LoyaltyPointsRepository();
 
     //check if user exist or not
     async validateUser(userId: string): Promise<boolean>{
@@ -17,6 +23,44 @@ export class UserService{
         }
 
         return true;
+    }
+
+    //get dashboard of user
+    async getDashboard(userId: string): Promise<ServiceResponse<IDashboard>>{
+        
+        //check if user exist or not
+        await this.validateUser(userId);
+
+        const [
+            orders,
+            addresses,
+            loyaltyAccount,
+            reviews
+        ] = await Promise.all([
+            this.orderRepo.getOrderCountById(userId),
+
+            this.addressRepo.getAddresses(userId),
+
+            this.loyaltyRepo.getBalanceByCustomerId(userId),
+
+            0
+        ]);
+
+        const result: IDashboard = {
+            id: userId,
+            totalOrders: orders,
+            savedAddresses: addresses.length || 0,
+            loyaltyPoints: loyaltyAccount?.currentPoints || 0,
+            totalReviews: 0
+        }
+
+        return {
+            success: true,
+            data: result,
+            message: "Dashboard stats details fetched successfully",
+            statusCode: 200
+        }
+
     }
 
     //get profile of user

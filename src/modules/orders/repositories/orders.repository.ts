@@ -126,5 +126,12 @@ export class OrdersRepository {
         return orders;
     }
 
-  
+    //count total orders per user by userId
+    async getOrderCountById(userId: string): Promise<number>{
+        return await this.prisma.order.count({
+            where: {
+                customerId: userId,
+            }
+        });
+    }
 }

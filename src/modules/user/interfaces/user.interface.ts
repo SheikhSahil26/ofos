@@ -22,3 +22,11 @@ export interface IUser{
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface IDashboard {
+    id: string;
+    totalOrders: number;
+    savedAddresses: number;
+    loyaltyPoints: number;
+    totalReviews: number;
+}

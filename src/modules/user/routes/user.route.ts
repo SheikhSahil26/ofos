@@ -14,6 +14,7 @@ export class UserRoutes implements IRoutes{
     }
 
     private initializeRoutes() : void{
+        this.router.get("/dashboard", isAuthenticated, this.controller.getDashboard);
         this.router.get("/profile", isAuthenticated, this.controller.getProfile);
         this.router.patch("/profile", isAuthenticated, upload.single("profilePhoto"), this.controller.updateProfile);
         this.router.delete("/profile", isAuthenticated, this.controller.deleteUserAccount);
