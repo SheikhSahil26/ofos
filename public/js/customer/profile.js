@@ -16,6 +16,19 @@ document.addEventListener(
                 deleteAccount
             );
         }
+
+        const logoutBtn =
+            document.getElementById(
+                "logoutBtn"
+            );
+
+        if (logoutBtn) {
+
+            logoutBtn.addEventListener(
+                "click",
+                logout
+            );
+        }
     }
 ); 
 
@@ -313,4 +326,68 @@ function formatDate(date) {
                 year: "numeric"
             }
         );
+}
+
+//logout btn
+async function logout() {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to logout?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await apiRequest(
+                "/api/auth/logout",
+                "POST"
+            );
+
+        if (!response) return;
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            showToast(
+                result.message ||
+                "Logout failed",
+                "error"
+            );
+
+            return;
+        }
+
+        localStorage.removeItem(
+            "accessToken"
+        );
+
+        showToast(
+            result.message ||
+            "Logged out successfully",
+            "success"
+        );
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/api/auth/customer/static/login";
+
+        }, 1000);
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Something went wrong",
+            "error"
+        );
+    }
 }

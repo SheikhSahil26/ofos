@@ -14,11 +14,11 @@ export class UserWebRoutes implements IRoutes{
     private initializeRoutes(){
         
         this.router.get("/profile", (req: Request, res: Response) => {
-            res.status(200).render("customer/profile");
+            res.status(200).render("customer/profile", {activePage: "profile"});
         });
 
         this.router.get("/dashboard", (req: Request, res: Response) => {
-            res.status(200).render("customer/dashboard");
+            res.status(200).render("customer/dashboard", {activePage: "dashboard"});
         });
     }
 }
