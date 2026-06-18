@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { RestaurantController } from "../../restaurant/controlllers/restaurant.controller";
 import { signupSchema } from "../validators/register.validator";
 import { ICreateUserDto, ISignupDto } from "../interfaces/auth.interface";
 import { use } from "passport";
@@ -51,7 +50,8 @@ export class AuthRepository {
 
     return await prisma.user.findUnique({
       where: {
-        id: userId
+        id: userId,
+        isDeleted: false
       }
     });
 
@@ -61,7 +61,7 @@ export class AuthRepository {
   async findUserByEmail(email: string) {
     try {
       const user = await prisma.user.findUnique({
-        where: { email },
+        where: { email, isDeleted: false },
         include: { userRoles: { include: { role: true } } }, // include roles if needed
       });
       return user;
@@ -95,6 +95,7 @@ export class AuthRepository {
       const user = await prisma.user.findFirst({
         where: {
           email: email,
+          isDeleted:false,
           userRoles: {
             some: {
               role: {
@@ -152,7 +153,7 @@ export class AuthRepository {
 
     return await prisma.refreshToken.create({
       data: {
-        user_id: userId,
+        userId: userId,
         token: refreshToken,
         expiresAt
       }

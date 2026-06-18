@@ -4,6 +4,9 @@ export const authorizeRoles =(...roles: string[]) =>(req: Request,res: Response,
 
             const user = req.user as Express.payload;
 
+            console.log('Is Authorize person')
+            console.log(user)
+
             if (!user) {
 
                 return res.status(401).json({

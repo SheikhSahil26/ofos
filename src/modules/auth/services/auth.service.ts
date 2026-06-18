@@ -288,7 +288,7 @@ console.log("loginuser service started after try");
             otp: bcryptOTP,
         })
 
-        const otpLink = 'http://localhost:8080/api/auth/static/inbox'; // you can replace with real email link
+        const otpLink = 'http://localhost:8080/inbox'; // you can replace with real email link
 
         return {
             status: 'Success',

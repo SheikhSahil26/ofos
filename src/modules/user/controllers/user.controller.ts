@@ -6,7 +6,7 @@ import { uploadImage } from "../../../services/multer.service";
 import { UserValidation } from "../validations/user.validation";
 import { AppError } from "../../../utils/appError";
 
-export class UserController{                                                                                 
+export class UserController {
     private userService = new UserService();
 
     //dashboard page
@@ -20,7 +20,7 @@ export class UserController{
     });
     
     //get profile of authenticated user
-    getProfile = asyncHandler(async(req: Request, res: Response) => {
+    getProfile = asyncHandler(async (req: Request, res: Response) => {
 
         const user = req.user as Express.payload | undefined;
 
@@ -38,7 +38,7 @@ export class UserController{
     });
 
     //edit user profile 
-    updateProfile = asyncHandler( async(req: Request, res: Response) => {
+    updateProfile = asyncHandler(async (req: Request, res: Response) => {
 
         const user = req.user as Express.payload | undefined;
 
@@ -95,7 +95,7 @@ export class UserController{
     });
 
     //delete user account
-    deleteUserAccount = asyncHandler(async(req: Request, res: Response) => {
+    deleteUserAccount = asyncHandler(async (req: Request, res: Response) => {
 
         const user = req.user as Express.payload | undefined;
 
@@ -108,7 +108,7 @@ export class UserController{
         UserValidation.validateUserId(userId);
 
         const response = await this.userService.deleteUserAccount(userId);
-        
+
         res.status(response.statusCode || 200).json(response);
     });
 }
