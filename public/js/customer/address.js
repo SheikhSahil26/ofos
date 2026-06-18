@@ -146,14 +146,14 @@ function createDefaultCard(address) {
             <div class="mt-5 flex gap-3">
 
                 <button
-                    class="text-[#014f38] font-medium" onclick="editAddress(${address.id})">
+                    class="text-[#014f38] font-medium" onClick=openEditModal()>
 
                     Edit
 
                 </button>
 
                 <button
-                    class="text-red-500 font-medium" onclick="deleteAddress(${address.id})>
+                    class="text-red-500 font-medium">
 
                     Delete
 
@@ -206,14 +206,14 @@ function createAddressCard(address) {
                 </button>
 
                 <button
-                    class="text-[#014f38] font-medium" onclick="editAddress(${address.id})>
+                    class="text-[#014f38] font-medium" onClick=openEditModal()>
 
                     Edit
 
                 </button>
 
                 <button
-                    class="text-red-500 font-medium" onclick="deleteAddress(${address.id})>
+                    class="text-red-500 font-medium">
 
                     Delete
 
@@ -224,3 +224,4 @@ function createAddressCard(address) {
         </div>
     `;
 }
+

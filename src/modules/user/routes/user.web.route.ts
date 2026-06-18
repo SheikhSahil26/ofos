@@ -12,7 +12,7 @@ export class UserWebRoutes implements IRoutes{
     }
 
     private initializeRoutes(){
-
+        
         this.router.get("/home", (req: Request, res: Response) => {
             res.status(200).render("customer/home", {activePage: "home"})
         })
