@@ -22,7 +22,11 @@ export class MenuRepository{
             include: {
                 _count: {
                     select: {
-                    menuItems: true
+                    menuItems:{
+                        where: {
+                            isDeleted: false,
+                        },
+                    }
                     }
                 }
             },
