@@ -48,6 +48,7 @@ app.use(buildWebRoutes());
 
 //this will initiate all the routes 
 app.use("/api", buildApiRouter());
+app.use("/", buildWebRoutes());
 
 
 //working fine redis
@@ -66,17 +67,7 @@ app.get("/list",(req:Request, res:Response) => {
 });
 
 
-
-
-
-
-
-
-
-
-
-
-app.listen(PORT,()=>{
-    console.log(`server is running on http://localhost:${PORT}`);
+app.listen(8080,()=>{
+    console.log(`server started at port : ${PORT}`);
 });
 

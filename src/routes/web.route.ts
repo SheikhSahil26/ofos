@@ -1,15 +1,13 @@
 import { Router } from "express"
 import { IRoutes } from "../common/interfaces/route.interface";
-import { CartWebRoutes } from "../modules/cart/routes/cart.web.route";
-// import { UserWebRoutes } from "../modules/user/routes/user.web.route";
+import { WebAuthRoutes } from "../modules/auth/routes/auth.web.route";
 
-export function buildWebRoutes(): Router{
+export function buildWebRoutes(): Router {
     const router = Router();
 
     const routes: IRoutes[] = [
         //create frontend view routes here
-        // new UserWebRoutes(),
-        new CartWebRoutes(),
+        new WebAuthRoutes(),
     ];
 
     routes.forEach((route) => {
@@ -17,4 +15,4 @@ export function buildWebRoutes(): Router{
     });
 
     return router;
-} 
+}
