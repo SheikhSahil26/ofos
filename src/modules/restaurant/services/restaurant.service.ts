@@ -5,12 +5,16 @@ import { prisma } from "../../../config/prisma";
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
 import { isBranchOpenNow } from "../../restaurantBranch/utils/branch-open-status.util"
+import { RestaurantPromotionRepository } from "../../restaurantPromotion/repository/promotion.repo";
+import { MenuRepository } from "../../menu/repositories/menu.repository";
 
 
 export class RestaurantService{
 
     private restaurantRepo: RestaurantRepository = new RestaurantRepository();
     private userRepo: UserRepository = new UserRepository();
+    private promotionRepository : RestaurantPromotionRepository = new RestaurantPromotionRepository();
+    private menuRepository : MenuRepository = new MenuRepository();
 
     //get all restaurants
    async getRestaurants(
@@ -807,5 +811,61 @@ async createReview(
         };
 
 
+}
+
+async getRestaurantPageData(
+    branchId: string,
+    userId: string
+): Promise<ServiceResponse<any>> {
+
+    const branch =
+        await this.branchRepo.getBranchDetails(
+            branchId
+        );
+
+    if (!branch) {
+        throw new AppError(
+            "Branch not found",
+            404
+        );
+    }
+
+    const restaurantId =
+        branch.restaurant.id;
+
+    const [menu, promotions] =
+        await Promise.all([
+
+            this.menuRepository.getFullMenu(
+                branchId
+            ),
+
+            this.promotionRepository
+                .getActivePromotions(
+                    restaurantId
+                )
+
+        ]);
+
+    return {
+
+        success: true,
+
+        message:
+            "Restaurant page data fetched successfully",
+
+        statusCode: 200,
+
+        data: {
+
+            branch,
+
+            menu,
+
+            promotions
+
+        }
+
+    };
 }
 }

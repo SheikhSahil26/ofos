@@ -20,5 +20,9 @@ export class RestaurantRoutes implements IRoutes {
     this.router.patch("/:id/status", this.controller.updateRestaurantStatus);
     this.router.delete("/:id", this.controller.deleteRestaurant);
     this.router.get("/:id/reviews", this.controller.getRestaurantReviews);
+    this.router.get(
+      "/restaurant-page/:branchId",
+      this.controller.getRestaurantPageData,
+    );
   }
-} 
+}

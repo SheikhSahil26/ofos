@@ -1,419 +1,196 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
-<head>
-    <title>Pizza Palace | Ziggy</title>
+  <head>
+    <title>Restaurant Details | Ziggy</title>
     <%- include('../partials/head.ejs') %>
-</head>
+  </head>
 
-<body>
-
-<div class="flex min-h-screen">
-
-    <!-- Sidebar -->
+  <body class="bg-[#f8f7f4] min-h-screen">
+    <!-- Header -->
     <%- include('../partials/customer-sidebar.ejs') %>
 
-    <!-- Main Content -->
-    <div class="flex-1">
-
-        <!-- Top Header -->
-        <header class="bg-[#014f38] text-white px-8 py-4 sticky top-0 z-40">
-
-            <div class="flex items-center justify-between">
-
-                <div>
-                    <a href="/restaurants"
-                        class="flex items-center gap-2 text-white/90 hover:text-white">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        Back to Restaurants
-                    </a>
-                </div>
-
-                <div class="flex items-center gap-6">
-
-                    <button>
-                        <i class="fa-solid fa-magnifying-glass text-xl"></i>
-                    </button>
-
-                    <button>
-                        <i class="fa-regular fa-bell text-xl"></i>
-                    </button>
-
-                    <button>
-                        <i class="fa-solid fa-cart-shopping text-xl"></i>
-                    </button>
-
-                </div>
-
-            </div>
-
-        </header>
-
-        <div class="max-w-7xl mx-auto px-8 py-8">
-
-            <!-- Restaurant Hero -->
-
-            <div
-                class="bg-white rounded-3xl shadow-sm border overflow-hidden mb-8">
-
-                <div class="md:flex">
-
-                    <img
-                        src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200"
-                        class="w-full md:w-96 h-72 object-cover"
-                        alt="Restaurant">
-
-                    <div class="flex-1 p-8">
-
-                        <div class="flex justify-between items-start">
-
-                            <div>
-
-                                <h1 class="text-4xl font-bold text-gray-900">
-                                    Pizza Palace
-                                </h1>
-
-                                <p class="text-gray-500 mt-2">
-                                    Pizza • Italian • Fast Food
-                                </p>
-
-                            </div>
-
-                            <div
-                                class="bg-green-600 text-white px-4 py-3 rounded-xl">
-
-                                <div class="font-bold text-lg">
-                                    ★ 4.5
-                                </div>
-
-                                <div class="text-xs">
-                                    1.2k Reviews
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div
-                            class="flex flex-wrap gap-6 mt-6 text-gray-600">
-
-                            <span>
-                                <i class="fa-regular fa-clock"></i>
-                                30 mins
-                            </span>
-
-                            <span>
-                                ₹200 min order
-                            </span>
-
-                            <span>
-                                Free delivery above ₹499
-                            </span>
-
-                        </div>
-
-                        <div
-                            class="mt-6 bg-green-50 text-green-700 px-4 py-3 rounded-xl inline-flex items-center gap-2">
-
-                            <i class="fa-solid fa-tags"></i>
-
-                            50% OFF up to ₹100 on orders above ₹199
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="grid grid-cols-12 gap-8">
-
-                <!-- Menu Section -->
-                <div class="col-span-8">
-
-                    <!-- Categories -->
-
-                    <div
-                        class="sticky top-20 z-20 bg-[#f8f7f4] py-4 mb-6">
-
-                        <div class="flex gap-3 overflow-x-auto">
-
-                            <button
-                                class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl">
-                                Recommended
-                            </button>
-
-                            <button
-                                class="bg-white border px-6 py-3 rounded-xl">
-                                Pizza
-                            </button>
-
-                            <button
-                                class="bg-white border px-6 py-3 rounded-xl">
-                                Sides
-                            </button>
-
-                            <button
-                                class="bg-white border px-6 py-3 rounded-xl">
-                                Beverages
-                            </button>
-
-                            <button
-                                class="bg-white border px-6 py-3 rounded-xl">
-                                Desserts
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Menu Items -->
-
-                    <div class="space-y-5">
-
-                        <!-- Item -->
-
-                        <div
-                            class="bg-white rounded-2xl p-5 shadow-sm border">
-
-                            <div class="flex gap-5">
-
-                                <img
-                                    src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500"
-                                    class="w-32 h-32 rounded-2xl object-cover">
-
-                                <div class="flex-1">
-
-                                    <div
-                                        class="flex justify-between items-start">
-
-                                        <div>
-
-                                            <div
-                                                class="flex items-center gap-2 mb-2">
-
-                                                <i
-                                                    class="fa-regular fa-circle text-green-600"></i>
-
-                                                <span
-                                                    class="text-sm text-green-600">
-                                                    Veg
-                                                </span>
-
-                                            </div>
-
-                                            <h3
-                                                class="text-xl font-semibold">
-                                                Margherita Pizza
-                                            </h3>
-
-                                            <p
-                                                class="text-gray-500 mt-2 max-w-xl">
-                                                Classic delight with 100%
-                                                real mozzarella cheese and
-                                                fresh basil.
-                                            </p>
-
-                                            <p
-                                                class="font-bold text-xl mt-3">
-                                                ₹199
-                                            </p>
-
-                                        </div>
-
-                                        <button
-                                            class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl hover:bg-orange-600">
-
-                                            Add +
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <!-- Item -->
-
-                        <div
-                            class="bg-white rounded-2xl p-5 shadow-sm border">
-
-                            <div class="flex gap-5">
-
-                                <img
-                                    src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500"
-                                    class="w-32 h-32 rounded-2xl object-cover">
-
-                                <div class="flex-1">
-
-                                    <div
-                                        class="flex justify-between items-start">
-
-                                        <div>
-
-                                            <h3
-                                                class="text-xl font-semibold">
-                                                Farmhouse Pizza
-                                            </h3>
-
-                                            <p
-                                                class="text-gray-500 mt-2">
-                                                Onion, capsicum, tomato,
-                                                mushroom and cheese.
-                                            </p>
-
-                                            <p
-                                                class="font-bold text-xl mt-3">
-                                                ₹249
-                                            </p>
-
-                                        </div>
-
-                                        <button
-                                            class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl">
-
-                                            Add +
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <!-- Item -->
-
-                        <div
-                            class="bg-white rounded-2xl p-5 shadow-sm border">
-
-                            <div class="flex gap-5">
-
-                                <img
-                                    src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500"
-                                    class="w-32 h-32 rounded-2xl object-cover">
-
-                                <div class="flex-1">
-
-                                    <div
-                                        class="flex justify-between items-start">
-
-                                        <div>
-
-                                            <h3
-                                                class="text-xl font-semibold">
-                                                Garlic Bread
-                                            </h3>
-
-                                            <p
-                                                class="text-gray-500 mt-2">
-                                                Crispy garlic bread with
-                                                cheesy dip.
-                                            </p>
-
-                                            <p
-                                                class="font-bold text-xl mt-3">
-                                                ₹99
-                                            </p>
-
-                                        </div>
-
-                                        <button
-                                            class="bg-[#ff7a00] text-white px-6 py-3 rounded-xl">
-
-                                            Add +
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- Cart Sidebar -->
-
-                <div class="col-span-4">
-
-                    <div
-                        class="sticky top-24 bg-white rounded-3xl shadow-sm border p-6">
-
-                        <h2 class="text-2xl font-bold mb-6">
-                            Your Cart
-                        </h2>
-
-                        <div class="space-y-4">
-
-                            <div
-                                class="flex justify-between">
-
-                                <span>
-                                    Margherita Pizza × 2
-                                </span>
-
-                                <span>
-                                    ₹398
-                                </span>
-
-                            </div>
-
-                            <div
-                                class="flex justify-between">
-
-                                <span>
-                                    Garlic Bread × 1
-                                </span>
-
-                                <span>
-                                    ₹99
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <hr class="my-5">
-
-                        <div
-                            class="flex justify-between font-bold text-lg">
-
-                            <span>Total</span>
-
-                            <span>₹497</span>
-
-                        </div>
-
-                        <button
-                            class="w-full mt-6 bg-[#014f38] text-white py-4 rounded-xl font-semibold hover:bg-[#013327]">
-
-                            Proceed to Checkout
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+    <main
+      id="restaurantPage"
+      class="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8"
+    >
+      <!-- Breadcrumb -->
+
+      <div class="mb-6">
+        <button
+          id="backBtn"
+          class="flex items-center gap-2 text-sm text-gray-600 hover:text-[#ff7a00] transition"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back to Restaurants</span>
+        </button>
+      </div>
+
+      <!-- Hero Section -->
+
+      <section
+        id="restaurantHero"
+        class="bg-white rounded-[28px] border border-[#ececec] overflow-hidden shadow-sm mb-8"
+      >
+        <div class="h-[400px] flex items-center justify-center">
+          <div class="text-center">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-[#ff7a00]"></i>
+
+            <p class="mt-4 text-gray-500">Loading restaurant...</p>
+          </div>
         </div>
+      </section>
 
+      <!-- Promotion Banner -->
+
+      <section id="promotionContainer" class="mb-8 hidden"></section>
+
+      <!-- Category Tabs -->
+
+      <section class="sticky top-16 z-30 bg-[#f8f7f4] py-4 mb-6">
+        <div
+          id="categoryTabs"
+          class="flex gap-3 overflow-x-auto scrollbar-hide"
+        ></div>
+      </section>
+
+      <!-- Menu Container -->
+
+      <section id="menuContainer" class="space-y-12">
+        <div
+          class="bg-white rounded-[28px] border border-[#ececec] p-10 text-center"
+        >
+          <i class="fa-solid fa-spinner fa-spin text-4xl text-[#ff7a00]"></i>
+
+          <p class="mt-4 text-gray-500">Loading menu...</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modifier Modal -->
+
+    <div id="modifierModal" class="fixed inset-0 bg-black/50 hidden z-[999]">
+      <div
+        class="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-2xl mx-auto"
+      >
+        <div class="bg-white rounded-[28px] p-6 max-h-[85vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-semibold text-gray-900">Customize Item</h2>
+
+            <button
+              id="closeModifierModal"
+              class="h-10 w-10 rounded-full border border-gray-200"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div id="modifierContent"></div>
+        </div>
+      </div>
     </div>
 
-</div>
+    <!-- Hidden Templates -->
 
-</body>
+    <template id="categoryTabTemplate">
+      <button
+        class="category-tab shrink-0 px-6 py-3 rounded-xl border border-[#e5e7eb] bg-white text-gray-700 font-medium transition hover:border-[#ff7a00]"
+      ></button>
+    </template>
 
+    <template id="menuCategoryTemplate">
+      <section class="menu-category">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-2xl font-semibold text-gray-900"></h2>
+
+          <span class="text-sm text-gray-500"></span>
+        </div>
+
+        <div class="space-y-5 menu-items"></div>
+      </section>
+    </template>
+
+    <template id="menuItemTemplate">
+      <div
+        class="bg-white rounded-[24px] border border-[#ececec] p-5 shadow-sm"
+      >
+        <div class="flex flex-col md:flex-row gap-5">
+          <img
+            class="item-image w-full md:w-40 h-40 object-cover rounded-2xl"
+          />
+
+          <div class="flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span
+                  class="veg-badge hidden text-xs px-2 py-1 rounded-full bg-green-100 text-green-700"
+                >
+                  Veg
+                </span>
+
+                <span
+                  class="bestseller-badge hidden text-xs px-2 py-1 rounded-full bg-[#fff1e5] text-[#ff7a00]"
+                >
+                  Bestseller
+                </span>
+              </div>
+
+              <h3 class="item-name text-xl font-semibold text-gray-900"></h3>
+
+              <p
+                class="item-description text-gray-500 mt-2 leading-relaxed"
+              ></p>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between gap-4">
+              <div>
+                <p class="item-price text-2xl font-bold text-gray-900"></p>
+
+                <p class="item-status text-sm mt-1"></p>
+              </div>
+
+              <button
+                class="add-to-cart-btn bg-[#ff7a00] hover:bg-[#e76d00] text-white px-6 py-3 rounded-xl font-semibold transition"
+              >
+                Add +
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Empty State -->
+
+    <template id="emptyMenuTemplate">
+      <div
+        class="bg-white border border-[#ececec] rounded-[28px] p-12 text-center"
+      >
+        <i class="fa-solid fa-utensils text-5xl text-gray-300"></i>
+
+        <h3 class="mt-4 text-xl font-semibold">No Menu Available</h3>
+
+        <p class="mt-2 text-gray-500">
+          This restaurant hasn't added menu items yet.
+        </p>
+      </div>
+    </template>
+
+    <!-- Error State -->
+
+    <template id="errorTemplate">
+      <div
+        class="bg-white border border-[#ececec] rounded-[28px] p-12 text-center"
+      >
+        <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
+
+        <h3 class="mt-4 text-xl font-semibold">Unable to load restaurant</h3>
+
+        <p class="mt-2 text-gray-500">Please try again later.</p>
+      </div>
+    </template>
+
+    <script src="/js/restaurant/restaurant-details.js"></script>
+    <script src="/js/common/api.js"></script>
+  </body>
 </html>

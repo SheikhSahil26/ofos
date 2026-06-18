@@ -58,8 +58,8 @@ app.get("/redis-test",async(req:any,res:any)=>{
 // app.use(errorHandler);
 // app.use(notFoundMiddleware);
 
-app.get("/list",(req:Request, res:Response) => {
-    res.render("restaurant/listing");
+app.get("/",(req:Request, res:Response) => {
+    res.render("restaurant/detailPage");
 });
 
 
