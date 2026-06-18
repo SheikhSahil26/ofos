@@ -14,9 +14,12 @@
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+
+    <link rel="stylesheet" href="/css/common/toast.css">
 </head>
 
 <body>
+    <p id="toast"></p>
 
     <div class="flex min-h-screen bg-[#f5f7f6]">
 
@@ -53,12 +56,10 @@
 
             </button>
 
-            <button
-                id="addItemBtn"
-                class="bg-[#ff7a00] text-white px-5 py-3 rounded-xl font-medium">
-
-                + Item
-
+            <button id="addMenuItemBtn"
+                class="bg-[#ff7a00] text-white px-4 py-2 rounded-xl">
+                <i class="fa-solid fa-plus mr-2"></i>
+                Add Item
             </button>
 
         </div>
@@ -99,6 +100,78 @@
 
         <!-- Menu Items -->
         <div class="col-span-9">
+
+            <!-- right panel header -->
+            <div
+                class="bg-white rounded-2xl p-5 shadow-sm mb-5">
+
+                <div class="flex justify-between items-center">
+
+                    <div>
+
+                        <h2
+                            id="selectedCategoryName"
+                            class="text-2xl font-bold text-[#014f38]">
+
+                            Starters
+
+                        </h2>
+
+                        <p
+                            id="selectedCategoryCount"
+                            class="text-gray-500 mt-1">
+
+                            2 Items
+
+                        </p>
+
+                    </div>
+
+                    <div class="flex gap-3">
+
+                        <button
+                            id="editCategoryBtn"
+                            class="
+                                px-4
+                                py-2
+                                border
+                                border-[#014f38]
+                                text-[#014f38]
+                                rounded-lg
+                                hover:bg-[#014f38]
+                                hover:text-white
+                                transition
+                            ">
+
+                            <i class="fa-solid fa-pen mr-2"></i>
+                            Edit Category
+
+                        </button>
+
+                        <button
+                            id="deleteCategoryBtn"
+                            class="
+                                px-4
+                                py-2
+                                bg-red-500
+                                text-white
+                                rounded-lg
+                                hover:bg-red-600
+                                transition
+                            ">
+
+                            <i class="fa-solid fa-trash mr-2"></i>
+                            Delete Category
+
+                        </button>
+
+                        
+
+                    </div>
+
+                </div>
+
+            </div>
 
             <div
                 id="menuItemsContainer"
@@ -176,11 +249,13 @@
         id="categoryModal"
         class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
+        <input type="hidden" id="editingCategoryId">
+
         <div class="bg-white w-full max-w-md rounded-2xl p-6">
 
             <div class="flex justify-between items-center mb-5">
 
-                <h2 class="text-xl font-bold text-[#014f38]">
+                <h2 id="categoryModalTitle" class="text-xl font-bold text-[#014f38]">
                     Create Category
                 </h2>
 
@@ -206,23 +281,8 @@
 
                 </div>
 
-                <div class="mb-5">
-
-                    <label class="block mb-2 text-sm font-medium">
-                        Display Order
-                    </label>
-
-                    <input
-                        id="displayOrder"
-                        type="number"
-                        min="0"
-                        value="0"
-                        class="w-full border rounded-xl px-4 py-3">
-
-                </div>
-
                 <button
-                    type="submit"
+                    type="submit" id="saveCategoryBtn"
                     class="w-full bg-[#ff7a00] text-white py-3 rounded-xl">
 
                     Create Category
@@ -236,8 +296,121 @@
     </div>
 
 
+    <!-- Delete Category Modal -->
+    <div id="deleteCategoryModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
 
-    <script src="/js/restaurant/create-category.js"></script>
+            <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-trash text-red-500 text-2xl"></i>
+            </div>
+
+            <div class="text-center mt-4">
+                <h2 class="text-2xl font-bold text-[#014f38]">Delete Category</h2>
+
+                <p class="text-gray-500 mt-3">
+                    Are you sure you want to delete
+                    <span id="deleteCategoryName" class="font-semibold text-[#014f38]"></span>?
+                </p>
+
+                <p class="text-sm text-gray-400 mt-2">
+                    This category will be hidden from the menu.
+                </p>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button id="cancelDeleteBtn" class="flex-1 border border-gray-300 py-3 rounded-xl hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+
+                <button id="confirmDeleteBtn" class="flex-1 bg-red-500 text-white py-3 rounded-xl hover:bg-red-600 transition">
+                    Delete
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- create menu item modal-->
+     <div id="menuItemModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+
+            <h2 class="text-2xl font-bold text-[#014f38] mb-6">Add Menu Item</h2>
+
+            <form id="menuItemForm">
+
+                <div class="mb-4">
+                    <label class="block mb-2">Item Name</label>
+                    <input id="itemName" type="text" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Description</label>
+                    <textarea id="itemDescription" class="w-full border rounded-xl px-4 py-3"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Price</label>
+                    <input id="itemPrice" type="number" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Food Type</label>
+
+                    <div class="flex gap-6">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="foodType" value="true" checked>
+                            <span>Veg</span>
+                        </label>
+
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="foodType" value="false">
+                            <span>Non Veg</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Item Image</label>
+                    <input type="file" id="itemImage" accept="image/*" class="w-full border rounded-xl p-3">
+                </div>
+
+                <div class="flex gap-6 mb-6">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="isAvailable" checked>
+                        <span>Available</span>
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="isBestseller">
+                        <span>Bestseller</span>
+                    </label>
+                </div>
+
+                <div id="tagsContainer" class="flex flex-wrap gap-2 mb-6"></div>
+
+                <div class="flex gap-3">
+                    <button type="button" id="closeMenuItemModal" class="flex-1 border rounded-xl py-3">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="flex-1 bg-[#ff7a00] text-white rounded-xl py-3">
+                        Create Item
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/common/api.js"></script>
+    <script  src="/js/restaurant/create-category.js"></script>
     <script src="/js/restaurant/menu-management.js"></script>
 </body>
 </html>

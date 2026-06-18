@@ -7,6 +7,8 @@ export interface ICreateMenuItem {
   isVeg?: boolean;
   imageUrl?: string;
   tagIds?: string[];
+  isAvailable?: boolean;
+  isBestseller?: boolean;
 }
 
 export interface ICategoryParams {

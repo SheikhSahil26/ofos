@@ -4,11 +4,22 @@ import { ICreateCategory, IReorderCategory, IUpdateCategory } from "../interface
 
 export class MenuRepository{
     async createCategory(data: ICreateCategory) {
+        const lastCategory =
+        await prisma.category.findFirst({
+            where: {
+                branchId: data.branchId,
+                isDeleted: false,
+            },
+            orderBy: {
+                displayOrder: "desc",
+            },
+        });
+
         return prisma.category.create({
             data: {
                 branchId: data.branchId,
                 name: data.name,
-                displayOrder: data.displayOrder ?? 0,
+                displayOrder:  (lastCategory?.displayOrder ?? 0) + 1,
             },
         });
     }
