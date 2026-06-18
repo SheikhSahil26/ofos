@@ -16,7 +16,7 @@ export class AuthController {
   private authRepo = new AuthRepository();
   private authService = new AuthService();
 
-    landingPage = async (req: Request, res: Response) => {
+  landingPage = async (req: Request, res: Response) => {
 
     return res.render(`auth/ziggy`);
   };

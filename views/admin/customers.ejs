@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Admin Page"}) %>
+
+    <body class="bg-slate-100">
+
+        <div class="flex min-h-screen">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- MAIN -->
+
+                <main class="flex-1 p-8">
+
+                    <!-- KPI CARDS -->
+                    <div>
+
+                        <div class="p-8">
+
+                            <!-- PAGE HEADER -->
+
+                            <div class="flex justify-between items-center mb-8">
+
+                                <div>
+
+                                    <h1 class="text-4xl font-bold">
+                                        Customer Management
+                                    </h1>
+
+                                    <p class="text-gray-500 mt-1">
+                                        Manage all platform customers
+                                    </p>
+
+                                </div>
+
+                                <button
+                                    class="bg-orange-500 text-white px-5 py-3 rounded-xl hover:bg-orange-600 transition">
+
+                                    Export Customers
+
+                                </button>
+
+                            </div>
+
+                            <!-- STATS -->
+
+                            <div class="grid lg:grid-cols-4 gap-6 mb-8">
+
+                                <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                    <p class="text-gray-500">
+                                        Total Customers
+                                    </p>
+
+                                    <h2 class="text-3xl font-bold mt-2">
+                                        3,210
+                                    </h2>
+
+                                </div>
+
+                                <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                    <p class="text-gray-500">
+                                        Active Customers
+                                    </p>
+
+                                    <h2 class="text-3xl font-bold mt-2 text-green-600">
+                                        2,845
+                                    </h2>
+
+                                </div>
+
+                                <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                    <p class="text-gray-500">
+                                        Blocked Users
+                                    </p>
+
+                                    <h2 class="text-3xl font-bold mt-2 text-red-500">
+                                        32
+                                    </h2>
+
+                                </div>
+
+                                <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                    <p class="text-gray-500">
+                                        New This Month
+                                    </p>
+
+                                    <h2 class="text-3xl font-bold mt-2 text-orange-500">
+                                        284
+                                    </h2>
+
+                                </div>
+
+                            </div>
+
+                            <!-- SEARCH -->
+
+                            <div class="bg-white rounded-3xl p-6 mb-8 shadow-sm">
+
+                                <div class="grid lg:grid-cols-4 gap-4">
+
+                                    <input type="text" placeholder="Search customer..."
+                                        class="border rounded-xl px-4 py-3">
+
+                                    <select class="border rounded-xl px-4 py-3">
+
+                                        <option>All Status</option>
+                                        <option>Active</option>
+                                        <option>Blocked</option>
+
+                                    </select>
+
+                                    <select class="border rounded-xl px-4 py-3">
+
+                                        <option>All Users</option>
+                                        <option>Verified</option>
+                                        <option>Unverified</option>
+
+                                    </select>
+
+                                    <button class="bg-[#014f38] text-white rounded-xl">
+
+                                        Search
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            <!-- TABLE -->
+
+                            <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+
+                                <table class="w-full">
+
+                                    <thead class="bg-slate-50">
+
+                                        <tr>
+
+                                            <th class="text-left p-5">
+                                                Customer
+                                            </th>
+
+                                            <th class="text-left">
+                                                Email
+                                            </th>
+
+                                            <th class="text-left">
+                                                Orders
+                                            </th>
+
+                                            <th class="text-left">
+                                                Spent
+                                            </th>
+
+                                            <th class="text-left">
+                                                Status
+                                            </th>
+
+                                            <th class="text-center">
+                                                Actions
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="https://i.pravatar.cc/40?img=1"
+                                                        class="w-10 h-10 rounded-full">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            Rahul Patel
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            #CUS001
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                rahul@gmail.com
+                                            </td>
+
+                                            <td>
+                                                42
+                                            </td>
+
+                                            <td>
+                                                ₹12,450
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+
+                                                    Active
+
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Suspend
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+
+                                                        Delete
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                            <!-- PAGINATION -->
+
+                        </div>
+                    </div>
+
+                </main>
+
+        </div>
+
+        <script src="/js/admin/admin-sidebar.js"></script>
+
+    </body>
+
+</html>

@@ -15,7 +15,7 @@ export class AuthService {
 
     private authRepo = new AuthRepository();
 
-    registerUser = async (userInfo: ISignupDto,role: string): Promise<IApiResponse> => {
+    registerUser = async (userInfo: ISignupDto, role: string): Promise<IApiResponse> => {
         try {
             const existUser =
                 await this.authRepo.findUserByEmail(
@@ -81,15 +81,15 @@ export class AuthService {
         }
     };
 
-    loginUser = async (loginInfo: ILoginDto,role: string): Promise<IApiResponse> => {
+    loginUser = async (loginInfo: ILoginDto, role: string): Promise<IApiResponse> => {
 
         console.log("loginuser service started");
         try {
             // Here if user on ${role} cumplusory login if it contain email and password
             // possibilities : 1 user have email and password for this role - Give login to that user
             // possibilities : 2 user have email and password but not have role on this url than assign that role
-console.log("loginuser service started after try");
-            const existUser = await this.authRepo.findUserByEmail( loginInfo.email);
+            console.log("loginuser service started after try");
+            const existUser = await this.authRepo.findUserByEmail(loginInfo.email);
 
             // Email exists or not...
             if (!existUser) {
@@ -214,7 +214,11 @@ console.log("loginuser service started after try");
             }
 
             // still live that token 
-            if (tokenRecord.expiresAt < new Date()) {
+
+            console.log("Testing Token expireies...........")
+            console.log(tokenRecord.expiresAt.getTime(), Date.now())
+
+            if (tokenRecord.expiresAt.getTime() < Date.now()) {
                 return {
                     status: "Error",
                     statusCode: 401,
@@ -224,7 +228,7 @@ console.log("loginuser service started after try");
             }
 
             const user = await this.authRepo.findUserById(
-                    decoded.userId
+                decoded.userId
             );
 
             // console.log(user)
@@ -361,7 +365,7 @@ console.log("loginuser service started after try");
         try {
             const hashedPassword =
                 await hashPassword(password);
-                console.log(hashPassword)
+            console.log(hashPassword)
 
             const user = await this.authRepo.updatePasswordByEmail(
                 email,

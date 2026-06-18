@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Admin Page"}) %>
+
+    <body class="bg-slate-100">
+
+        <div class="flex min-h-screen">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- MAIN -->
+
+                <main class="flex-1 p-8">
+                    <div class="p-8">
+
+                        <!-- Header -->
+
+                        <div class="flex justify-between items-center mb-8">
+
+                            <div>
+
+                                <h1 class="text-4xl font-bold">
+                                    Restaurant Management
+                                </h1>
+
+                                <p class="text-gray-500 mt-1">
+                                    Manage all restaurants on Ziggy
+                                </p>
+
+                            </div>
+
+                            <button class="bg-orange-500 text-white px-5 py-3 rounded-xl">
+
+                                Add Restaurant
+
+                            </button>
+
+                        </div>
+
+                        <!-- Restaurant stats -->
+
+
+                        <!-- STATS -->
+
+                        <div class="grid lg:grid-cols-4 gap-6 mb-8">
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Total Customers
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2">
+                                    3,210
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Active Customers
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2 text-green-600">
+                                    2,845
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Blocked Users
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2 text-red-500">
+                                    32
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    New This Month
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2 text-orange-500">
+                                    284
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+                        <!-- SEARCH -->
+
+                        <div class="bg-white rounded-3xl p-6 mb-8 shadow-sm">
+
+                            <div class="grid lg:grid-cols-4 gap-4">
+
+                                <input type="text" placeholder="Search customer..." class="border rounded-xl px-4 py-3">
+
+                                <select class="border rounded-xl px-4 py-3">
+
+                                    <option>All Status</option>
+                                    <option>Active</option>
+                                    <option>Blocked</option>
+
+                                </select>
+
+                                <select class="border rounded-xl px-4 py-3">
+
+                                    <option>All Users</option>
+                                    <option>Verified</option>
+                                    <option>Unverified</option>
+
+                                </select>
+
+                                <button class="bg-[#014f38] text-white rounded-xl">
+
+                                    Search
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Restaurant Table -->
+
+                        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+
+                            <table class="w-full">
+
+                                <thead class="bg-slate-50">
+
+                                    <tr>
+
+                                        <th class="text-left p-5">Restaurant</th>
+                                        <th class="text-left">Owner</th>
+                                        <th class="text-left">Category</th>
+                                        <th class="text-left">Orders</th>
+                                        <th class="text-left">Revenue</th>
+                                        <th class="text-left">Status</th>
+                                        <th class="text-center">Actions</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <% restaurants.forEach(restaurant=> { %>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="<%= restaurant.logo %>"
+                                                        class="w-12 h-12 rounded-xl object-cover">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            <%= restaurant.name %>
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            <%= restaurant.city %>
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                <%= restaurant.owner %>
+                                            </td>
+
+                                            <td>
+                                                <%= restaurant.category %>
+                                            </td>
+
+                                            <td>
+                                                <%= restaurant.orders %>
+                                            </td>
+
+                                            <td>
+                                                ₹<%= restaurant.revenue %>
+                                            </td>
+
+                                            <td>
+
+                                                <% if(restaurant.status==="Approved" ){ %>
+
+                                                    <span
+                                                        class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+                                                        Approved
+                                                    </span>
+
+                                                    <% } else if(restaurant.status==="Pending" ){ %>
+
+                                                        <span
+                                                            class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm">
+                                                            Pending
+                                                        </span>
+
+                                                        <% } else { %>
+
+                                                            <span
+                                                                class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">
+                                                                Blocked
+                                                            </span>
+
+                                                            <% } %>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">
+                                                        View
+                                                    </button>
+
+                                                    <button class="bg-yellow-500 text-white px-3 py-2 rounded-lg">
+                                                        Block
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-3 py-2 rounded-lg">
+                                                        Delete
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <% }) %>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                </main>
+
+        </div>
+
+        <script src="/js/admin-dashboard.js"></script>
+        <script src="/js/admin/admin-sidebar.js"></script>
+
+    </body>
+
+</html>

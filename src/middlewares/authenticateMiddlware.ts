@@ -9,7 +9,9 @@ export const isAuthenticated = (
 
   passport.authenticate(
     'jwt',
-    { session: false },
+    { session: false }
+    
+    ,
     (err: any, user: any) => {
 
       if (err) {

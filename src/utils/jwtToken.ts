@@ -24,7 +24,7 @@ export const generateRefreshToken = (
         },
         String(process.env.JWT_REFRESH_SECRET),
         {
-            expiresIn: rememberMe === "on" ? "7d" : "1d"
+            expiresIn: rememberMe === "on" ?  "1m":"1h" 
         }
     );
 };
