@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Addresses</title>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+<p id="toast"></p>
+
+<div class="flex min-h-screen bg-[#f8f7f4]">
+
+    <%- include('../partials/customer-sidebar') %>
+
+    <main class="flex-1 p-8">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+
+            <div>
+                <h1 class="text-3xl font-semibold text-gray-800">
+                    Saved Addresses
+                </h1>
+
+                <p class="text-gray-500 mt-1">
+                    Manage your delivery locations
+                </p>
+            </div>
+
+            <button
+                id="addAddressBtn"
+                class="bg-[#ff7a00] text-white px-5 py-3 rounded-xl font-medium hover:bg-orange-600 transition">
+
+                <i class="fa-solid fa-plus mr-2"></i>
+                Add Address
+
+            </button>
+
+        </div>
+
+        <!-- Default Address -->
+        <div id="defaultAddressSection"
+             class="mb-8">
+
+            <h2 class="text-lg font-semibold mb-4">
+                Default Address
+            </h2>
+
+            <div id="defaultAddressContainer">
+            </div>
+
+        </div>
+
+        <!-- Other Addresses -->
+        <div>
+
+            <h2 class="text-lg font-semibold mb-4">
+                Other Addresses
+            </h2>
+
+            <div
+                id="otherAddressesContainer"
+                class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            </div>
+
+        </div>
+
+        <!-- Empty State -->
+        <div
+            id="emptyAddressState"
+            class="hidden bg-white rounded-2xl border p-12 text-center">
+
+            <i class="fa-solid fa-location-dot text-5xl text-[#ff7a00]"></i>
+
+            <h3 class="text-xl font-semibold mt-4">
+                No Addresses Found
+            </h3>
+
+            <p class="text-gray-500 mt-2">
+                Add your first delivery address
+            </p>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script src="/js/common/api.js"></script>
+<script src="/js/common/auth.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/customer/address.js"></script>
+</body>
+</html> 
