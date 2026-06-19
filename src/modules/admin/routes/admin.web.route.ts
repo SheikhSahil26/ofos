@@ -17,10 +17,19 @@ export class AdminWebRoutes implements IRoutes {
             res.status(200).render("admin/dashboard");
         });
         this.router.get("/customers", (req: Request, res: Response) => {
-            res.status(200).render("admin/customers");
+            res.status(200).render("admin/customers", {
+                currentPage: 1,
+
+                totalPages: 5,
+
+            });
         });
         this.router.get("/restaurants", (req: Request, res: Response) => {
             res.status(200).render("admin/restaurants", {
+                currentPage: 1,
+
+                totalPages: 5,
+
                 restaurants: [
                     {
                         id: 1,

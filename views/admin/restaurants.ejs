@@ -154,7 +154,7 @@
 
                                 </thead>
 
-                                <tbody>
+                                <tbody overflow-y: auto;>
 
                                     <% restaurants.forEach(restaurant=> { %>
 
@@ -253,6 +253,38 @@
                                 </tbody>
 
                             </table>
+
+                            <!-- Pagination -->
+                            <div class="flex justify-between items-center p-6 border-t">
+
+                                <p class="text-gray-500">
+                                    Page <%= currentPage %> of <%= totalPages %>
+                                </p>
+
+                                <div class="flex gap-2">
+
+                                    <% for(let i=1; i <=totalPages; i++) { %>
+
+                                        <a href="?page=<%= i %>" class="
+                    w-10 h-10
+                    flex items-center
+                    justify-center
+                    rounded-xl
+
+                    <%= i === currentPage
+                    ? 'bg-orange-500 text-white'
+                    : 'border hover:bg-slate-100'
+                    %>">
+
+                                            <%= i %>
+
+                                        </a>
+
+                                        <% } %>
+
+                                </div>
+
+                            </div>
 
                         </div>
 
