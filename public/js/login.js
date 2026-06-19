@@ -107,7 +107,6 @@ loginForm.addEventListener('submit',
                     "accessToken",
                     result.data.accessToken
                 );
-                // window.location.href = "http://localhost:8080/api/auth/customer/static/dashboard";
                 window.location.href = "http://localhost:8080/dashboard";
 
             } else {

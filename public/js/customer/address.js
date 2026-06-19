@@ -3,6 +3,7 @@ document.addEventListener(
     loadAddresses
 );
 
+//fetch all address
 async function loadAddresses() {
 
     try {
@@ -146,14 +147,14 @@ function createDefaultCard(address) {
             <div class="mt-5 flex gap-3">
 
                 <button
-                    class="text-[#014f38] font-medium" onClick=openEditModal("${address.id}")>
+                    class="text-[#014f38] font-medium" onClick='openEditModal("${address.id}")'>
 
                     Edit
 
                 </button>
 
                 <button
-                    class="text-red-500 font-medium">
+                    class="text-red-500 font-medium" onclick="deleteAddress('${address.id}')">
 
                     Delete
 
@@ -199,21 +200,22 @@ function createAddressCard(address) {
             <div class="mt-5 flex flex-wrap gap-3">
 
                 <button
-                    class="text-[#014f38] font-medium">
+                    class="text-[#014f38] font-medium"
+                    onclick="setDefaultAddress('${address.id}')">
 
-                    Set Default
+                    Make Default
 
                 </button>
 
                 <button
-                    class="text-[#014f38] font-medium" onClick=openEditModal("${address.id}")>
+                    class="text-[#014f38] font-medium" onClick='openEditModal("${address.id}")'>
 
                     Edit
 
                 </button>
 
                 <button
-                    class="text-red-500 font-medium">
+                    class="text-red-500 font-medium" onclick="deleteAddress('${address.id}')">
 
                     Delete
 
@@ -223,5 +225,106 @@ function createAddressCard(address) {
 
         </div>
     `;
+}
+
+//delete address
+async function deleteAddress(addressId) {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this address?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await apiRequest(
+                `/api/addresses/${addressId}`,
+                "DELETE"
+            );
+
+        if (!response) return;
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            showToast(
+                result.message ||
+                "Failed to delete address",
+                "error"
+            );
+
+            return;
+        }
+
+        showToast(
+            result.message ||
+            "Address deleted successfully",
+            "success"
+        );
+
+        loadAddresses();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Failed to delete address",
+            "error"
+        );
+    }
+}
+
+//set default address
+async function setDefaultAddress(addressId) {
+
+    try {
+
+        const response =
+            await apiRequest(
+                `/api/addresses/default/${addressId}`,
+                "PATCH"
+            );
+
+        if (!response) return;
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            showToast(
+                result.message ||
+                "Failed to set default address",
+                "error"
+            );
+
+            return;
+        }
+
+        showToast(
+            result.message ||
+            "Default address updated",
+            "success"
+        );
+
+        await loadAddresses();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Failed to set default address",
+            "error"
+        );
+    }
 }
 

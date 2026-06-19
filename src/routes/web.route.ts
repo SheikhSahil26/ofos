@@ -2,6 +2,7 @@ import { Router } from "express"
 import { IRoutes } from "../common/interfaces/route.interface";
 import { UserWebRoutes } from "../modules/user/routes/user.web.route";
 import { RestaurantWebRoutes } from "../modules/restaurant/routes/restaurant.web.route";
+import { WebAuthRoutes } from "../modules/auth/routes/auth.web.route";
 
 export function buildWebRoutes(): Router{
     const router = Router();
@@ -10,6 +11,7 @@ export function buildWebRoutes(): Router{
         //create frontend view routes here
         new UserWebRoutes(),
         new RestaurantWebRoutes(),
+        new WebAuthRoutes(),
     ];
 
     routes.forEach((route) => {

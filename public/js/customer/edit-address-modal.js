@@ -1,5 +1,7 @@
 async function openEditModal(addressId) {
 
+    console.log("Clicked Address ID:", addressId);
+
     const modal =
         document.getElementById(
             "editAddressModal"
@@ -16,7 +18,7 @@ async function openEditModal(addressId) {
     await editAddress(addressId);                                                             
 }
 
-function closeEditModal() {
+async function closeEditModal() {
 
     const modal =
         document.getElementById(
@@ -96,6 +98,21 @@ async function editAddress(addressId) {
         document.getElementById("pincode").value =
             address.pincode || "";
 
+        document.getElementById(
+            "latitude"
+        ).value =
+            address.latitude || "";
+
+        document.getElementById(
+            "longitude"
+        ).value =
+            address.longitude || "";
+
+        document.getElementById(
+            "isDefault"
+        ).checked =
+            address.isDefault || false;
+
         document.getElementById("editAddressModal")
             .classList.remove("hidden");
 
@@ -130,19 +147,68 @@ async function saveAddress(event) {
         ).value;
 
     const payload = {
+
         label:
-            document.getElementById("label").value,
+            document.getElementById(
+                "label"
+            ).value.trim(),
+
         addressLine1:
-            document.getElementById("addressLine1").value,
+            document.getElementById(
+                "addressLine1"
+            ).value.trim(),
+
         addressLine2:
-            document.getElementById("addressLine2").value,
+            document.getElementById(
+                "addressLine2"
+            ).value.trim(),
+
         city:
-            document.getElementById("city").value,
+            document.getElementById(
+                "city"
+            ).value.trim(),
+
         state:
-            document.getElementById("state").value,
+            document.getElementById(
+                "state"
+            ).value.trim(),
+
         pincode:
-            document.getElementById("pincode").value,
+            document.getElementById(
+                "pincode"
+            ).value.trim(),
+
+        latitude:
+            document.getElementById(
+                "latitude"
+            ).value || null,
+
+        longitude:
+            document.getElementById(
+                "longitude"
+            ).value || null,
+
+        isDefault:
+            document.getElementById(
+                "isDefault"
+            ).checked
     };
+
+    
+    const errors =
+    validateAddress(payload);
+    
+    console.log(errors);
+
+    if (Object.keys(errors).length) {
+
+        showToast(
+            Object.values(errors)[0],
+            "error"
+        );
+
+        return;
+    }
 
     try {
 
@@ -175,9 +241,9 @@ async function saveAddress(event) {
             "success"
         );
 
-        closeEditModal();
+        await closeEditModal();
 
-        loadAddresses();
+        await loadAddresses();
 
     } catch (error) {
 

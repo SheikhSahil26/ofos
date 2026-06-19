@@ -45,7 +45,7 @@ async function apiRequest(url,method = "GET",body = null) {
             setTimeout(() => {
 
                 window.location.href =
-                    `http://localhost:8080/${role}/login`;
+                    `http://localhost:8080/customer/login`;
 
             }, 1500);
 

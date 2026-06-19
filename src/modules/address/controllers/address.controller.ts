@@ -12,15 +12,15 @@ export class AddressController{
     //get all addresses of users
     getAddresses = asyncHandler( async(req: Request, res: Response) => {
 
-        // const user = req.user as Express.payload | undefined;
+        const user = req.user as Express.payload | undefined;
 
-        // if(!user || typeof user.userId !== "string"){
-        //     throw new AppError("Invalid user id", 409);
-        // }
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
 
-        // const userId = user.userId;
+        const userId = user.userId;
 
-        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         AddressValidation.validateId(userId, "user id");
 
@@ -33,15 +33,15 @@ export class AddressController{
     getAddressById = asyncHandler( async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        // const user = req.user as Express.payload | undefined;
+        const user = req.user as Express.payload | undefined;
 
-        // if(!user || typeof user.userId !== "string"){
-        //     throw new AppError("Invalid user id", 409);
-        // }
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
 
-        // const userId = user.userId;
+        const userId = user.userId;
 
-        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         if(typeof addressId !== "string"){
             throw new AppError("Invalid address id", 409);
@@ -66,6 +66,8 @@ export class AddressController{
 
         const userId = user.userId;
 
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
         AddressValidation.validateId(userId, "user id");
 
         const data: ICreateAddress = req.body;
@@ -73,6 +75,7 @@ export class AddressController{
         AddressValidation.validateCreateAddress(data);
 
         const response = await this.addressService.createAddress(data, userId);
+        console.log("address added successfully");
 
         res.status(response.statusCode || 200).json(response);
     });
@@ -81,15 +84,15 @@ export class AddressController{
     updateAddressById = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        // const user = req.user as Express.payload | undefined;
+        const user = req.user as Express.payload | undefined;
 
-        // if(!user || typeof user.userId !== "string"){
-        //     throw new AppError("Invalid user id", 409);
-        // }
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
 
-        // const userId = user.userId;
+        const userId = user.userId;
 
-        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         const data: IUpdateAddress = req.body;
 
@@ -118,6 +121,8 @@ export class AddressController{
 
         const userId = user.userId;
 
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
         if(typeof addressId !== "string"){
             throw new AppError("Invalid address id", 409);
         }
@@ -141,6 +146,8 @@ export class AddressController{
         }
 
         const userId = user.userId;
+
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         //validating address id and user id
         if(typeof addressId !== "string"){
