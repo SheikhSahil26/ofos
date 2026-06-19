@@ -7,6 +7,7 @@
     <title>Restaurant Login</title>
 
     <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/common/toast.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -52,7 +53,7 @@
                     Access your restaurant dashboard
                 </span>
 
-                <form action="/restaurant/login" method="POST">
+                <form id="loginForm">
 
                     <div class="input-group">
 
@@ -86,7 +87,7 @@
 
                     <div class="terms">
 
-                        <input type="checkbox" name="rememberMe" required>
+                        <input type="checkbox" name="rememberMe">
 
                         <p>
                             Remember Me
@@ -98,7 +99,7 @@
                     <div class="forgot-password">
 
 
-                        <a href="/api/auth/forget-password">
+                        <a href="http://localhost:8080/forget-password">
                             Forgot Password?
                         </a>
 
@@ -114,7 +115,7 @@
 
                     New Restaurant Partner?
 
-                    <a href="/api/auth/restaurant_owner/static/register">
+                    <a href="http://localhost:8080/restaurant_owner/register">
                         Register Now
                     </a>
 

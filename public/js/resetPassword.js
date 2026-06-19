@@ -50,7 +50,7 @@ form.addEventListener(
 
             const response =
                 await apiRequest(
-                    "/api/auth/api/reset-password",
+                    "/api/auth/reset-password",
                     "PATCH",
                     {
                         password,
@@ -82,7 +82,7 @@ form.addEventListener(
                     );
 
                     window.location.href =
-                        "/api/auth/customer/static/login";
+                        "http://localhost:8080/customer/login";
 
                 }, 1500);
 
