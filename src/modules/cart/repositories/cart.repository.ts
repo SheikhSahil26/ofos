@@ -64,7 +64,7 @@ export class CartRepository {
             price: true,
             isAvailable: true,
             isDeleted: true,
-            branch_id: true,
+            branchId: true,
         },
     });
 }

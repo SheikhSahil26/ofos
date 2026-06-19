@@ -12,6 +12,7 @@ async function refreshAccessToken() {
 
         const result =
             await response.json();
+            console.log(result,"result in refeshAccessToken");
 
         if (response.ok) {
 

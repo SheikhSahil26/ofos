@@ -38,6 +38,8 @@ export class OrderService {
     }
 
     const cart = cartResponse.data;
+
+    console.log("Cart fetched for order creation:", cart);
     // cart shape:
     // {
     //   userId: 1,

@@ -13,12 +13,16 @@ export class CartWebRoutes implements IRoutes{
 
     private initializeRoutes(){
         
-        this.router.get("/see-cart", (req: Request, res: Response) => {
+        this.router.get("/customer/see-cart", (req: Request, res: Response) => {
             res.status(200).render("cart/see-cart");
         });
 
-        this.router.get("/dashboard", (req: Request, res: Response) => {
+        this.router.get("/customer/dashboard", (req: Request, res: Response) => {
             res.status(200).render("customer/dashboard");
+        });
+
+        this.router.get("/customer/checkout", (req: Request, res: Response) => {
+            res.status(200).render("cart/checkout");
         });
     }
 }

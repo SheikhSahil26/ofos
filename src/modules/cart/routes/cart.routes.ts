@@ -33,6 +33,8 @@ this.router.post("/add-to-cart",isAuthenticated,authorizeRoles("CUSTOMER") ,this
 // Remove item from cart
 this.router.delete("/remove-item/:itemId",isAuthenticated,authorizeRoles("CUSTOMER") , this.controller.removeCartItem); //delete the item's quantity first and if zero then remove the item entirely from cart
 
+this.router.delete("/delete-item/:itemId",isAuthenticated,authorizeRoles("CUSTOMER") , this.controller.clearCart); // Clear entire item at once
+
 // // Clear entire cart
 this.router.delete("/delete-cart", this.controller.clearCart);
 
@@ -42,10 +44,9 @@ this.router.delete("/delete-cart", this.controller.clearCart);
 // // Get cart summary
 this.router.get("/summary", this.controller.getCartSummary);
 
-// this.router.get("/see-cart",(req:any,res:any)=> {
-//   res.send("Cart routes are working");
-//   return res.render("cart/see-cart", { title: "Cart Page" });
-//   })
-// }
+this.router.patch("/update-quantity", isAuthenticated, authorizeRoles("CUSTOMER"), this.controller.updateItemQuantity);
+this.router.delete("/item/:menuItemId", isAuthenticated, authorizeRoles("CUSTOMER"), this.controller.removeItem);
+
+this.router.get("/checkout-details", isAuthenticated, authorizeRoles("CUSTOMER"), this.controller.getCheckoutDetails);
   }
 }

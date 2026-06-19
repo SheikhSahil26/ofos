@@ -173,4 +173,22 @@ export class MenuItemRepository{
         });
     }
 
+    async getAllCartMenuItems(menuItemIds: string[]) {
+        const menuItems = await prisma.menuItem.findMany({
+    where: {
+      id: { in: menuItemIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });
+  return menuItems;
+    }
+
 }

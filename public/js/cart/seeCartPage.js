@@ -18,7 +18,7 @@ async function loadCartItems(){
 
         if(!result.success) {
             showToast(
-                   result.error || "Failed to load cart items",
+                   result.error || "Failed to load cart items","error"
                 );
         }
 
@@ -163,28 +163,27 @@ function attachItemEventListeners() {
   });
 }
 
+// js/cart/seeCartPage.js
+
 async function updateQuantity(menuItemId, delta) {
   const item = cartData.items.find((i) => i.menuItemId === menuItemId);
   if (!item) return;
 
   const newQuantity = item.quantity + delta;
 
-  if (newQuantity <= 0) {
-    removeItem(menuItemId);
-    return;
-  }
-
   try {
-    const response = await api.patch("/api/v1/cart/update-quantity", {
+    const response = await apiRequest("/api/cart/update-quantity", "PATCH", {
       menuItemId,
-      quantity: newQuantity,
+      quantity: newQuantity,   // backend handles <= 0 by auto-removing
     });
 
-    if (response.success) {
-      cartData = response.data;
+    const result = await response.json();
+
+    if (result.success) {
+      cartData = result.data;
       renderCart(cartData);
     } else {
-      showToast(response.error || "Failed to update quantity", "error");
+      showToast(result.error || "Failed to update quantity", "error");
     }
   } catch (err) {
     console.error("Update quantity failed:", err);
@@ -194,21 +193,27 @@ async function updateQuantity(menuItemId, delta) {
 
 async function removeItem(menuItemId) {
   try {
-    const response = await api.delete(`/api/v1/cart/item/${menuItemId}`);
+    const response = await apiRequest(`/api/cart/item/${menuItemId}`, "DELETE");
+    const result = await response.json();
 
-    if (response.success) {
-      cartData = response.data;
-      renderCart(cartData);
+    if (result.success) {
+      cartData = result.data;
+
+      if (cartData.items.length === 0) {
+        renderEmptyCart();
+      } else {
+        renderCart(cartData);
+      }
+
       showToast("Item removed from cart", "success");
     } else {
-      showToast(response.error || "Failed to remove item", "error");
+      showToast(result.error || "Failed to remove item", "error");
     }
   } catch (err) {
-    console.error("Remove item failed:", err);
+    console.error("Remove item failed:", err.message);
     showToast("Something went wrong", "error");
   }
 }
-
 // ──────────────────────────────────────────────
 // Checkout button
 // ──────────────────────────────────────────────
