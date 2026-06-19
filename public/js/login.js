@@ -107,7 +107,7 @@ loginForm.addEventListener('submit',
                     "accessToken",
                     result.data.accessToken
                 );
-                window.location.href = "http://localhost:8080/dashboard";
+                window.location.href = "/home";
 
             } else {
 

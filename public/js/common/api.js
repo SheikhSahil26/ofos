@@ -45,7 +45,7 @@ async function apiRequest(url,method = "GET",body = null) {
             setTimeout(() => {
 
                 window.location.href =
-                    "/api/auth/customer/login";
+                    "/customer/login";
 
             }, 1500);
 

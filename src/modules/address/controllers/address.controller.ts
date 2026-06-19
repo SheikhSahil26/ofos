@@ -20,8 +20,6 @@ export class AddressController{
 
         const userId = user.userId;
 
-        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
-
         AddressValidation.validateId(userId, "user id");
 
         const response = await this.addressService.getAddresses(userId);
@@ -40,8 +38,6 @@ export class AddressController{
         }
 
         const userId = user.userId;
-
-        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         if(typeof addressId !== "string"){
             throw new AppError("Invalid address id", 409);
@@ -66,8 +62,6 @@ export class AddressController{
 
         const userId = user.userId;
 
-        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
-
         AddressValidation.validateId(userId, "user id");
 
         const data: ICreateAddress = req.body;
@@ -91,8 +85,6 @@ export class AddressController{
         }
 
         const userId = user.userId;
-
-        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         const data: IUpdateAddress = req.body;
 
