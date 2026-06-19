@@ -83,7 +83,7 @@ function renderRestaurants(restaurants) {
             document.createElement("a");
 
         card.href =
-            `/customer/restaurants/${restaurant.id}`;
+            `/restaurants/detail/${branch?.id || ''}`;
 
         card.className =
             "bg-white rounded-3xl overflow-hidden border shadow-sm hover:shadow-lg transition duration-300";

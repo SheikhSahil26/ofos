@@ -65,22 +65,42 @@ export class MenuItemRepository{
         });
     }
 
-    async updateMenuItem(id: string, data: IUpdateMenuItem) {
-        return prisma.menuItem.update({
-            where: {
-                id,
+    async updateMenuItem(
+    id: string,
+    data: IUpdateMenuItem
+) {
+
+    const {
+        tagIds = [],
+        ...menuItemData
+    } = data;
+
+    return prisma.menuItem.update({
+        where: {
+            id,
+        },
+        data: {
+            ...menuItemData,
+
+            tags: {
+                deleteMany: {},
+
+                create: tagIds.map(tagId => ({
+                    tagId,
+                })),
             },
-            data,
-            include: {
-                tags: {
-                    include: {
-                        dietaryTag: true,
-                    },
+        },
+
+        include: {
+            tags: {
+                include: {
+                    dietaryTag: true,
                 },
-                modifierGroups: true,
             },
-        });
-    }
+            modifierGroups: true,
+        },
+    });
+}
 
     async updateMenuItemImage(id: string, imageUrl: string) {
         return prisma.menuItem.update({
@@ -189,6 +209,17 @@ export class MenuItemRepository{
     },
   });
   return menuItems;
+    }
+
+    async itemExists(categoryId : string, name: string){
+
+        return prisma.menuItem.findFirst({
+            where: {
+                categoryId: categoryId,
+                name: name,
+                isDeleted: false,
+            },
+        });
     }
 
 }

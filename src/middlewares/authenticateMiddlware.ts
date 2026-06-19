@@ -17,7 +17,6 @@ export const isAuthenticated = (
       }
 
       // console.log("Here use.............")
-      console.log("req.user", user);
 
       if (!user) {
         return res.status(401).json({
@@ -28,7 +27,7 @@ export const isAuthenticated = (
       }
 
       req.user = user;
-      console.log(req.user);
+      console.log("req.user", user);
 
       next();
     }
