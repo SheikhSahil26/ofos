@@ -12,12 +12,10 @@ export class MenuController{
         if(typeof branchId != 'string'){
             throw new AppError("Branch ID is required", 400);
         }
-        console.log(req.body)
-        console.log("branch id : ", branchId);
+    
         const response = await this.menuService.createCategory({
             branchId: branchId,
             name: req.body.name,
-            displayOrder: req.body.displayOrder,
         });
 
         res.status(response.statusCode || 201).json({

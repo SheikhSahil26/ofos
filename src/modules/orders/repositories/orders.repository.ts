@@ -126,5 +126,70 @@ export class OrdersRepository {
         return orders;
     }
 
-  
+    //count total orders per user by userId
+    async getOrderCountById(userId: string): Promise<number>{
+        return await prisma.order.count({
+            where: {
+                customerId: userId,
+            }
+        });
+    }
+
+    //get restaurants from recent orders
+    async getRecentRestaurants(userId: string){
+
+        return await prisma.order.findMany({
+            where: {
+                customerId: userId,
+            },
+
+            orderBy: {
+                placedAt: "desc",
+            },
+
+            take: 5,
+
+            distinct: ["branchId"],
+
+            include: {
+                branch: {
+                    select: {
+                        id: true,
+                        branchName: true,
+
+                        restaurant: {
+                            select: {
+                                id: true,
+                                name: true,
+                                logoUrl: true,
+                            }
+                        }
+                    }
+                },
+            }
+        })
+    }
+
+    //get recent order
+    async getRecentOrder(userId: string){
+        return prisma.order.findFirst({
+            where: {
+                customerId: userId,
+
+                status: {
+                    in: [
+                        "PLACED",
+                        "CONFIRMED",
+                        "PREPARING",
+                        "READY_FOR_PICKUP",
+                        "OUT_FOR_DELIVERY",
+                    ]
+                }
+            },
+
+            orderBy: {
+                placedAt: "desc",
+            }
+        })
+    }
 }

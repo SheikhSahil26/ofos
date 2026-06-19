@@ -1,6 +1,6 @@
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
-import { ICustomerDetailsResponse, IRestaurantOwnerDetailsResponse, IUserDetailsResponse } from "../interfaces/admin.interface";
+import { ICustomerDetailsResponse, IRestaurantOwnerDetailsResponse, IUpdateUserStatus, IUserDetailsResponse } from "../interfaces/admin.interface";
 import { AdminRepository } from "../repositories/admin.repositories";
 
 export class AdminService {
@@ -159,11 +159,11 @@ export class AdminService {
                         })
                     ),
 
-                createdAt: owner.createdAt,
-            },
-            statusCode: 200,
-        };
-
+                    createdAt: owner.createdAt,
+                },
+                statusCode: 200,
+            };
+    
     }
 
     // Get Branch history
@@ -224,4 +224,40 @@ export class AdminService {
 
     }
 
+
+    //activate and deactivate a user
+    async updateUserStatus(id: string, data: IUpdateUserStatus): Promise<ServiceResponse<null>> {
+
+        const user =
+            await this.adminRepository.getUserById(id);
+
+        if (!user) {
+            throw new AppError("User not found", 404);
+        }
+
+        if (user.isActive === data.isActive) {
+            throw new AppError(
+                `User is already ${
+                    data.isActive ? "active" : "inactive"
+                }`,
+                409
+            );
+        }
+
+        await this.adminRepository.updateUserStatus(
+            id,
+            data.isActive
+        );
+
+        return {
+            success: true,
+            message: `User ${
+                data.isActive
+                    ? "activated"
+                    : "deactivated"
+            } successfully`,
+            data: null,
+            statusCode: 200,
+        };
+    }
 }

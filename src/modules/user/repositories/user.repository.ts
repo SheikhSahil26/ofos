@@ -12,6 +12,17 @@ const userProfileSelect = {
     isDeleted: true,
     createdAt: true,
     updatedAt: true,
+
+    userRoles: {
+        select: {
+            role: {
+                select: {
+                    id: true,
+                    role: true,
+                }
+            }
+        }
+    }
 } as const;
 
 export class UserRepository{

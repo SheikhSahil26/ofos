@@ -18,5 +18,6 @@ export class AdminRoutes implements IRoutes {
 
         this.router.get("/branches", this.controller.getAllBranchesDetails);
         this.router.get("/branches/stats", this.controller.getBranchesStats);
+        this.router.patch("/users/:id/status", this.controller.updateUserStatus); // activate and deactivate a user
     }
 }

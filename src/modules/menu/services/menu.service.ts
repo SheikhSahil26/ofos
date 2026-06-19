@@ -9,6 +9,7 @@ export class MenuService{
     
 
     async createCategory(data: ICreateCategory): Promise<ServiceResponse<Category>> {
+        console.log(data)
         const category = await this.menuRepository.createCategory(data);
 
         return {

@@ -1,0 +1,665 @@
+<!-- ==========================================
+     ADD RESTAURANT MODAL
+=========================================== -->
+<p id="toast"></p>
+<div
+    id="addRestaurantModal"
+    class="
+    fixed
+    inset-0
+    bg-black/50
+    hidden
+    z-[999]
+    "
+>
+ 
+    <div
+        class="
+        h-full
+        overflow-y-auto
+        p-4
+        flex
+        items-start
+        justify-center
+        "
+    >
+
+        <div
+    class="
+    bg-white
+    w-full
+    max-w-6xl
+    my-8
+    rounded-[28px]
+    shadow-xl
+    "
+>
+
+            <!-- Header -->
+
+            <div
+                class="
+                sticky
+                top-0
+                bg-white
+                z-20
+                px-8
+                py-6
+                border-b
+                border-gray-200
+                flex
+                justify-between
+                items-center
+                "
+            >
+
+                <div>
+
+                    <h2
+                        class="
+                        text-3xl
+                        font-bold
+                        text-gray-900
+                        "
+                    >
+                        Add Restaurant
+                    </h2>
+
+                    <p
+                        class="
+                        text-gray-500
+                        mt-1
+                        "
+                    >
+                        Fill all details to register your restaurant.
+                    </p>
+
+                </div>
+
+                <button
+                    id="closeRestaurantModal"
+                    class="
+                    h-11
+                    w-11
+                    rounded-full
+                    border
+                    border-gray-300
+                    hover:bg-gray-100
+                    "
+                >
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+            </div>
+
+            <!-- Form -->
+
+            <form
+                id="restaurantForm"
+                class="p-8"
+            >
+
+                <!-- ======================
+                     RESTAURANT INFO
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Restaurant Information
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <div>
+
+                            <label class="block mb-2 font-medium">
+                                Restaurant Name *
+                            </label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                class="w-full
+h-12
+px-4
+border-2
+border-gray-300
+rounded-xl
+bg-white
+text-gray-900
+focus:outline-none
+focus:border-[#ff7a00]
+focus:ring-2
+focus:ring-orange-100"
+                            >
+
+                            <p
+                                class="error-message"
+                                data-error="name"
+                            ></p>
+
+                        </div>
+
+                        <div>
+
+                            <label class="block mb-2 font-medium">
+                                Contact Number *
+                            </label>
+
+                            <input
+                                type="text"
+                                name="contactNumber"
+                                class="w-full
+h-12
+px-4
+border-2
+border-gray-300
+rounded-xl
+bg-white
+text-gray-900
+focus:outline-none
+focus:border-[#ff7a00]
+focus:ring-2
+focus:ring-orange-100"
+                            >
+
+                            <p
+                                class="error-message"
+                                data-error="contactNumber"
+                            ></p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6">
+
+                        <label class="block mb-2 font-medium">
+                            Description
+                        </label>
+
+                        <textarea
+                            name="description"
+                            rows="4"
+                            class="class="
+w-full
+px-4
+py-3
+border-2
+border-gray-300
+rounded-xl
+bg-white
+text-gray-900
+focus:outline-none
+focus:border-[#ff7a00]
+focus:ring-2
+focus:ring-orange-100
+""
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     IMAGES
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Restaurant Images
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <div>
+
+                            <label class="block mb-2 font-medium">
+                                Logo
+                            </label>
+
+                            <input
+                                type="file"
+                                name="logo"
+                                accept="image/*"
+                                class="class="
+w-full
+p-3
+border-2
+border-dashed
+border-gray-300
+rounded-xl
+bg-gray-50
+""
+                            >
+
+                        </div>
+
+                        <div>
+
+                            <label class="block mb-2 font-medium">
+                                Cover Image
+                            </label>
+
+                            <input
+                                type="file"
+                                name="coverImage"
+                                accept="image/*"
+                                class="class="
+w-full
+p-3
+border-2
+border-dashed
+border-gray-300
+rounded-xl
+bg-gray-50
+""
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     BRANCH INFO
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Branch Information
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <div>
+
+                            <label class="block mb-2 font-medium">
+                                Branch Name *
+                            </label>
+
+                            <input
+                                type="text"
+                                name="branchName"
+                                class="w-full
+h-12
+px-4
+border-2
+border-gray-300
+rounded-xl
+bg-white
+text-gray-900
+focus:outline-none
+focus:border-[#ff7a00]
+focus:ring-2
+focus:ring-orange-100"
+                            >
+
+                        </div>
+
+                        <div>
+
+                            <label class="block mb-2 font-medium">
+                                Delivery Radius (KM) *
+                            </label>
+
+                            <input
+                                type="number"
+                                name="deliveryRadiusKm"
+                                class="input-field"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     ADDRESS
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Address Information
+                    </h3>
+
+                    <div class="space-y-6">
+
+                        <input
+                            type="text"
+                            name="addressLine1"
+                            placeholder="Address Line 1"
+                            class="input-field"
+                        >
+
+                        <input
+                            type="text"
+                            name="addressLine2"
+                            placeholder="Address Line 2"
+                            class="input-field"
+                        >
+
+                        <div
+                            class="
+                            grid
+                            grid-cols-1
+                            md:grid-cols-3
+                            gap-6
+                            "
+                        >
+
+                            <input
+                                type="text"
+                                name="city"
+                                placeholder="City"
+                                class="input-field"
+                            >
+
+                            <input
+                                type="text"
+                                name="state"
+                                placeholder="State"
+                                class="input-field"
+                            >
+
+                            <input
+                                type="text"
+                                name="pincode"
+                                placeholder="Pincode"
+                                class="input-field"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     LEGAL
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Legal Information
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <input
+                            type="text"
+                            name="gstin"
+                            placeholder="GSTIN"
+                            class="input-field"
+                        >
+
+                        <input
+                            type="text"
+                            name="fssaiLicense"
+                            placeholder="FSSAI License"
+                            class="input-field"
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     LOCATION
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Location Coordinates
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <input
+                            type="number"
+                            step="0.000001"
+                            name="latitude"
+                            placeholder="Latitude"
+                            class="input-field"
+                        >
+
+                        <input
+                            type="number"
+                            step="0.000001"
+                            name="longitude"
+                            placeholder="Longitude"
+                            class="input-field"
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     OPERATING HOURS
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Operating Hours
+                    </h3>
+
+                    <div
+                        id="operatingHoursContainer"
+                        class="space-y-4"
+                    >
+
+                        <% const days = [
+                        "MONDAY",
+                        "TUESDAY",
+                        "WEDNESDAY",
+                        "THURSDAY",
+                        "FRIDAY",
+                        "SATURDAY",
+                        "SUNDAY"
+                        ] %>
+
+                        <% days.forEach(day => { %>
+
+                        <div
+                            class="
+                            flex
+                            flex-col
+                            md:flex-row
+                            md:items-center
+                            gap-4
+                            border
+                            border-gray-200
+                            rounded-xl
+                            p-4
+                            "
+                        >
+
+                            <div
+                                class="
+                                w-full
+                                md:w-40
+                                font-medium
+                                "
+                            >
+                                <%= day %>
+                            </div>
+
+                            <input
+                                type="time"
+                                name="<%= day %>Open"
+                                class="input-field flex-1"
+                            >
+
+                            <input
+                                type="time"
+                                name="<%= day %>Close"
+                                class="input-field flex-1"
+                            >
+
+                            <label
+                                class="
+                                flex
+                                items-center
+                                gap-2
+                                "
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="<%= day %>Closed"
+                                >
+
+                                Closed
+                            </label>
+
+                        </div>
+
+                        <% }) %>
+
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+
+                <div
+                    class="
+                    flex
+                    justify-end
+                    gap-4
+                    pt-4
+                    border-t
+                    "
+                >
+
+                    <button
+                        type="button"
+                        id="cancelRestaurantBtn"
+                        class="
+                        px-6
+                        py-3
+                        rounded-xl
+                        border
+                        border-gray-300
+                        "
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="
+                        px-8
+                        py-3
+                        rounded-xl
+                        bg-[#ff7a00]
+                        hover:bg-[#eb6f00]
+                        text-white
+                        font-semibold
+                        "
+                    >
+                        Create Restaurant
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

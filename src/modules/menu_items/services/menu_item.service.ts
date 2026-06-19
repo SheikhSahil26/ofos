@@ -39,14 +39,32 @@ export class MenuItemService{
             }
         }
 
-        const menuItem = await this.menuItemRepository.createMenuItem(data);
+        console.log(data.name);
+        const existingItem: any = await this.menuItemRepository.itemExists(
+            data.categoryId,
+            data.name,
+        )
 
-        return {
-            success: true,
-            data: menuItem,
-            message: "Menu item created successfully",
-            statusCode: 201,
-        };
+        console.log(existingItem)
+            
+
+        if (!existingItem) {
+            
+            
+            const menuItem = await this.menuItemRepository.createMenuItem(data);
+            
+            return {
+                success: true,
+                data: menuItem,
+                message: "Menu item created successfully",
+                statusCode: 201,
+            };
+        } else{
+            throw new AppError(
+                "Menu item already exists in this category",
+                409
+            );
+        }
     }
 
     async getMenuItemsByCategory(categoryId: string): Promise<ServiceResponse<any>> {

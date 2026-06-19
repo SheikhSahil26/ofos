@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>My Restaurants | Ziggy</title>
+    <!-- <link rel="stylesheet" href="/css/auth.css"> -->
+    <%- include('../partials/head.ejs') %>
+</head>
+
+<body class="bg-[#f8f7f4] min-h-screen">
+
+    <p id="toast"></p>
+    <!-- Dashboard Layout -->
+    <div class="flex min-h-screen">
+
+            <!-- Main Content -->
+            <div class="flex-1 flex flex-col">
+
+                    <!-- Page Content -->
+                    <main class="flex-1 px-4 md:px-8 py-6">
+
+                        <!-- Page Heading -->
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900">
+                                    Restaurants
+                                </h1>
+
+                                <p class="text-gray-500 mt-1">
+                                    Manage all your restaurants from one place.
+                                </p>
+                            </div>
+
+                            <button id="openAddRestaurantModal" class="
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    bg-[#ff7a00]
+                    hover:bg-[#eb6f00]
+                    text-white
+                    px-5
+                    py-3
+                    rounded-xl
+                    font-medium
+                    transition
+                ">
+                                <i class="fa-solid fa-plus"></i>
+                                Add Restaurant
+                            </button>
+
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="emptyRestaurantState" class="
+                bg-white
+                rounded-[28px]
+                border
+                border-[#ececec]
+                min-h-[550px]
+                flex
+                items-center
+                justify-center
+                p-8
+            ">
+
+                            <div class="text-center max-w-lg">
+
+                                <div class="
+                        w-28
+                        h-28
+                        mx-auto
+                        rounded-full
+                        bg-[#fff4ea]
+                        flex
+                        items-center
+                        justify-center
+                        mb-6
+                    ">
+                                    <i class="
+                            fa-solid
+                            fa-utensils
+                            text-5xl
+                            text-[#ff7a00]
+                        ">
+                                    </i>
+                                </div>
+
+                                <h2 class="
+                        text-3xl
+                        font-bold
+                        text-gray-900
+                        mb-4
+                    ">
+                                    No Restaurants Added Yet
+                                </h2>
+
+                                <p class="
+                        text-gray-500
+                        text-lg
+                        leading-relaxed
+                        mb-8
+                    ">
+                                    Create your first restaurant and start receiving
+                                    online orders from customers through Ziggy.
+                                </p>
+
+                                <button id="emptyStateAddBtn" class="
+                        inline-flex
+                        items-center
+                        gap-3
+                        bg-[#014f38]
+                        hover:bg-[#013f2d]
+                        text-white
+                        px-8
+                        py-4
+                        rounded-xl
+                        font-semibold
+                        transition
+                    ">
+                                    <i class="fa-solid fa-store"></i>
+                                    Add Your First Restaurant
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Restaurant Listing Section -->
+                        <!-- Initially Hidden -->
+                        <div id="restaurantListingSection" class="hidden">
+
+                            <div id="restaurantGrid" class="
+                    grid
+                    grid-cols-1
+                    md:grid-cols-2
+                    xl:grid-cols-3
+                    gap-6
+                ">
+                            </div>
+
+                        </div>
+
+                    </main>
+
+            </div>
+
+    </div>
+
+    <!-- Add Restaurant Modal -->
+    <%- include('../partials/add-restaurant-modal.ejs') %>
+
+        <script src="/js/restaurant/create-restaurant.js"></script>
+        <script src="/js/common/toast.js"></script>
+
+
+</body>
+
+</html>
