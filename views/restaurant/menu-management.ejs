@@ -16,6 +16,7 @@
 
 
     <link rel="stylesheet" href="/css/common/toast.css">
+    <link rel="stylesheet" href="/css/restaurant/toggle.css">
 </head>
 
 <body>
@@ -200,6 +201,12 @@
                         <span
                             class="item-type text-xs px-2 py-1 rounded-full">
                         </span>
+                        
+
+                       <button class="delete-item-btn px-4 border border-red-300 text-red-500 rounded-lg hover:bg-red-50">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
 
                     </div>
 
@@ -211,8 +218,46 @@
                         class="item-price text-[#014f38] font-bold text-lg mt-3">
                     </p>
 
-                    <div
-                        class="item-badges flex flex-wrap gap-2 mt-3">
+                    <div class="mt-4 space-y-3">
+
+                        <div class="flex items-center justify-between">
+
+                            <span class="text-sm text-gray-600">
+                                 <i class="fa-solid fa-circle text-green-500 text-xs"></i>
+                                Available
+                            </span>
+
+                            <label class="toggle-switch">
+
+                                <input
+                                    type="checkbox"
+                                    class="availability-toggle">
+
+                                <span class="slider"></span>
+
+                            </label>
+
+                        </div>
+
+                        <div class="flex items-center justify-between">
+
+                            <span class="text-sm text-gray-600">
+                                
+                                Bestseller
+                            </span>
+
+                            <label class="toggle-switch">
+
+                                <input
+                                    type="checkbox"
+                                    class="bestseller-toggle">
+
+                                <span class="slider"></span>
+
+                            </label>
+
+                        </div>
+
                     </div>
 
                     <div class="flex gap-2 mt-4">
@@ -226,6 +271,7 @@
                             class="modifier-btn flex-1 bg-[#014f38] text-white py-2 rounded-lg">
                             Modifiers
                         </button>
+
 
                     </div>
 
@@ -336,6 +382,8 @@
     <!-- create menu item modal-->
      <div id="menuItemModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
 
+        <!-- for editing purpose -->
+        <input type="hidden" id="editingMenuItemId">
         <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
 
             <h2 class="text-2xl font-bold text-[#014f38] mb-6">Add Menu Item</h2>
@@ -374,21 +422,32 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block mb-2">Item Image</label>
-                    <input type="file" id="itemImage" accept="image/*" class="w-full border rounded-xl p-3">
-                </div>
+                    <img
+                        id="editItemImagePreview"
+                        class="w-full h-48 object-cover rounded-xl border">
 
-                <div class="flex gap-6 mb-6">
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" id="isAvailable" checked>
-                        <span>Available</span>
+                    <label
+                        for="itemImage"
+                        class="
+                            inline-flex
+                            items-center
+                            gap-2
+                            mt-3
+                            text-[#014f38]
+                            font-medium
+                            cursor-pointer
+                        ">
+                        <i class="fa-solid fa-image"></i>
+                        Change Image
                     </label>
 
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" id="isBestseller">
-                        <span>Bestseller</span>
-                    </label>
+                    <input
+                        type="file"
+                        id="itemImage"
+                        accept="image/*"
+                        class="hidden">
                 </div>
+
 
                 <div id="tagsContainer" class="flex flex-wrap gap-2 mb-6"></div>
 
@@ -408,9 +467,156 @@
 
     </div>
 
+    <!-- delete item modal -->
+     <div
+        id="deleteMenuItemModal"
+        class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+        <div class="bg-white rounded-2xl w-full max-w-md p-6">
+
+            <div class="text-center">
+
+                <i class="fa-solid fa-trash text-red-500 text-4xl"></i>
+
+                <h2 class="text-2xl font-bold mt-4">
+                    Delete Menu Item
+                </h2>
+
+                <p class="mt-3 text-gray-500">
+                    Are you sure you want to delete
+                    <span
+                        id="deleteMenuItemName"
+                        class="font-semibold">
+                    </span>
+                    ?
+                </p>
+
+            </div>
+
+            <div class="flex gap-3 mt-6">
+
+                <button
+                    id="cancelDeleteMenuItemBtn"
+                    class="flex-1 border py-3 rounded-xl">
+                    Cancel
+                </button>
+
+                <button
+                    id="confirmDeleteMenuItemBtn"
+                    class="flex-1 bg-red-500 text-white py-3 rounded-xl">
+                    Delete
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- template for modifier group -->
+    <template id="modifierGroupTemplate">
+
+        <div class="border rounded-xl p-4 mb-4">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+
+                    <h3 class="group-name font-semibold text-lg"></h3>
+
+                    <p class="group-details text-sm text-gray-500"></p>
+
+                </div>
+
+                <span class="group-option-count text-sm text-[#014f38]"></span>
+
+            </div>
+
+        </div>
+
+    </template>
+
+    <!-- open modifier grps -->
+     <div id="modifierModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+        <div class="bg-white rounded-2xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+
+            <div class="flex justify-between items-center mb-6">
+
+                <h2 class="text-2xl font-bold text-[#014f38]">
+                    Modifier Groups
+                </h2>
+
+                <button id="closeModifierModal">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+
+            </div>
+            <div>
+                <button id="addModifierGroupBtn"
+                    class="mb-4 bg-[#014f38] text-white px-4 py-2 rounded-lg">
+                    + Add Modifier Group
+                </button>
+            </div>
+            <div id="modifierGroupsContainer"></div>
+
+        </div>
+
+    </div>
+
+    <!-- create modifier group modal -->
+     <div id="modifierGroupModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+        <div class="bg-white rounded-2xl w-full max-w-md p-6">
+
+            <h2 class="text-2xl font-bold text-[#014f38] mb-6">
+                Create Modifier Group
+            </h2>
+
+            <form id="modifierGroupForm">
+
+                <div class="mb-4">
+                    <label class="block mb-2">Group Name</label>
+                    <input id="groupName" type="text" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="mb-4">
+                    <label class="flex items-center gap-2">
+                        <input id="isRequired" type="checkbox">
+                        Required
+                    </label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Min Selection</label>
+                    <input id="minSelection" type="number" value="0" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block mb-2">Max Selection</label>
+                    <input id="maxSelection" type="number" value="1" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" id="closeModifierGroupModal" class="flex-1 border py-3 rounded-xl">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="flex-1 bg-[#014f38] text-white py-3 rounded-xl">
+                        Create
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
     <script src="/js/common/toast.js"></script>
     <script src="/js/common/api.js"></script>
     <script  src="/js/restaurant/create-category.js"></script>
     <script src="/js/restaurant/menu-management.js"></script>
+    <script src="/js/restaurant/modifier-management.js"></script>
 </body>
 </html>

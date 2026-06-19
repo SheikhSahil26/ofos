@@ -4,6 +4,8 @@ let selectedCategoryCount = 0;
 let selectedCategoryDisplayOrder = null;
 let dietaryTags = [];
 let selectedTags = [];
+let menuItems = [];
+let deletingMenuItemId = null;
 
 const branchId  = document.getElementById('branchId').value;
 
@@ -207,7 +209,7 @@ async function loadMenuItems(categoryId) {
     const result =
         await response.json();
 
-    console.log(result);
+    menuItems = result.data;
 
     renderMenuItems(result.data);
 }
@@ -216,12 +218,21 @@ async function loadMenuItems(categoryId) {
 //creating menu card 
 function createMenuItemCard(item) {
 
+    
+
     const template =
         document
             .getElementById("menuItemTemplate");
 
     const clone =
         template.content.cloneNode(true);
+
+    clone.querySelector(".delete-item-btn")
+    .addEventListener(
+        "click",
+        () => openDeleteMenuItemModal(item.id)
+    );
+    
 
     clone.querySelector(".item-name")
         .textContent = item.name;
@@ -265,48 +276,54 @@ function createMenuItemCard(item) {
 
     }
 
-    const badges =
-        clone.querySelector(".item-badges");
+    const availabilityToggle =
+            clone.querySelector(
+                ".availability-toggle"
+            );
 
-    if (item.isBestseller) {
+        availabilityToggle.checked =
+            item.isAvailable;
 
-        badges.innerHTML += `
-            <span
-                class="
-                    bg-orange-100
-                    text-orange-600
-                    text-xs
-                    px-2
-                    py-1
-                    rounded-full
-                "
-            >
-                Bestseller
-            </span>
-        `;
-    }
+        availabilityToggle.addEventListener(
+            "change",
+            () => updateAvailability(
+                item.id,
+                availabilityToggle.checked
+            )
+        );
+    
+    const bestsellerToggle =
+        clone.querySelector(
+            ".bestseller-toggle"
+        );
 
-    badges.innerHTML += `
-        <span
-            class="
-                ${
-                    item.isAvailable
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                }
-                text-xs
-                px-2
-                py-1
-                rounded-full
-            "
-        >
-            ${
-                item.isAvailable
-                    ? "Available"
-                    : "Unavailable"
-            }
-        </span>
-    `;
+    bestsellerToggle.checked =
+        item.isBestseller;
+    
+    bestsellerToggle.addEventListener(
+        "change",
+        () => updateBestseller(
+            item.id,
+            bestsellerToggle.checked
+        )
+    );
+
+
+    //for edit btn
+    clone.querySelector(".edit-btn").dataset.id = item.id;
+
+    clone.querySelector(".edit-btn")
+    .addEventListener(
+        "click",
+        () => openEditMenuItemModal(item.id)
+    );
+
+    //modifier button
+    clone.querySelector(".modifier-btn")
+    .addEventListener(
+        "click",
+        () => openModifierModal(item.id)
+    );
 
     return clone;
 }
@@ -366,6 +383,64 @@ function renderMenuItems(items) {
         );
 
     });
+}
+
+//update is available
+async function updateAvailability(
+    menuItemId,
+    isAvailable
+) {
+
+    const response =
+        await apiRequest(
+            `/api/menu-items/${menuItemId}/availability`,
+            "PATCH",
+            { isAvailable }
+        );
+
+    if (!response?.ok) {
+
+        showToast(
+            "Failed to update availability",
+            "error"
+        );
+
+        return;
+    }
+
+    showToast(
+        "Availability updated",
+        "success"
+    );
+}
+
+//update best seller
+async function updateBestseller(
+    menuItemId,
+    isBestseller
+) {
+
+    const response =
+        await apiRequest(
+            `/api/menu-items/${menuItemId}/bestseller`,
+            "PATCH",
+            { isBestseller }
+        );
+
+    if (!response?.ok) {
+
+        showToast(
+            "Failed to update bestseller",
+            "error"
+        );
+
+        return;
+    }
+
+    showToast(
+        "Bestseller updated",
+        "success"
+    );
 }
 
 
@@ -660,12 +735,14 @@ async function loadDietaryTags() {
         await response.json();
 
     dietaryTags = result.data;
-
     renderDietaryTags();
 }
 
+loadDietaryTags();
+
 //render tags
-function renderDietaryTags() {
+
+  function renderDietaryTags() {
 
     const container =
         document.getElementById(
@@ -676,11 +753,27 @@ function renderDietaryTags() {
 
     dietaryTags.forEach(tag => {
 
+        const isSelected =
+            selectedTags.includes(
+                tag.id
+            );
+
         container.innerHTML += `
             <button
                 type="button"
-                class="tag-btn px-3 py-2 bg-gray-100 rounded-full"
-                data-id="${tag.id}">
+                class="
+                    tag-btn
+                    px-3
+                    py-2
+                    rounded-full
+                    ${
+                        isSelected
+                            ? "bg-[#014f38] text-white"
+                            : "bg-gray-100"
+                    }
+                "
+                data-id="${tag.id}"
+            >
                 ${tag.name}
             </button>
         `;
@@ -738,47 +831,76 @@ function toggleTag(event) {
         );
     }
 }
-
-//open create menu item modal
+// Open Create Menu Item Modal
 document
-    .getElementById(
-        "addMenuItemBtn"
-    )
+    .getElementById("addMenuItemBtn")
     .addEventListener(
         "click",
-        () => {
-
-            document
-                .getElementById(
-                    "menuItemModal"
-                )
-                .classList.remove(
-                    "hidden"
-                );
-
-            document
-                .getElementById(
-                    "menuItemModal"
-                )
-                .classList.add(
-                    "flex"
-                );
-        }
+        openMenuItemModal
     );
 
-    //create menu item
+function openMenuItemModal() {
+
+    document.getElementById("editingMenuItemId").value = "";
+
+    document.getElementById("menuItemForm").reset();
+
+    selectedTags = [];
+
+    renderDietaryTags();
+
+    document.querySelector(
+        "#menuItemModal h2"
+    ).textContent =
+        "Add Menu Item";
+
+    document.querySelector(
+        '#menuItemForm button[type="submit"]'
+    ).textContent =
+        "Create Item";
+
+    document
+        .getElementById("menuItemModal")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("menuItemModal")
+        .classList.add("flex");
+}
+
+
+// Form Submit Handler
 document
-    .getElementById(
-        "menuItemForm"
-    )
+    .getElementById("menuItemForm")
     .addEventListener(
         "submit",
-        createMenuItem
+        handleMenuItemSubmit
     );
 
-async function createMenuItem(event) {
+async function handleMenuItemSubmit(event) {
 
     event.preventDefault();
+
+    const editingMenuItemId =
+        document.getElementById(
+            "editingMenuItemId"
+        ).value;
+
+    if (editingMenuItemId) {
+
+        await updateMenuItem(
+            editingMenuItemId
+        );
+
+    } else {
+
+        await createMenuItem();
+    }
+}
+
+
+// Create Menu Item
+async function createMenuItem() {
 
     const formData = new FormData();
 
@@ -787,42 +909,371 @@ async function createMenuItem(event) {
     formData.append("name", document.getElementById("itemName").value);
     formData.append("description", document.getElementById("itemDescription").value);
     formData.append("price", document.getElementById("itemPrice").value);
-    formData.append("isVeg", document.querySelector('input[name="foodType"]:checked').value);
-    formData.append("isAvailable", document.getElementById("isAvailable").checked);
-    formData.append("isBestseller", document.getElementById("isBestseller").checked);
-
-    selectedTags.forEach(tagId => formData.append("tagIds", tagId));
-
-    const imageFile = document.getElementById("itemImage").files[0];
-
-    if (imageFile) {
-        formData.append("image", imageFile);
-    }
-
-    const token = localStorage.getItem("accessToken");
-
-    const response = await fetch(
-        `/api/menu-items/categories/${selectedCategoryId}/items`,
-        {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            body: formData
-        }
+    formData.append(
+        "isVeg",
+        document.querySelector(
+            'input[name="foodType"]:checked'
+        ).value
+    );
+    selectedTags.forEach(
+        tagId => formData.append(
+            "tagIds",
+            tagId
+        )
     );
 
+    clone.querySelector(".delete-item-btn")
+    .addEventListener(
+        "click",
+        () => openDeleteMenuItemModal(item.id)
+    );
+
+    const imageFile =
+        document.getElementById(
+            "itemImage"
+        ).files[0];
+
+    if (imageFile) {
+        formData.append(
+            "image",
+            imageFile
+        );
+    }
+
+    const token =
+        localStorage.getItem(
+            "accessToken"
+        );
+
+    const response =
+        await fetch(
+            `/api/menu-items/categories/${selectedCategoryId}/items`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                },
+                body: formData
+            }
+        );
+
     if (!response.ok) {
-        showToast("Failed to create menu item", "error");
+
+        showToast(
+            "Failed to create menu item",
+            "error"
+        );
+
         return;
     }
 
-    const result = await response.json();
-
-    showToast("Menu item created successfully", "success");
+    showToast(
+        "Menu item created successfully",
+        "success"
+    );
 
     closeMenuItemModal();
 
-    await loadMenuItems(selectedCategoryId);
+    await loadMenuItems(
+        selectedCategoryId
+    );
 }
+
+
+// Edit Menu Item
+function openEditMenuItemModal(menuItemId) {
+
+    const item =
+        menuItems.find(
+            item => item.id === menuItemId
+        );
+
+    if (!item) return;
+
+    console.log(item.tags);
+
+    document.getElementById("editingMenuItemId").value =
+        item.id;
+
+    document.getElementById("itemName").value =
+        item.name;
+
+    document.getElementById("itemDescription").value =
+        item.description || "";
+
+    document.getElementById("itemPrice").value =
+        item.price;
+
+    document.querySelector(
+        `input[name="foodType"][value="${item.isVeg}"]`
+    ).checked = true;
+
+    selectedTags =
+        (item.tags || []).map(
+            tag => tag.tagId
+        );
+
+    renderDietaryTags();
+
+    const previewImage =
+        document.getElementById(
+            "editItemImagePreview"
+        );
+
+    if (previewImage) {
+
+        previewImage.src =
+            item.imageUrl ||
+            "https://placehold.co/600x400?text=Food+Item";
+    }
+
+    document.querySelector(
+        "#menuItemModal h2"
+    ).textContent =
+        "Edit Menu Item";
+
+    document.querySelector(
+        '#menuItemForm button[type="submit"]'
+    ).textContent =
+        "Update Item";
+
+    document
+        .getElementById("menuItemModal")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("menuItemModal")
+        .classList.add("flex");
+}
+
+
+// Update Menu Item
+async function updateMenuItem(menuItemId) {
+
+    const payload = {
+        name: document.getElementById("itemName").value,
+        description: document.getElementById("itemDescription").value,
+        price: Number(document.getElementById("itemPrice").value),
+        isVeg:
+            document.querySelector(
+                'input[name="foodType"]:checked'
+            ).value === "true",
+        tagIds: selectedTags
+    };
+
+    const response =
+        await apiRequest(
+            `/api/menu-items/${menuItemId}`,
+            "PUT",
+            payload
+        );
+
+    if (!response?.ok) {
+        showToast(
+            "Failed to update item",
+            "error"
+        );
+        return;
+    }
+    const imageFile =
+    document.getElementById(
+        "itemImage"
+    ).files[0];
+
+    if (imageFile) {
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "image",
+            imageFile
+        );
+
+        await fetch(
+            `/api/menu-items/${menuItemId}/image`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization:
+                        `Bearer ${localStorage.getItem("accessToken")}`
+                },
+                body: formData
+            }
+        );
+        
+    }
+
+    showToast(
+        "Menu item updated successfully",
+        "success"
+    );
+    
+    closeMenuItemModal();
+    
+    await loadMenuItems(
+        selectedCategoryId
+    );
+}
+
+
+// Close Modal
+function closeMenuItemModal() {
+
+    document
+        .getElementById("menuItemModal")
+        .classList.add("hidden");
+
+    document
+        .getElementById("menuItemModal")
+        .classList.remove("flex");
+
+    document
+        .getElementById("menuItemForm")
+        .reset();
+
+    document
+        .getElementById("editingMenuItemId")
+        .value = "";
+
+    selectedTags = [];
+
+    document
+        .querySelectorAll(".tag-btn")
+        .forEach(button => {
+
+            button.classList.remove(
+                "bg-[#014f38]",
+                "text-white"
+            );
+
+            button.classList.add(
+                "bg-gray-100"
+            );
+        });
+
+    document.querySelector(
+        "#menuItemModal h2"
+    ).textContent =
+        "Add Menu Item";
+
+    document.querySelector(
+        '#menuItemForm button[type="submit"]'
+    ).textContent =
+        "Create Item";
+}
+
+
+// Cancel Button
+document
+    .getElementById(
+        "closeMenuItemModal"
+    )
+    .addEventListener(
+        "click",
+        closeMenuItemModal
+    );
+
+
+//delete modal open
+function openDeleteMenuItemModal(menuItemId) {
+
+    const item =
+        menuItems.find(
+            item => item.id === menuItemId
+        );
+
+    if (!item) return;
+
+    deletingMenuItemId =
+        menuItemId;
+
+    document.getElementById(
+        "deleteMenuItemName"
+    ).textContent =
+        item.name;
+
+    document.getElementById(
+        "deleteMenuItemModal"
+    ).classList.remove(
+        "hidden"
+    );
+
+    document.getElementById(
+        "deleteMenuItemModal"
+    ).classList.add(
+        "flex"
+    );
+}
+
+function closeDeleteMenuItemModal() {
+
+    deletingMenuItemId = null;
+
+    document.getElementById(
+        "deleteMenuItemModal"
+    ).classList.add(
+        "hidden"
+    );
+
+    document.getElementById(
+        "deleteMenuItemModal"
+    ).classList.remove(
+        "flex"
+    );
+}
+
+//comfirm delete
+document
+    .getElementById(
+        "confirmDeleteMenuItemBtn"
+    )
+    .addEventListener(
+        "click",
+        deleteMenuItem
+    );
+
+async function deleteMenuItem() {
+
+    if (!deletingMenuItemId)
+        return;
+
+    const response =
+        await apiRequest(
+            `/api/menu-items/${deletingMenuItemId}`,
+            "DELETE"
+        );
+
+    if (!response?.ok) {
+
+        showToast(
+            "Failed to delete menu item",
+            "error"
+        );
+
+        return;
+    }
+
+    showToast(
+        "Menu item deleted successfully",
+        "success"
+    );
+
+    closeDeleteMenuItemModal();
+
+    await loadMenuItems(
+        selectedCategoryId
+    );
+}
+
+//cancel button
+document
+    .getElementById(
+        "cancelDeleteMenuItemBtn"
+    )
+    .addEventListener(
+        "click",
+        closeDeleteMenuItemModal
+    );

@@ -21,6 +21,7 @@ export interface IUpdateMenuItem {
     price?: number;
     isVeg?: boolean;
     categoryId?: string;
+    tagIds?: string[];
 }
 
 export interface IUpdateMenuItemImage {
