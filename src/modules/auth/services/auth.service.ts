@@ -15,7 +15,7 @@ export class AuthService {
 
     private authRepo = new AuthRepository();
 
-    registerUser = async (userInfo: ISignupDto,role: string): Promise<IApiResponse> => {
+    registerUser = async (userInfo: ISignupDto, role: string): Promise<IApiResponse> => {
         try {
             const existUser =
                 await this.authRepo.findUserByEmail(
@@ -81,7 +81,7 @@ export class AuthService {
         }
     };
 
-    loginUser = async (loginInfo: ILoginDto,role: string): Promise<IApiResponse> => {
+    loginUser = async (loginInfo: ILoginDto, role: string): Promise<IApiResponse> => {
 
         try {
             // Here if user on ${role} cumplusory login if it contain email and password
@@ -211,7 +211,11 @@ export class AuthService {
             }
 
             // still live that token 
-            if (tokenRecord.expiresAt < new Date()) {
+
+            console.log("Testing Token expireies...........")
+            console.log(tokenRecord.expiresAt.getTime(), Date.now())
+
+            if (tokenRecord.expiresAt.getTime() < Date.now()) {
                 return {
                     status: "Error",
                     statusCode: 401,
@@ -221,7 +225,7 @@ export class AuthService {
             }
 
             const user = await this.authRepo.findUserById(
-                    decoded.userId
+                decoded.userId
             );
 
             // console.log(user)
@@ -358,7 +362,7 @@ export class AuthService {
         try {
             const hashedPassword =
                 await hashPassword(password);
-                console.log(hashPassword)
+            console.log(hashPassword)
 
             const user = await this.authRepo.updatePasswordByEmail(
                 email,

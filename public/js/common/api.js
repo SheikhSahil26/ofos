@@ -25,7 +25,7 @@ async function apiRequest(url,method = "GET",body = null) {
 
         showToast(
             "Session expired. Refreshing...",
-            "warning"
+            "error"
         );
 
         const refreshed =
@@ -33,19 +33,14 @@ async function apiRequest(url,method = "GET",body = null) {
 
         if (!refreshed) {
 
-            showToast(
-                "Session Expired...",
-                "error"
-            );
-
             localStorage.removeItem(
                 "accessToken"
             );
 
             setTimeout(() => {
 
-                window.location.href =
-                    "/api/auth/customer/login";
+                // window.location.href =
+                //     `http://localhost:8080/${role}/login`;
 
             }, 1500);
 

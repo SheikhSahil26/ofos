@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Admin Page"}) %>
+
+    <body class="bg-slate-100">
+
+        <div class="flex min-h-screen">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- MAIN -->
+
+                <main class="flex-1 p-8">
+
+                    <!-- HEADER -->
+                    <div class="p-8">
+
+                        <!-- PAGE HEADER -->
+
+                        <div class="flex justify-between items-center mb-8">
+
+                            <div>
+
+                                <h1 class="text-4xl font-bold">
+                                    Restaurant Approvals
+                                </h1>
+
+                                <p class="text-gray-500 mt-2">
+                                    Review and approve new restaurant applications
+                                </p>
+
+                            </div>
+
+                            <div class="bg-orange-100 text-orange-600 px-4 py-2 rounded-xl font-semibold">
+
+                                12 Pending Requests
+
+                            </div>
+
+                        </div>
+
+                        <!-- SUMMARY CARDS -->
+
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Pending Approvals
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2 text-orange-500">
+                                    12
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Approved Today
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2 text-green-600">
+                                    8
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Rejected Today
+                                </p>
+
+                                <h2 class="text-3xl font-bold mt-2 text-red-500">
+                                    2
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+                        <!-- FILTERS -->
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm mb-8">
+
+                            <div class="grid lg:grid-cols-4 gap-4">
+
+                                <input type="text" placeholder="Search restaurant..."
+                                    class="border rounded-xl px-4 py-3">
+
+                                <select class="border rounded-xl px-4 py-3">
+
+                                    <option>All Categories</option>
+                                    <option>Pizza</option>
+                                    <option>Burger</option>
+                                    <option>Biryani</option>
+
+                                </select>
+
+                                <select class="border rounded-xl px-4 py-3">
+
+                                    <option>Newest First</option>
+                                    <option>Oldest First</option>
+
+                                </select>
+
+                                <button class="bg-[#014f38] text-white rounded-xl">
+
+                                    Search
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- APPROVAL TABLE -->
+
+                        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+
+                            <table class="w-full">
+
+                                <thead class="bg-slate-50">
+
+                                    <tr>
+
+                                        <th class="text-left p-5">
+                                            Restaurant
+                                        </th>
+
+                                        <th class="text-left">
+                                            Owner
+                                        </th>
+
+                                        <th class="text-left">
+                                            Category
+                                        </th>
+
+                                        <th class="text-left">
+                                            Submitted
+                                        </th>
+
+                                        <th class="text-left">
+                                            Documents
+                                        </th>
+
+                                        <th class="text-center">
+                                            Actions
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <% approvals.forEach(restaurant=> { %>
+
+                                        <tr class="border-t hover:bg-slate-50">
+
+                                            <td class="p-5">
+
+                                                <div class="flex items-center gap-3">
+
+                                                    <img src="<%= restaurant.logo %>"
+                                                        class="w-12 h-12 rounded-xl object-cover">
+
+                                                    <div>
+
+                                                        <h4 class="font-semibold">
+                                                            <%= restaurant.name %>
+                                                        </h4>
+
+                                                        <p class="text-sm text-gray-500">
+                                                            <%= restaurant.city %>
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                <%= restaurant.owner %>
+                                            </td>
+
+                                            <td>
+                                                <%= restaurant.category %>
+                                            </td>
+
+                                            <td>
+                                                <%= restaurant.submittedAt %>
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex gap-2">
+
+                                                    <span
+                                                        class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
+
+                                                        GST
+
+                                                    </span>
+
+                                                    <span
+                                                        class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
+
+                                                        FSSAI
+
+                                                    </span>
+
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+
+                                                        View
+
+                                                    </button>
+
+                                                    <button class="bg-green-500 text-white px-4 py-2 rounded-lg">
+
+                                                        Approve
+
+                                                    </button>
+
+                                                    <button class="bg-red-500 text-white px-4 py-2 rounded-lg">
+
+                                                        Reject
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <% }) %>
+
+                                </tbody>
+
+                            </table>
+
+                            <!-- PAGINATION -->
+
+                            <div class="flex justify-between items-center p-6 border-t">
+
+                                <p class="text-gray-500">
+                                    Page <%= currentPage %> of <%= totalPages %>
+                                </p>
+
+                                <div class="flex gap-2">
+
+                                    <% for(let i=1; i <=totalPages; i++) { %>
+
+                                        <a href="?page=<%= i %>" class="
+                    w-10 h-10
+                    flex items-center
+                    justify-center
+                    rounded-xl
+
+                    <%= i === currentPage
+                    ? 'bg-orange-500 text-white'
+                    : 'border hover:bg-slate-100'
+                    %>">
+
+                                            <%= i %>
+
+                                        </a>
+
+                                        <% } %>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+        </div>
+
+        <script src="/js/admin-dashboard.js"></script>
+        <script src="/js/admin/admin-sidebar.js"></script>
+
+    </body>
+
+</html>
