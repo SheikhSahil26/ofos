@@ -19,6 +19,7 @@ import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
 import { buildWebRoutes } from "./routes/web.route";
 
 
+
 const PORT = process.env.PORT;
 
 
@@ -51,6 +52,7 @@ app.use(buildWebRoutes());
 
 //this will initiate all backend routes 
 app.use("/api", buildApiRouter());
+app.use("/", buildWebRoutes());
 
 
 //working fine redis

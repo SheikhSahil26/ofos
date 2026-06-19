@@ -15,6 +15,12 @@ export class AuthController {
 
   private authRepo = new AuthRepository();
   private authService = new AuthService();
+
+    landingPage = async (req: Request, res: Response) => {
+
+    return res.render(`auth/ziggy`);
+  };
+
   registerPage = async (req: Request, res: Response) => {
 
     const role: string = String(req.params.role).toLowerCase();
@@ -26,6 +32,12 @@ export class AuthController {
     const role: string = String(req.params.role).toLowerCase();
     return res.render(`auth/${role}/login`, { role: role });
   };
+
+  roleSelectionPage = async (req: Request, res: Response) => {
+    console.log("Helooo")
+    return res.render(`auth/role-selection`);
+  };
+
 
   // Register user who does not have already Accounts....
   register = async (req: Request, res: Response) => {
