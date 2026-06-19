@@ -51,6 +51,7 @@ app.use(buildWebRoutes());
 
 //this will initiate all backend routes 
 app.use("/api", buildApiRouter());
+app.use("/", buildWebRoutes());
 
 
 //working fine redis

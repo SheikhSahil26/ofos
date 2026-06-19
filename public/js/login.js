@@ -20,8 +20,7 @@ const passwordRegex =
 const loginForm =
     document.getElementById("loginForm");
 
-loginForm.addEventListener(
-    "submit",
+loginForm.addEventListener('submit',
     async (e) => {
 
         console.log("Submit btn Cliked")
@@ -76,7 +75,7 @@ loginForm.addEventListener(
 
             const response =
                 await fetch(
-                    `http://localhost:8080/api/auth/${role}/api/login`,
+                    `http://localhost:8080/api/auth/${role}/login`,
                     {
                         method: "POST",
 
@@ -101,7 +100,7 @@ loginForm.addEventListener(
 
                 showToast(
                     result.message ||
-                    "Registration Successful",
+                    "Login Successful",
                     "success"
                 );
                 localStorage.setItem(

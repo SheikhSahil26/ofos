@@ -10,7 +10,13 @@ declare global {
         interface payload {
             userId: string;
             role: string;
-            email:string;
+            email: string;
+        }
+        
+        interface otpPayload {
+            userId: string;
+            email: string;
+            otp: string;
         }
     }
 }
