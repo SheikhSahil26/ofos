@@ -109,3 +109,83 @@ async function editAddress(addressId) {
         );
     }
 }
+
+//save edited address
+document
+    .getElementById(
+        "editAddressForm"
+    )
+    ?.addEventListener(
+        "submit",
+        saveAddress
+    );
+
+async function saveAddress(event) {
+
+    event.preventDefault();
+
+    const addressId =
+        document.getElementById(
+            "addressId"
+        ).value;
+
+    const payload = {
+        label:
+            document.getElementById("label").value,
+        addressLine1:
+            document.getElementById("addressLine1").value,
+        addressLine2:
+            document.getElementById("addressLine2").value,
+        city:
+            document.getElementById("city").value,
+        state:
+            document.getElementById("state").value,
+        pincode:
+            document.getElementById("pincode").value,
+    };
+
+    try {
+
+        const response =
+            await apiRequest(
+                `/api/addresses/${addressId}`,
+                "PUT",
+                payload
+            );
+
+        if (!response) return;
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            showToast(
+                result.message ||
+                "Failed to update address",
+                "error"
+            );
+
+            return;
+        }
+
+        showToast(
+            result.message ||
+            "Address updated successfully",
+            "success"
+        );
+
+        closeEditModal();
+
+        loadAddresses();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Failed to update address",
+            "error"
+        );
+    }
+}

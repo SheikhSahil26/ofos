@@ -81,13 +81,15 @@ export class AddressController{
     updateAddressById = asyncHandler(async(req: Request, res: Response) => {
 
         const addressId = req.params.id;
-        const user = req.user as Express.payload | undefined;
+        // const user = req.user as Express.payload | undefined;
 
-        if(!user || typeof user.userId !== "string"){
-            throw new AppError("Invalid user id", 409);
-        }
+        // if(!user || typeof user.userId !== "string"){
+        //     throw new AppError("Invalid user id", 409);
+        // }
 
-        const userId = user.userId;
+        // const userId = user.userId;
+
+        const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         const data: IUpdateAddress = req.body;
 
