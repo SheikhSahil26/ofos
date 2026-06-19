@@ -15,6 +15,7 @@ import { MenuItemRoutes } from "../modules/menu_items/routes/menu_item.route.js"
 import { ModifierRoutes } from "../modules/modifier/routes/modifier.route.js";
 import { CouponRoutes } from "../modules/coupons/routes/coupon.route.js";
 import { AdminRoutes } from "../modules/admin/routes/admin.route.js";
+import { RestaurantRoutes } from "../modules/restaurant/routes/restaurant.route.js";
 
 
 export function buildApiRouter(): Router {
@@ -23,7 +24,7 @@ export function buildApiRouter(): Router {
     const routes: IRoutes[] = [
         new AuthRoutes(),
         new CartRoutes(),
-        // new RestaurantRoutes(),
+        new RestaurantRoutes(),
         new OrdersRoutes(),
         new UserRoutes(),
         new AddressRoutes(),
