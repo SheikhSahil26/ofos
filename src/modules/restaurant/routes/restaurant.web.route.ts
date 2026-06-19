@@ -20,7 +20,7 @@ export class RestaurantWebRoutes implements IRoutes {
         });
 
         this.router.get("/detail/:branchId", (req: Request, res: Response) => {
-            res.render("restaurant/detailPage");
+            res.render("restaurant/detailPage", {activePage: ""});
         });
     }
 }

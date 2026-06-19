@@ -4,7 +4,7 @@ import { UserWebRoutes } from "../modules/user/routes/user.web.route";
 import { RestaurantWebRoutes } from "../modules/restaurant/routes/restaurant.web.route";
 import { WebAuthRoutes } from "../modules/auth/routes/auth.web.route";
 
-export function buildWebRoutes(): Router{
+export function buildWebRoutes(): Router {
     const router = Router();
 
     const routes: IRoutes[] = [

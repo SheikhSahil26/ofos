@@ -29,9 +29,14 @@ export const isBranchOpenNow = (
         hour => hour.dayOfWeek === currentDay
     );
 
-    if (!todayHours || todayHours.isClosed) {
-        return false;
-    }
+    if (
+    !todayHours ||
+    todayHours.isClosed ||
+    !todayHours.openTime ||
+    !todayHours.closeTime
+) {
+    return false;
+}
 
     const currentMinutes =
         now.getHours() * 60 + now.getMinutes();
