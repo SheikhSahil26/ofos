@@ -36,6 +36,7 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
+    --container-lg: 32rem;
     --container-2xl: 42rem;
     --container-7xl: 80rem;
     --text-xs: 0.75rem;
@@ -361,6 +362,9 @@
   .inline-block {
     display: inline-block;
   }
+  .inline-flex {
+    display: inline-flex;
+  }
   .table {
     display: table;
   }
@@ -400,6 +404,9 @@
   .min-h-\[72px\] {
     min-height: 72px;
   }
+  .min-h-\[550px\] {
+    min-height: 550px;
+  }
   .min-h-screen {
     min-height: 100vh;
   }
@@ -426,6 +433,9 @@
   }
   .max-w-7xl {
     max-width: var(--container-7xl);
+  }
+  .max-w-lg {
+    max-width: var(--container-lg);
   }
   .min-w-\[140px\] {
     min-width: 140px;
@@ -604,6 +614,9 @@
   }
   .bg-\[\#fff1e5\] {
     background-color: #fff1e5;
+  }
+  .bg-\[\#fff4ea\] {
+    background-color: #fff4ea;
   }
   .bg-black\/50 {
     background-color: color-mix(in srgb, #000 50%, transparent);
@@ -867,6 +880,13 @@
       }
     }
   }
+  .hover\:bg-\[\#013f2d\] {
+    &:hover {
+      @media (hover: hover) {
+        background-color: #013f2d;
+      }
+    }
+  }
   .hover\:bg-\[\#e76d00\] {
     &:hover {
       @media (hover: hover) {
@@ -878,6 +898,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: #ea6f00;
+      }
+    }
+  }
+  .hover\:bg-\[\#eb6f00\] {
+    &:hover {
+      @media (hover: hover) {
+        background-color: #eb6f00;
       }
     }
   }
@@ -965,6 +992,21 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+  .sm\:flex-row {
+    @media (width >= 40rem) {
+      flex-direction: row;
+    }
+  }
+  .sm\:items-center {
+    @media (width >= 40rem) {
+      align-items: center;
+    }
+  }
+  .sm\:justify-between {
+    @media (width >= 40rem) {
+      justify-content: space-between;
+    }
+  }
   .md\:w-40 {
     @media (width >= 48rem) {
       width: calc(var(--spacing) * 40);
@@ -978,6 +1020,11 @@
   .md\:flex-row {
     @media (width >= 48rem) {
       flex-direction: row;
+    }
+  }
+  .md\:px-8 {
+    @media (width >= 48rem) {
+      padding-inline: calc(var(--spacing) * 8);
     }
   }
   .lg\:flex {
