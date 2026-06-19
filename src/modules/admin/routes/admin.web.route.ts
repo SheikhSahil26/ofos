@@ -25,47 +25,7 @@ export class AdminWebRoutes implements IRoutes {
             });
         });
         this.router.get("/restaurants", (req: Request, res: Response) => {
-            res.status(200).render("admin/restaurants", {
-                currentPage: 1,
-
-                totalPages: 5,
-
-                restaurants: [
-                    {
-                        id: 1,
-                        name: "Pizza Palace",
-                        owner: "Rahul Patel",
-                        category: "Pizza",
-                        city: "Ahmedabad",
-                        orders: 425,
-                        revenue: "1,25,430",
-                        status: "Approved",
-                        logo: "https://picsum.photos/60?1"
-                    },
-                    {
-                        id: 2,
-                        name: "Burger Hub",
-                        owner: "Jay Shah",
-                        category: "Burger",
-                        city: "Surat",
-                        orders: 210,
-                        revenue: "85,200",
-                        status: "Pending",
-                        logo: "https://picsum.photos/60?2"
-                    },
-                    {
-                        id: 3,
-                        name: "Biryani House",
-                        owner: "Amit Kumar",
-                        category: "Biryani",
-                        city: "Vadodara",
-                        orders: 350,
-                        revenue: "98,700",
-                        status: "Blocked",
-                        logo: "https://picsum.photos/60?3"
-                    }
-                ]
-            });
+            res.status(200).render("admin/restaurants");
         });
 
 
