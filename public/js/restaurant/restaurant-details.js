@@ -1090,7 +1090,7 @@ document
         () => {
 
             window.location.href =
-                "/restaurants";
+                "/home";
 
         }
     );

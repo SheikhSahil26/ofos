@@ -19,8 +19,8 @@ export class RestaurantWebRoutes implements IRoutes {
             res.render("customer/home", { activePage: "home" });
         });
 
-        this.router.get("/restaurants/detail/:branchId", (req: Request, res: Response) => {
-            res.render("restaurant/detailPage");
+        this.router.get("/detail/:branchId", (req: Request, res: Response) => {
+            res.render("restaurant/detailPage", {activePage: ""});
         });
     }
 }
