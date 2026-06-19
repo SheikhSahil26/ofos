@@ -44,12 +44,12 @@
 
                         <!-- STATS -->
 
-                        <div class="grid lg:grid-cols-4 gap-6 mb-8">
+                        <!-- <div class="grid lg:grid-cols-4 gap-6 mb-8">
 
                             <div class="bg-white rounded-3xl p-6 shadow-sm">
 
                                 <p class="text-gray-500">
-                                    Total Customers
+                                    Total Restaurants
                                 </p>
 
                                 <h2 class="text-3xl font-bold mt-2">
@@ -61,7 +61,7 @@
                             <div class="bg-white rounded-3xl p-6 shadow-sm">
 
                                 <p class="text-gray-500">
-                                    Active Customers
+                                    Active Restaurants
                                 </p>
 
                                 <h2 class="text-3xl font-bold mt-2 text-green-600">
@@ -73,7 +73,7 @@
                             <div class="bg-white rounded-3xl p-6 shadow-sm">
 
                                 <p class="text-gray-500">
-                                    Blocked Users
+                                    Blocked Restaurants
                                 </p>
 
                                 <h2 class="text-3xl font-bold mt-2 text-red-500">
@@ -94,36 +94,151 @@
 
                             </div>
 
-                        </div>
+                        </div> -->
 
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Total Restaurants</h3>
+                                <p id="totalRestaurants" class="text-3xl font-bold mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Active Restaurants</h3>
+                                <p id="activeRestaurants" class="text-3xl font-bold text-green-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Blocked Restaurants</h3>
+                                <p id="blockedRestaurants" class="text-3xl font-bold text-red-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">New This Month</h3>
+                                <p id="newRestaurants" class="text-3xl font-bold text-blue-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                        </div>
                         <!-- SEARCH -->
 
-                        <div class="bg-white rounded-3xl p-6 mb-8 shadow-sm">
+                        <div class="bg-white rounded-2xl p-5 shadow-sm mb-6">
 
-                            <div class="grid lg:grid-cols-4 gap-4">
+                            <div class="flex flex-wrap items-center gap-4">
 
-                                <input type="text" placeholder="Search customer..." class="border rounded-xl px-4 py-3">
+                                <!-- Search -->
 
-                                <select class="border rounded-xl px-4 py-3">
+                                <div class="flex-1 min-w-[300px]">
 
-                                    <option>All Status</option>
-                                    <option>Active</option>
-                                    <option>Blocked</option>
+                                    <input type="text" id="searchInput"
+                                        placeholder="Search Restaurant, Branch, Head Name, Revenue..." class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4
+                    py-3
+                    outline-none
+                    focus:ring-2
+                    focus:ring-orange-400
+                ">
+
+                                </div>
+
+                                <!-- Active / Blocked -->
+
+                                <select id="statusFilter" class="
+                border
+                rounded-xl
+                px-4
+                py-3
+                bg-white
+            ">
+
+                                    <option value="">
+                                        All Status
+                                    </option>
+
+                                    <option value="ACTIVE">
+                                        Active
+                                    </option>
+
+                                    <option value="BLOCKED">
+                                        Blocked
+                                    </option>
 
                                 </select>
 
-                                <select class="border rounded-xl px-4 py-3">
+                                <!-- Open / Close -->
 
-                                    <option>All Users</option>
-                                    <option>Verified</option>
-                                    <option>Unverified</option>
+                                <select id="openFilter" class="
+                border
+                rounded-xl
+                px-4
+                py-3
+                bg-white
+            ">
+
+                                    <option value="">
+                                        Open / Close
+                                    </option>
+
+                                    <option value="OPEN">
+                                        Open
+                                    </option>
+
+                                    <option value="CLOSED">
+                                        Closed
+                                    </option>
 
                                 </select>
 
-                                <button class="bg-[#014f38] text-white rounded-xl">
+                                <!-- Sort -->
 
+                                <select id="sortFilter" class="
+                border
+                rounded-xl
+                px-4
+                py-3
+                bg-white
+            ">
+
+                                    <option value="branchName">
+                                        Branch Name (A-Z)
+                                    </option>
+
+                                    <option value="restaurantName">
+                                        Restaurant (A-Z)
+                                    </option>
+
+                                    <option value="headName">
+                                        Head Name (A-Z)
+                                    </option>
+
+                                    <option value="revenue">
+                                        Revenue (Low-High)
+                                    </option>
+
+                                    <option value="orders">
+                                        Orders (Low-High)
+                                    </option>
+
+                                </select>
+
+                                <button onclick="loadRestaurants(1)" class="
+                bg-orange-500
+                text-white
+                px-6
+                py-3
+                rounded-xl
+            ">
                                     Search
-
                                 </button>
 
                             </div>
@@ -131,40 +246,87 @@
                         </div>
 
 
-
                         <!-- Restaurant Table -->
 
-                        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+                        <div class="
+                            bg-white
+                            rounded-2xl
+                            shadow-sm
+                            overflow-hidden
+                        ">
 
-                            <table class="w-full">
+                            <div class="overflow-x-auto">
 
-                                <thead class="bg-slate-50">
+                                <div class="max-h-[650px] overflow-y-auto">
 
-                                    <tr>
+                                    <table class="w-full min-w-[1200px]">
 
-                                        <th class="text-left p-5">Restaurant</th>
-                                        <th class="text-left">Owner</th>
-                                        <th class="text-left">Category</th>
-                                        <th class="text-left">Orders</th>
-                                        <th class="text-left">Revenue</th>
-                                        <th class="text-left">Status</th>
-                                        <th class="text-center">Actions</th>
+                                        <thead class="
+                                            bg-slate-100
+                                            sticky
+                                            top-0
+                                            z-10
+                                        ">
+                                            <tr>
 
-                                    </tr>
+                                                <th class="p-4 text-left">
+                                                    Restaurant
+                                                </th>
 
-                                </thead>
+                                                <th class="p-4 text-left">
+                                                    Branch
+                                                </th>
 
-                                <tbody id="restaurantTableBody">
+                                                <th class="p-4 text-left">
+                                                    Branch Head
+                                                </th>
 
+                                                <th class="p-4 text-center">
+                                                    Orders
+                                                </th>
 
-                                </tbody>
+                                                <th class="p-4 text-center">
+                                                    Revenue
+                                                </th>
 
-                            </table>
+                                                <th class="p-4 text-center">
+                                                    Rating
+                                                </th>
 
-                            <!-- Pagination -->
-                            <div id="paginationContainer" class="flex justify-end gap-2 p-6 border-t">
+                                                <th class="p-4 text-center">
+                                                    Status
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Verification
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Actions
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="restaurantTableBody">
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
                             </div>
+
                         </div>
+
+                        <!-- Pagination -->
+                        <div id="paginationContainer" class="
+        flex
+        justify-end
+        gap-2
+        mt-6
+    "></div>
 
                     </div>
                 </main>

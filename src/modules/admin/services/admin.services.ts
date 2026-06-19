@@ -3,7 +3,7 @@ import { AppError } from "../../../utils/appError";
 import { ICustomerDetailsResponse, IRestaurantOwnerDetailsResponse, IUserDetailsResponse } from "../interfaces/admin.interface";
 import { AdminRepository } from "../repositories/admin.repositories";
 
-export class AdminService{
+export class AdminService {
 
     private adminRepository = new AdminRepository();
 
@@ -105,63 +105,117 @@ export class AdminService{
     //restaurant owner details
     async getRestaurantOwnerDetails(id: string): Promise<ServiceResponse<IRestaurantOwnerDetailsResponse>> {
 
-    const owner = await this.adminRepository.getRestaurantOwnerDetails(id);
+        const owner = await this.adminRepository.getRestaurantOwnerDetails(id);
 
-    if (!owner) {
-        throw new AppError("Restaurant owner not found", 404);
-    }
+        if (!owner) {
+            throw new AppError("Restaurant owner not found", 404);
+        }
 
-    const isOwner = owner.userRoles.some(
-        userRole =>
-            userRole.role.role === "RESTAURANT_OWNER"
-    );
-
-    if (!isOwner) {
-        throw new AppError(
-            "User is not a restaurant owner",
-            400
-        );
-    }
-
-    const totalRestaurants =
-        owner.ownedRestaurants.length;
-
-    const totalBranches =
-        owner.ownedRestaurants.reduce(
-            (sum, restaurant) =>
-                sum + restaurant.branches.length,
-            0
+        const isOwner = owner.userRoles.some(
+            userRole =>
+                userRole.role.role === "RESTAURANT_OWNER"
         );
 
-    return {
-        success: true,
-        message:
-            "Restaurant owner details fetched successfully",
-        data: {
-            id: owner.id,
-            fullName: owner.fullName,
-            email: owner.email,
-            mobile: owner.mobile,
-            isVerified: owner.isVerified,
-            isActive: owner.isActive,
+        if (!isOwner) {
+            throw new AppError(
+                "User is not a restaurant owner",
+                400
+            );
+        }
 
-            totalRestaurants,
-            totalBranches,
+        const totalRestaurants =
+            owner.ownedRestaurants.length;
 
-            restaurants:
-                owner.ownedRestaurants.map(
-                    restaurant => ({
-                        id: restaurant.id,
-                        name: restaurant.name,
-                        isActive: restaurant.isActive,
-                        totalBranches:
-                            restaurant.branches.length,
-                    })
-                ),
+        const totalBranches =
+            owner.ownedRestaurants.reduce(
+                (sum, restaurant) =>
+                    sum + restaurant.branches.length,
+                0
+            );
 
-            createdAt: owner.createdAt,
-        },
-        statusCode: 200,
-    };
-}
+        return {
+            success: true,
+            message:
+                "Restaurant owner details fetched successfully",
+            data: {
+                id: owner.id,
+                fullName: owner.fullName,
+                email: owner.email,
+                mobile: owner.mobile,
+                isVerified: owner.isVerified,
+                isActive: owner.isActive,
+
+                totalRestaurants,
+                totalBranches,
+
+                restaurants:
+                    owner.ownedRestaurants.map(
+                        restaurant => ({
+                            id: restaurant.id,
+                            name: restaurant.name,
+                            isActive: restaurant.isActive,
+                            totalBranches:
+                                restaurant.branches.length,
+                        })
+                    ),
+
+                createdAt: owner.createdAt,
+            },
+            statusCode: 200,
+        };
+
+    }
+
+    // Get Branch history
+    async getAllBranches(
+        page: number,
+        limit: number,
+        search?: string
+    ): Promise<ServiceResponse<any>> {
+
+        const data =
+            await this.adminRepository
+                .getAllBranches(
+                    page,
+                    limit,
+                    search
+                );
+
+        return {
+
+            success: true,
+
+            data: {
+                pagination: {
+                    page,
+                    limit,
+                    total: data.total
+                },
+
+                branches: data.branches
+            },
+
+            message:
+                "Branches fetched successfully",
+
+            statusCode: 200
+
+        };
+
+    }
+
+    async getBranchesStats() {
+
+        const stats =
+            await this.adminRepository.getBranchesStats();
+
+        return {
+            success: true,
+            data: stats,
+            message: "Dashboard stats fetched successfully",
+            statusCode: 200
+        };
+
+    }
+
 }

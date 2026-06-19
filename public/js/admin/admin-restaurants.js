@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
     await loadRestaurants();
+    await loadDashboardStats();
 });
 
 async function loadRestaurants(page = 1) {
@@ -8,7 +9,7 @@ async function loadRestaurants(page = 1) {
 
         const response =
             await fetch(
-                `/api/restaurants?page=${page}&limit=10`
+                `/api/admin/brances?page=${page}&limit=10`
             );
 
         const result = await response.json();
@@ -20,110 +21,327 @@ async function loadRestaurants(page = 1) {
 
         tbody.innerHTML = "";
 
-        result.data.forEach(restaurant => {
-
-            const branch =
-                restaurant.branches?.[0];
-
-            const city =
-                branch?.city || "N/A";
-
-            const status =
-                branch?.isOpenNow
-                    ? `
-                        <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
-                            Open
-                        </span>
-                    `
-                    : `
-                        <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">
-                            Closed
-                        </span>
-                    `;
-
-            const logo =
-                restaurant.logoUrl ||
-                "https://placehold.co/100x100";
+        result.data.branches.forEach((branch) => {
 
             const row = `
-                <tr class="border-t hover:bg-slate-50">
 
-                    <td class="p-5">
+        <tr
+            class="
+                border-b
+                hover:bg-slate-50
+                transition-all
+            "
+        >
 
-                        <div class="flex items-center gap-3">
+            <!-- Restaurant -->
 
-                            <img
-                                src="${logo}"
-                                class="w-12 h-12 rounded-xl object-cover"
+            <td class="p-5">
+
+                <div class="flex items-center gap-3">
+
+                    <img
+                        src="${branch.restaurant.logo ||
+                'https://placehold.co/60x60'
+                }"
+                        class="
+                            w-14
+                            h-14
+                            rounded-xl
+                            object-cover
+                            border
+                        "
+                    >
+
+                    <div>
+
+                        <h4 class="font-semibold text-slate-800">
+                            ${branch.restaurant.name}
+                        </h4>
+
+                        <p class="text-sm text-gray-500">
+                            ${branch.city}, ${branch.state}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </td>
+
+            <!-- Branch -->
+
+            <td class="px-4">
+
+                <div>
+
+                    <p class="font-medium">
+                        ${branch.branchName}
+                    </p>
+
+                    ${branch.isPrimary
+                    ? `
+                                <span
+                                    class="
+                                        text-xs
+                                        bg-blue-100
+                                        text-blue-600
+                                        px-2
+                                        py-1
+                                        rounded-full
+                                    "
+                                >
+                                    Primary
+                                </span>
+                              `
+                    : ""
+                }
+
+                </div>
+
+            </td>
+
+            <!-- Branch Head -->
+
+            <td class="px-4">
+
+                <div>
+
+                    <p class="font-medium">
+                        ${branch.branchHead?.name ||
+                "Not Assigned"
+                }
+                    </p>
+
+                    <p class="text-xs text-gray-500">
+                        ${branch.branchHead?.mobile ||
+                ""
+                }
+                    </p>
+
+                </div>
+
+            </td>
+
+            <!-- Orders -->
+
+            <td class="text-center">
+
+                <div>
+
+                    <p class="font-bold text-lg">
+                        ${branch.totalOrders}
+                    </p>
+
+                    <p class="text-xs text-green-600">
+                        Delivered :
+                        ${branch.deliveredOrders}
+                    </p>
+
+                </div>
+
+            </td>
+
+            <!-- Revenue -->
+
+            <td
+                class="
+                    text-center
+                    font-bold
+                    text-green-600
+                "
+            >
+                ₹${Number(
+                    branch.totalRevenue
+                ).toLocaleString()}
+            </td>
+
+            <!-- Rating -->
+
+            <td class="text-center">
+
+                <div
+                    class="
+                        flex
+                        items-center
+                        justify-center
+                        gap-1
+                    "
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-star
+                            text-yellow-500
+                        "
+                    ></i>
+
+                    <span class="font-semibold">
+                        ${branch.averageRating}
+                    </span>
+
+                    <span class="text-xs text-gray-500">
+                        (${branch.totalReviews})
+                    </span>
+
+                </div>
+
+            </td>
+
+            <!-- Open / Close -->
+
+            <td class="text-center">
+
+                ${branch.isOpenNow
+                    ? `
+                            <span
+                                class="
+                                    bg-green-100
+                                    text-green-700
+                                    px-3
+                                    py-1
+                                    rounded-full
+                                    text-sm
+                                "
                             >
-
-                            <div>
-
-                                <h4 class="font-semibold">
-                                    ${restaurant.name}
-                                </h4>
-
-                                <p class="text-sm text-gray-500">
-                                    ${city}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        -
-                    </td>
-
-                    <td>
-                        Restaurant
-                    </td>
-
-                    <td>
-                        -
-                    </td>
-
-                    <td>
-                        -
-                    </td>
-
-                    <td>
-                        ${status}
-                    </td>
-
-                    <td>
-
-                        <div class="flex justify-center gap-2">
-
-                            <button
-                                class="bg-blue-500 text-white px-3 py-2 rounded-lg"
-                                onclick="viewRestaurant('${restaurant.id}')"
+                                Open
+                            </span>
+                        `
+                    : `
+                            <span
+                                class="
+                                    bg-red-100
+                                    text-red-700
+                                    px-3
+                                    py-1
+                                    rounded-full
+                                    text-sm
+                                "
                             >
-                                View
-                            </button>
+                                Closed
+                            </span>
+                        `
+                }
 
-                            <button
-                                class="bg-yellow-500 text-white px-3 py-2 rounded-lg"
-                                onclick="toggleRestaurant('${restaurant.id}')"
+            </td>
+
+            <!-- Verification -->
+
+            <td class="text-center">
+
+                ${branch.verificationStatus ===
+                    "APPROVED"
+
+                    ? `
+                            <span
+                                class="
+                                    bg-green-100
+                                    text-green-700
+                                    px-3
+                                    py-1
+                                    rounded-full
+                                    text-sm
+                                "
                             >
-                                Block
-                            </button>
+                                Approved
+                            </span>
+                        `
 
-                            <button
-                                class="bg-red-500 text-white px-3 py-2 rounded-lg"
-                                onclick="deleteRestaurant('${restaurant.id}')"
+                    : `
+                            <span
+                                class="
+                                    bg-yellow-100
+                                    text-yellow-700
+                                    px-3
+                                    py-1
+                                    rounded-full
+                                    text-sm
+                                "
                             >
-                                Delete
-                            </button>
+                                Pending
+                            </span>
+                        `
+                }
 
-                        </div>
+            </td>
 
-                    </td>
+            <!-- Actions -->
 
-                </tr>
-            `;
+            <td class="text-center">
+
+                <div
+                    class="
+                        flex
+                        justify-center
+                        gap-2
+                    "
+                >
+
+                    <button
+                        class="
+                            bg-blue-500
+                            hover:bg-blue-600
+                            text-white
+                            w-9
+                            h-9
+                            rounded-lg
+                        "
+                        title="View"
+                        onclick="viewBranch('${branch.id}')"
+                    >
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+
+                    <button
+                        class="
+                            ${branch.isActive
+                    ? "bg-yellow-500 hover:bg-yellow-600"
+                    : "bg-green-500 hover:bg-green-600"
+                }
+                            text-white
+                            w-9
+                            h-9
+                            rounded-lg
+                        "
+                        title="${branch.isActive
+                    ? "Block"
+                    : "Activate"
+                }"
+                        onclick="toggleBranch('${branch.id}')"
+                    >
+                        <i
+                            class="
+                                fa-solid
+                                ${branch.isActive
+                    ? "fa-ban"
+                    : "fa-check"
+                }
+                            "
+                        ></i>
+                    </button>
+
+                    <button
+                        class="
+                            bg-red-500
+                            hover:bg-red-600
+                            text-white
+                            w-9
+                            h-9
+                            rounded-lg
+                        "
+                        title="Delete"
+                        onclick="deleteBranch('${branch.id}')"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `;
 
             tbody.insertAdjacentHTML(
                 "beforeend",
@@ -133,10 +351,10 @@ async function loadRestaurants(page = 1) {
         });
 
         renderPagination(
-            result.pagination.page,
+            result.data.pagination.page,
             Math.ceil(
-                result.pagination.total /
-                result.pagination.limit
+                result.data.pagination.total /
+                result.data.pagination.limit
             )
         );
 
@@ -220,4 +438,35 @@ function toggleRestaurant(id) {
         `Block/Unblock restaurant ${id}`
     );
 
+}
+
+async function loadDashboardStats() {
+
+    const response =
+        await fetch(
+            "/api/admin/branches/stats"
+        );
+
+    const result =
+        await response.json();
+
+    document.getElementById(
+        "totalRestaurants"
+    ).textContent =
+        result.data.totalRestaurants;
+
+    document.getElementById(
+        "activeRestaurants"
+    ).textContent =
+        result.data.activeRestaurants;
+
+    document.getElementById(
+        "blockedRestaurants"
+    ).textContent =
+        result.data.blockedRestaurants;
+
+    document.getElementById(
+        "newRestaurants"
+    ).textContent =
+        result.data.newRestaurantsThisMonth;
 }
