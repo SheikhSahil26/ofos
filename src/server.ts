@@ -10,12 +10,14 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { buildApiRouter } from "./routes";
 import redisClient from "./config/redis";
-import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
+// import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
 import cookieParser from 'cookie-parser';
 import "./config/jwtAuth";
 import passport from "passport";
 import { Request, Response } from "express";
+import { errorHandler, notFoundMiddleware } from "./middlewares/errorHandler";
 import { buildWebRoutes } from "./routes/web.route";
+
 
 
 const PORT = process.env.PORT;
@@ -43,8 +45,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 app.use(cookieParser())
 app.use(passport.initialize());
+app.use(errorHandler);
 
-//this will initiate all the routes 
+//this will initiate all frontend routes
+app.use(buildWebRoutes());
+
+//this will initiate all backend routes 
 app.use("/api", buildApiRouter());
 app.use("/", buildWebRoutes());
 
@@ -57,12 +63,9 @@ app.get("/redis-test",async(req:any,res:any)=>{
     console.log(value,"this is redis value")
 })
 
-// app.use(errorHandler);
-// app.use(notFoundMiddleware);
+app.use(notFoundMiddleware);
 
-app.get("/list",(req:Request, res:Response) => {
-    res.render("restaurant/listing");
-});
+
 
 
 

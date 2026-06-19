@@ -2,7 +2,7 @@ console.log("hello")
 async function apiRequest(url,method = "GET",body = null) {
     let token =
         localStorage.getItem("accessToken");
-        console.log(token);
+        // console.log(token);
 
     let response = await fetch(url, {
             method,
@@ -45,7 +45,7 @@ async function apiRequest(url,method = "GET",body = null) {
             setTimeout(() => {
 
                 window.location.href =
-                    `http://localhost:8080/${role}/login`;
+                    "/api/auth/customer/login";
 
             }, 1500);
 

@@ -150,10 +150,9 @@ export class AuthRepository {
     refreshToken: string,
     expiresAt: Date
   ) {
-
     return await prisma.refreshToken.create({
       data: {
-        userId: userId,
+        userId,
         token: refreshToken,
         expiresAt
       }
