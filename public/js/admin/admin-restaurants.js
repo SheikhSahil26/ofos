@@ -7,11 +7,26 @@ async function loadRestaurants(page = 1) {
 
     try {
 
-        const response =
-            await fetch(
-                `/api/admin/brances?page=${page}&limit=10`
-            );
+        const search =
+            document.getElementById("searchInput").value;
 
+        const status =
+            document.getElementById("statusFilter").value;
+
+        const openStatus =
+            document.getElementById("openFilter").value;
+
+        const sort =
+            document.getElementById("sortFilter").value;
+
+        const response = await fetch(
+            `/api/admin/branches?page=${page}
+    &limit=10
+    &search=${encodeURIComponent(search)}
+    &status=${status}
+    &openStatus=${openStatus}
+    &sort=${sort}`
+        );
         const result = await response.json();
 
         const tbody =
@@ -442,31 +457,58 @@ function toggleRestaurant(id) {
 
 async function loadDashboardStats() {
 
-    const response =
-        await fetch(
-            "/api/admin/branches/stats"
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin/branches/stats"
+            );
+
+        const result =
+            await response.json();
+
+        const stats =
+            result.data;
+
+        document.getElementById(
+            "totalRestaurants"
+        ).textContent =
+            stats.totalRestaurants ?? 0;
+
+        document.getElementById(
+            "totalBranches"
+        ).textContent =
+            stats.totalBranches ?? 0;
+
+        document.getElementById(
+            "activeBranches"
+        ).textContent =
+            stats.activeBranches ?? 0;
+
+        document.getElementById(
+            "blockedBranchess"
+        ).textContent =
+            stats.blockedBranches ?? 0;
+
+        document.getElementById(
+            "newBranchess"
+        ).textContent =
+            stats.newBranchesThisMonth ?? 0;
+
+    } catch (error) {
+
+        console.error(
+            "Dashboard stats error:",
+            error
         );
 
-    const result =
-        await response.json();
+    }
 
-    document.getElementById(
-        "totalRestaurants"
-    ).textContent =
-        result.data.totalRestaurants;
-
-    document.getElementById(
-        "activeRestaurants"
-    ).textContent =
-        result.data.activeRestaurants;
-
-    document.getElementById(
-        "blockedRestaurants"
-    ).textContent =
-        result.data.blockedRestaurants;
-
-    document.getElementById(
-        "newRestaurants"
-    ).textContent =
-        result.data.newRestaurantsThisMonth;
 }
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        loadDashboardStats();
+    }
+);

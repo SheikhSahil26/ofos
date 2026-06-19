@@ -57,12 +57,25 @@ export class AdminController {
             const search =
                 req.query.search as string;
 
+            const status =
+                req.query.status as string;
+
+            const openStatus =
+                req.query.openStatus as string;
+
+            const sort =
+                req.query.sort as string;
+
+
             const data =
                 await this.adminService
                     .getAllBranches(
                         page,
                         limit,
-                        search
+                        search,
+                        status,
+                        openStatus,
+                        sort
                     );
 
             return res.status(200).json({

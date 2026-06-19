@@ -170,7 +170,10 @@ export class AdminService {
     async getAllBranches(
         page: number,
         limit: number,
-        search?: string
+        search?: string,
+        status?: string,
+        openStatus?: string,
+        sort?: string
     ): Promise<ServiceResponse<any>> {
 
         const data =
@@ -178,7 +181,10 @@ export class AdminService {
                 .getAllBranches(
                     page,
                     limit,
-                    search
+                    search,
+                    status,
+                    openStatus,
+                    sort
                 );
 
         return {

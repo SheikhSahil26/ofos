@@ -84,49 +84,69 @@ export class AdminRepository {
     async getAllBranches(
         page: number,
         limit: number,
-        search?: string
+        search?: string,
+        status?: string,
+        openStatus?: string,
+        sortBy?: string
     ) {
 
         const skip = (page - 1) * limit;
 
-
-        const where = {
-            verificationStatus: VerificationStatus.APPROVED,
-
-            ...(search
-                ? {
-                    OR: [
-                        {
-                            branchName: {
-                                contains: search,
-                                mode: "insensitive"
-                            }
-                        },
-                        {
-                            restaurant: {
-                                name: {
-                                    contains: search,
-                                    mode: "insensitive"
-                                }
-                            }
-                        }
-                    ]
-                }
-                : {})
+        const where: any = {
+            isDeleted: false,
+            verificationStatus: "APPROVED"
         };
 
-        const total = await prisma.restaurantBranch.count({
-            where
-        });
+        // Active / Blocked
+        if (status === "ACTIVE") {
+            where.isActive = true;
+        }
+
+        if (status === "BLOCKED") {
+            where.isActive = false;
+        }
+
+        // Search
+        if (search) {
+
+            where.OR = [
+
+                {
+                    branchName: {
+                        contains: search
+                    }
+                },
+
+                {
+                    restaurant: {
+                        name: {
+                            contains: search
+                        }
+                    }
+                },
+
+                {
+                    head: {
+                        user: {
+                            fullName: {
+                                contains: search
+                            }
+                        }
+                    }
+                }
+
+            ];
+        }
+
+        const total =
+            await prisma.restaurantBranch.count({
+                where
+            });
 
         const branches =
             await prisma.restaurantBranch.findMany({
 
                 where,
-
-                skip,
-
-                take: limit,
 
                 include: {
 
@@ -164,7 +184,7 @@ export class AdminRepository {
                 }
             });
 
-        const transformed =
+        let transformed =
             await Promise.all(
 
                 branches.map(
@@ -181,9 +201,10 @@ export class AdminRepository {
                                 _sum: {
                                     totalAmount: true
                                 }
+
                             });
 
-                        const reviewRatings =
+                        const ratings =
                             await prisma.review.aggregate({
 
                                 where: {
@@ -195,6 +216,7 @@ export class AdminRepository {
                                     deliveryRating: true,
                                     packagingRating: true
                                 }
+
                             });
 
                         const deliveredOrders =
@@ -215,6 +237,7 @@ export class AdminRepository {
 
                         const pendingOrders =
                             await prisma.order.count({
+
                                 where: {
                                     branchId: branch.id,
                                     status: {
@@ -228,26 +251,35 @@ export class AdminRepository {
                                         ]
                                     }
                                 }
+
                             });
 
                         const avgRating =
                             (
                                 (
-                                    Number(reviewRatings._avg.foodRating || 0) +
-                                    Number(reviewRatings._avg.deliveryRating || 0) +
-                                    Number(reviewRatings._avg.packagingRating || 0)
+                                    Number(ratings._avg.foodRating || 0) +
+                                    Number(ratings._avg.deliveryRating || 0) +
+                                    Number(ratings._avg.packagingRating || 0)
                                 ) / 3
                             ).toFixed(1);
+
+                        const isOpenNow =
+                            isBranchOpenNow(
+                                branch.operatingHours
+                            );
 
                         return {
 
                             id: branch.id,
 
-                            branchName: branch.branchName,
+                            branchName:
+                                branch.branchName,
 
-                            city: branch.city,
+                            city:
+                                branch.city,
 
-                            state: branch.state,
+                            state:
+                                branch.state,
 
                             address:
                                 `${branch.addressLine1 || ""} ${branch.addressLine2 || ""}`,
@@ -318,10 +350,7 @@ export class AdminRepository {
                             totalCategories:
                                 branch._count.categories,
 
-                            isOpenNow:
-                                isBranchOpenNow(
-                                    branch.operatingHours
-                                ),
+                            isOpenNow,
 
                             createdAt:
                                 branch.createdAt
@@ -330,11 +359,96 @@ export class AdminRepository {
                 )
             );
 
+        // Open / Close Filter
+        if (openStatus === "OPEN") {
+
+            transformed =
+                transformed.filter(
+                    branch => branch.isOpenNow
+                );
+        }
+
+        if (openStatus === "CLOSED") {
+
+            transformed =
+                transformed.filter(
+                    branch => !branch.isOpenNow
+                );
+        }
+
+        // Sorting
+        switch (sortBy) {
+
+            case "restaurantName":
+
+                transformed.sort(
+                    (a : any, b:any) =>
+                        a.restaurant.name.localeCompare(
+                            b.restaurant.name
+                        )
+                );
+
+                break;
+
+            case "headName":
+
+                transformed.sort(
+                    (a, b) =>
+                        (a.branchHead?.name || "")
+                            .localeCompare(
+                                b.branchHead?.name || ""
+                            )
+                );
+
+                break;
+
+            case "revenue":
+
+                transformed.sort(
+                    (a, b) =>
+                        a.totalRevenue -
+                        b.totalRevenue
+                );
+
+                break;
+
+            case "orders":
+
+                transformed.sort(
+                    (a, b) =>
+                        a.totalOrders -
+                        b.totalOrders
+                );
+
+                break;
+
+            default:
+
+                transformed.sort(
+                    (a, b) =>
+                        (a.branchName || "")
+                            .localeCompare(
+                                b.branchName || ""
+                            )
+                );
+        }
+
+        const paginated =
+            transformed.slice(
+                skip,
+                skip + limit
+            );
+
         return {
-            branches: transformed,
-            total
+
+            branches: paginated,
+
+            total:
+                transformed.length
+
         };
     }
+
 
     async getBranchesStats() {
 
@@ -347,34 +461,51 @@ export class AdminRepository {
 
         const [
             totalRestaurants,
-            activeRestaurants,
-            blockedRestaurants,
-            newRestaurantsThisMonth
+            totalBranches,
+            activeBranches,
+            blockedBranches,
+            newBranchesThisMonth
         ] = await Promise.all([
 
             prisma.restaurant.count({
                 where: {
-                    isDeleted: false
+                    isDeleted: false,
+                    branches: {
+                        some: {
+                            verificationStatus: "APPROVED",
+                            isDeleted: false
+                        }
+                    }
                 }
             }),
 
-            prisma.restaurant.count({
+            prisma.restaurantBranch.count({
                 where: {
                     isDeleted: false,
+                    verificationStatus: "APPROVED"
+                }
+            }),
+
+            prisma.restaurantBranch.count({
+                where: {
+                    isDeleted: false,
+                    verificationStatus: "APPROVED",
                     isActive: true
                 }
             }),
 
-            prisma.restaurant.count({
+            prisma.restaurantBranch.count({
                 where: {
                     isDeleted: false,
+                    verificationStatus: "APPROVED",
                     isActive: false
                 }
             }),
 
-            prisma.restaurant.count({
+            prisma.restaurantBranch.count({
                 where: {
                     isDeleted: false,
+                    verificationStatus: "APPROVED",
                     createdAt: {
                         gte: startOfMonth
                     }
@@ -387,11 +518,13 @@ export class AdminRepository {
 
             totalRestaurants,
 
-            activeRestaurants,
+            totalBranches,
 
-            blockedRestaurants,
+            activeBranches,
 
-            newRestaurantsThisMonth
+            blockedBranches,
+
+            newBranchesThisMonth
 
         };
 
