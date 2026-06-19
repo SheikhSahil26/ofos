@@ -146,7 +146,7 @@ function createDefaultCard(address) {
             <div class="mt-5 flex gap-3">
 
                 <button
-                    class="text-[#014f38] font-medium" onClick=openEditModal()>
+                    class="text-[#014f38] font-medium" onClick=openEditModal("${address.id}")>
 
                     Edit
 
@@ -206,7 +206,7 @@ function createAddressCard(address) {
                 </button>
 
                 <button
-                    class="text-[#014f38] font-medium" onClick=openEditModal()>
+                    class="text-[#014f38] font-medium" onClick=openEditModal("${address.id}")>
 
                     Edit
 

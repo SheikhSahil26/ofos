@@ -1,4 +1,4 @@
-function openEditModal() {
+async function openEditModal(addressId) {
 
     const modal =
         document.getElementById(
@@ -13,7 +13,7 @@ function openEditModal() {
         "flex"
     );
 
-    editAddress();                                                             
+    await editAddress(addressId);                                                             
 }
 
 function closeEditModal() {
@@ -96,7 +96,7 @@ async function editAddress(addressId) {
         document.getElementById("pincode").value =
             address.pincode || "";
 
-        document.getElementById("addressModal")
+        document.getElementById("editAddressModal")
             .classList.remove("hidden");
 
     } catch (error) {
