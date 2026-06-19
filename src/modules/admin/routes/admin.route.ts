@@ -16,7 +16,7 @@ export class AdminRoutes implements IRoutes {
         this.router.get("/customers/:id", this.controller.getCustomerDetails); /* customer details */
         this.router.get("/restaurant-owners/:id", this.controller.getRestaurantOwnerDetails); /* restaurant owner details */
 
-        this.router.get("/brances", this.controller.getAllBranchesDetails);
+        this.router.get("/branches", this.controller.getAllBranchesDetails);
         this.router.get("/branches/stats", this.controller.getBranchesStats);
     }
 }

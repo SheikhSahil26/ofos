@@ -20,12 +20,7 @@ async function loadRestaurants(page = 1) {
             document.getElementById("sortFilter").value;
 
         const response = await fetch(
-            `/api/admin/branches?page=${page}
-    &limit=10
-    &search=${encodeURIComponent(search)}
-    &status=${status}
-    &openStatus=${openStatus}
-    &sort=${sort}`
+            `/api/admin/branches?page=${page}&limit=10&search=${encodeURIComponent(search)}&status=${status}&openStatus=${openStatus}&sort=${sort}`
         );
         const result = await response.json();
 
