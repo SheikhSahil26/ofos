@@ -3,8 +3,11 @@ import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
 import { DietaryTagRepository } from "../../dietaryTags/repositories/dietaryTag.repository";
 import { MenuRepository } from "../../menu/repositories/menu.repository";
-import { ICreateMenuItem, IUpdateMenuItem } from "../interfaces/menu_item.interfaces";
+import { CartMenuItemResponse, ICreateMenuItem, IUpdateMenuItem } from "../interfaces/menu_item.interfaces";
 import { MenuItemRepository } from "../repositories/menu_item.repository";
+import { EnrichedCart, EnrichedCartItem } from "../../cart/types/cart.types";
+import { Cart, CartItem, CartModifier } from "../interfaces/cart.interface";
+
 
 export class MenuItemService{
     private menuRepository = new MenuRepository();
@@ -39,14 +42,32 @@ export class MenuItemService{
             }
         }
 
-        const menuItem = await this.menuItemRepository.createMenuItem(data);
+        console.log(data.name);
+        const existingItem: any = await this.menuItemRepository.itemExists(
+            data.categoryId,
+            data.name,
+        )
 
-        return {
-            success: true,
-            data: menuItem,
-            message: "Menu item created successfully",
-            statusCode: 201,
-        };
+        console.log(existingItem)
+            
+
+        if (!existingItem) {
+            
+            
+            const menuItem = await this.menuItemRepository.createMenuItem(data);
+            
+            return {
+                success: true,
+                data: menuItem,
+                message: "Menu item created successfully",
+                statusCode: 201,
+            };
+        } else{
+            throw new AppError(
+                "Menu item already exists in this category",
+                409
+            );
+        }
     }
 
     async getMenuItemsByCategory(categoryId: string): Promise<ServiceResponse<any>> {
@@ -307,4 +328,20 @@ export class MenuItemService{
         statusCode: 200,
     };
 }
+
+    async getAllCartMenuItems(cart:Cart,menuItemIds: string[]): Promise<ServiceResponse<CartMenuItemResponse[]>> {
+
+        const menuItems = await this.menuItemRepository.getAllCartMenuItems(menuItemIds);
+       
+        
+       
+
+
+        return {
+            success: true,
+            data: menuItems,
+            message: "Menu items fetched successfully",
+            statusCode: 200,
+        };
+    }
 }

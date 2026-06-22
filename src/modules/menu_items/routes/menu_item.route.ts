@@ -24,5 +24,7 @@ export class MenuItemRoutes implements IRoutes{
         this.router.delete("/:id", this.controller.deleteMenuItem); /* Soft delete a menu item */
         this.router.post("/:id/tags", this.controller.addDietaryTags); /*  Add dietary tags to a menu item */
         this.router.delete("/:id/tags/:tagId", this.controller.removeDietaryTag); /*  Remove dietary tags to a menu item */
+
+        
     }
 }

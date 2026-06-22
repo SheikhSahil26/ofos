@@ -53,6 +53,10 @@ export const createMenuItemSchema = Joi.object({
             })
         )
         .optional(),
+
+    isAvailable: Joi.boolean().optional(),
+
+    isBestseller: Joi.boolean().optional(), 
 });
 
 export const updateMenuItemSchema = Joi.object({

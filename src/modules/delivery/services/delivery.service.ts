@@ -4,7 +4,7 @@ import Redis from "ioredis";
 import { IDeliveryService } from "../interfaces/delivery.interface";
 import { DeliveryRepository } from "../repositories/delivery.repository";
 import {
-  UpdateLocationInput,
+  UpdateLocationInputs,
   AssignPartnerInput,
   ToggleAvailabilityInput,
   ToggleAvailabilityResult,

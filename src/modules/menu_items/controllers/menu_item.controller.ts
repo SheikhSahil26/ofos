@@ -20,6 +20,20 @@ export class MenuItemController{
             );
         }
 
+        const payload = {
+            ...req.body,
+
+            price: Number(req.body.price),
+
+            isVeg: req.body.isVeg === "true",
+
+            isAvailable:
+                req.body.isAvailable === "true",
+
+            isBestseller:
+                req.body.isBestseller === "true",
+        };
+
         //image uploading
         if (!req.file) {
             throw new AppError("Image file is required", 400);
@@ -32,7 +46,7 @@ export class MenuItemController{
 
         const response =
             await this.menuItemService.createMenuItem({
-                ...req.body,
+                ...payload,
                 categoryId: req.params.categoryId,
                 imageUrl: imageUrl
             });

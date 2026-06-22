@@ -38,6 +38,8 @@ export class OrderService {
     }
 
     const cart = cartResponse.data;
+
+    console.log("Cart fetched for order creation:", cart);
     // cart shape:
     // {
     //   userId: 1,
@@ -98,7 +100,7 @@ export class OrderService {
     const menuItems = await this.prisma.menuItem.findMany({
       where: {
         id: { in: menuItemIds },
-        branch_id: cart.restaurantBranchId,
+        branchId: cart.restaurantBranchId,
         isAvailable: true,
         isDeleted: false,
       },
@@ -614,6 +616,8 @@ async updateOrderStatusByDeliveryPartner(
       where: { id: orderId },
       include: { delivery: true },
     });
+
+    console.log("Order fetched for delivery update:", order);
 
     if (!order || !order.delivery) {
       return { success: false, error: "Order or delivery record not found", statusCode: 404 };
