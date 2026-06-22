@@ -4,6 +4,7 @@ import { UserWebRoutes } from "../modules/user/routes/user.web.route";
 import { RestaurantWebRoutes } from "../modules/restaurant/routes/restaurant.web.route";
 import { AdminWebRoutes } from "../modules/admin/routes/admin.web.route";
 import { MenuWebRoutes } from "../modules/menu/routes/menu.web.route";
+import { AuthWebRoutes } from "../modules/auth/routes/auth.web.route";
 
 export function buildWebRoutes(): Router {
     const router = Router();
@@ -14,6 +15,7 @@ export function buildWebRoutes(): Router {
         new RestaurantWebRoutes(),
         new AdminWebRoutes(),
         new MenuWebRoutes(),
+        new AuthWebRoutes()
     ];
 
     routes.forEach((route) => {

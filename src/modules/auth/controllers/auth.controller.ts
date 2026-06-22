@@ -127,15 +127,11 @@ export class AuthController {
   };
 
   // Refresh Token : Comes in picture when the user Access Token expire...
-  refreshToken = async (
-    req: Request,
-    res: Response
-  ) => {
-
+  refreshToken = async (req: Request, res: Response) => {
 
     console.log("refresh token", req.cookies.refreshToken)
 
-    const refreshToken =
+    const refreshToken: string =
       req.cookies.refreshToken;
 
     const response =

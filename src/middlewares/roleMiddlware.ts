@@ -1,11 +1,14 @@
 import { Request, Response, NextFunction } from "express";
+export const authorizeRoles =
+    (...allowedRoles: string[]) =>
+        (
+            req: Request,
+            res: Response,
+            next: NextFunction
+        ) => {
 
-export const authorizeRoles =(...roles: string[]) =>(req: Request,res: Response,next: NextFunction) => {
-
-            const user = req.user as Express.payload;
-
-            console.log('Is Authorize person')
-            console.log(user)
+            const user =
+                req.user as Express.payload;
 
             if (!user) {
 
@@ -13,14 +16,22 @@ export const authorizeRoles =(...roles: string[]) =>(req: Request,res: Response,
                     success: false,
                     message: "Unauthorized"
                 });
+
             }
 
-            if (!roles.includes(user.role)) {
+            const hasRole =
+                user.roles.some(
+                    role =>
+                        allowedRoles.includes(role)
+                );
+
+            if (!hasRole) {
 
                 return res.status(403).json({
                     success: false,
                     message: "Forbidden"
                 });
+
             }
 
             next();

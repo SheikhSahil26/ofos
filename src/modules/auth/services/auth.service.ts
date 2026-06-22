@@ -87,7 +87,7 @@ export class AuthService {
             // Here if user on ${role} cumplusory login if it contain email and password
             // possibilities : 1 user have email and password for this role - Give login to that user
             // possibilities : 2 user have email and password but not have role on this url than assign that role
-            const existUser = await this.authRepo.findUserByEmail( loginInfo.email);
+            const existUser = await this.authRepo.findUserByEmail(loginInfo.email);
 
             // Email exists or not...
             if (!existUser) {
@@ -238,7 +238,14 @@ export class AuthService {
                 };
             }
 
-            const accessToken: string = generateAccessToken({ userId: user.id, role: decoded.role, email: decoded.email });
+            console.log(decoded);
+            const userRoles =
+                user.userRoles.map(
+                    ur => ur.role.role
+                );
+
+            console.log(user,user.userRoles)
+            const accessToken: string = generateAccessToken({ userId: user.id, roles: userRoles, email: user.email });
 
             return {
                 status: "Success",

@@ -44,15 +44,32 @@ export class AuthRepository {
   }
 
   // Find user by ID
-  async findUserById(
-    userId: string
-  ) {
+  async findUserById(userId: string) {
 
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
+
       where: {
-        id: userId,
-        isDeleted: false
+        id: userId
+      },
+
+      include: {
+
+        userRoles: {
+
+          include: {
+
+            role: {
+              select: {
+                role: true
+              }
+            }
+
+          }
+
+        }
+
       }
+
     });
 
   }
@@ -95,7 +112,7 @@ export class AuthRepository {
       const user = await prisma.user.findFirst({
         where: {
           email: email,
-          isDeleted:false,
+          isDeleted: false,
           userRoles: {
             some: {
               role: {
