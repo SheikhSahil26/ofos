@@ -70,7 +70,9 @@ export class LoyaltyPointsRepository{
         const result =
             await prisma.loyaltyTransaction.aggregate({
                 where: {
-                    customerId: userId,
+                    account: {
+                        customerId: userId
+                    },
                     points: {
                         gt: 0
                     }
@@ -87,7 +89,9 @@ export class LoyaltyPointsRepository{
     async getRedeemedPoints(userId: string){
         const result = await prisma.loyaltyTransaction.aggregate({
             where: {
-                customerId: userId,
+                account: {
+                    customerId: userId
+                },
                 points: {
                     lt: 0
                 }
@@ -100,5 +104,92 @@ export class LoyaltyPointsRepository{
         return Math.abs(
             result._sum.points || 0
         );
+    }
+
+    //get transaction count
+    async getTransactionCount(userId: string) {
+
+        const count = await prisma.loyaltyTransaction.count({
+            where: {
+                account: {
+                    customerId: userId
+                }
+            }
+        });
+
+        return count;
+    }
+
+    //get all transactions with pagination and filter
+    async getTransactions(
+        userId: string,
+        page: number,
+        limit: number,
+        filter?: "day" | "week" | "month"
+    ) {
+
+        const skip = (page - 1) * limit;
+
+        let createdAtFilter = {};
+
+        if (filter) {
+
+            const now = new Date();
+
+            let startDate = new Date();
+
+            if (filter === "day") {
+
+                startDate.setHours(
+                    0, 0, 0, 0
+                );
+
+            } else if (filter === "week") {
+
+                startDate.setDate(
+                    now.getDate() - 7
+                );
+
+            } else if (filter === "month") {
+
+                startDate.setMonth(
+                    now.getMonth() - 1
+                );
+            }
+
+            createdAtFilter = {
+                gte: startDate
+            };
+        }
+
+        const where = {
+            account: {
+                customerId: userId
+            },
+            ...(filter && {
+                createdAt: createdAtFilter
+            })
+        };
+
+        const [transactions, total] =
+            await Promise.all([
+                prisma.loyaltyTransaction.findMany({
+                    where,
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    skip,
+                    take: limit
+                }),
+
+                prisma.loyaltyTransaction.count({
+                    where
+                })
+            ]);
+
+        return {
+            transactions,
+            total
+        };
     }
 }

@@ -97,45 +97,97 @@ export class UserService{
     }
 
     //get loyalty points dashboard
-    async getLoyaltyPointsDashboard (userId: string): Promise<ServiceResponse<ILoyaltyOverviewResponse>>{
+    async getLoyaltyPointsDashboard(
+        userId: string,
+        page = 1,
+        limit = 10,
+        filter?: "day" | "week" | "month"
+    ): Promise<ServiceResponse<ILoyaltyOverviewResponse>> {
+
         const [
-            account, 
+            account,
             totalEarned,
             totalRedeemed,
-            transactions
+            totalTransactions,
+            transactionData
         ] = await Promise.all([
-            this.loyaltyRepo.getBalanceByCustomerId(userId),
 
-            this.loyaltyRepo.getEarnedPoints(userId),
+            this.loyaltyRepo.getBalanceByCustomerId(
+                userId
+            ),
 
-            this.loyaltyRepo.getRedeemedPoints(userId),
+            this.loyaltyRepo.getEarnedPoints(
+                userId
+            ),
 
-            this.loyaltyRepo.getLoyaltyTransactions(userId),
+            this.loyaltyRepo.getRedeemedPoints(
+                userId
+            ),
+
+            this.loyaltyRepo.getTransactionCount(
+                userId
+            ),
+
+            this.loyaltyRepo.getTransactions(
+                userId,
+                page,
+                limit,
+                filter
+            )
         ]);
 
-        const mappedTransactions: ILoyaltyTransactions[] = transactions.map((transaction) => ({
-            id: transaction.id,
-            customerId: userId,
-            points: transaction.points,
-            type: transaction.transactionType,
-            createdAt: transaction.createdAt
-        }));
-
-        const result = {
-            summary: {
-                currentPoints: account?.currentPoints || 0,
-                totalEarned,
-                totalRedeemed
-            },
-            transactions: mappedTransactions
-        }
+        const mappedTransactions =
+            transactionData.transactions.map(
+                transaction => ({
+                    id: transaction.id,
+                    points: transaction.points,
+                    type: transaction.transactionType,
+                    createdAt: transaction.createdAt
+                })
+            );
 
         return {
             success: true,
-            data: result,
-            message: "Successfully fetched data for loyalty point dashboard",
+
+            data: {
+
+                summary: {
+
+                    currentPoints:
+                        account?.currentPoints || 0,
+
+                    totalEarned,
+
+                    totalRedeemed,
+
+                    totalTransactions
+                },
+
+                transactions:
+                    mappedTransactions,
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total:
+                        transactionData.total,
+
+                    totalPages:
+                        Math.ceil(
+                            transactionData.total /
+                            limit
+                        )
+                }
+            },
+
+            message:
+                "Successfully fetched loyalty dashboard",
+
             statusCode: 200
-        }
+        };
     }
 
     //get profile of user

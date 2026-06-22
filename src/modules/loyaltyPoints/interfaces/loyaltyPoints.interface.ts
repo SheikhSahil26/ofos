@@ -15,19 +15,45 @@ export interface IBalance{
 export interface ILoyaltyOverviewResponse {
     summary: ILoyaltySummary;
     transactions: ILoyaltyTransactions[];
+    pagination: IPagination;
 }
 
 export interface ILoyaltySummary {
     currentPoints: number;
     totalEarned: number;
     totalRedeemed: number;
-    earnedThisMonth: number
+    totalTransactions: number
 }
 
 export interface ILoyaltyTransactions {
     id: string;
-    customerId: string;
     points: number;
     type: LoyaltyTransactionType;
     createdAt: Date;
+}
+
+export interface IPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface IPaginatedLoyaltyTransactions {
+    transactions: ILoyaltyTransactions[];
+    pagination: IPagination;
+}
+
+export enum LoyaltyPeriod {
+    DAY = "DAY",
+    WEEK = "WEEK",
+    MONTH = "MONTH",
+    ALL = "ALL"
+}
+
+export interface IGetLoyaltyDashboardQuery {
+    page: number;
+    limit: number;
+    type?: LoyaltyTransactionType;
+    period?: LoyaltyPeriod;
 }

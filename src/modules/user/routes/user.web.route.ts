@@ -28,5 +28,9 @@ export class UserWebRoutes implements IRoutes{
         this.router.get("/addresses", (req: Request, res: Response) => {
             res.status(200).render("customer/addresses", {activePage: "addresses"});
         });
+
+        this.router.get("/loyalty-points", (req: Request, res: Response) => {
+            res.status(200).render("customer/loyalty-points", {activePage: "points"});
+        });
     }
 }
