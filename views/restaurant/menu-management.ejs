@@ -528,9 +528,31 @@
 
                 </div>
 
+                
+
                 <span class="group-option-count text-sm text-[#014f38]"></span>
 
+
+
+
             </div>
+
+            <div class="group-options mt-3"></div>
+
+            <div class="flex gap-2 mt-4">
+                <button class="add-option-btn flex-1 border border-[#014f38] text-[#014f38] py-2 rounded-lg">
+                    Add Option
+                </button>
+
+                <button class="edit-group-btn px-4 border rounded-lg">
+                    Edit
+                </button>
+
+                <button class="delete-group-btn px-4 border border-red-300 text-red-500 rounded-lg">
+                    Delete
+                </button>
+            </div>
+            
 
         </div>
 
@@ -568,6 +590,9 @@
      <div id="modifierGroupModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
 
         <div class="bg-white rounded-2xl w-full max-w-md p-6">
+
+            <!-- for editing purpose -->
+            <input type="hidden" id="editingGroupId">
 
             <h2 class="text-2xl font-bold text-[#014f38] mb-6">
                 Create Modifier Group
@@ -608,6 +633,84 @@
                 </div>
 
             </form>
+
+        </div>
+
+    </div>
+
+    <!-- create option modal -->
+     <div id="modifierOptionModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+        <div class="bg-white rounded-2xl w-full max-w-md p-6">
+
+            <!-- for edit  -->
+            <input type="hidden" id="editingOptionId">
+
+            <h2 class="text-2xl font-bold text-[#014f38] mb-6">
+                Create Modifier Option
+            </h2>
+
+            <form id="modifierOptionForm">
+
+                <div class="mb-4">
+                    <label class="block mb-2">Option Name</label>
+                    <input id="optionName" type="text" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block mb-2">Extra Price</label>
+                    <input id="extraPrice" type="number" min="0" value="0" class="w-full border rounded-xl px-4 py-3">
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" id="closeModifierOptionModal" class="flex-1 border py-3 rounded-xl">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="flex-1 bg-[#014f38] text-white py-3 rounded-xl">
+                        Create
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- confirm modal to delete option -->
+     <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+        <div class="bg-white rounded-3xl p-8 w-full max-w-md text-center">
+
+            <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+                <i class="fa-solid fa-trash text-red-500 text-3xl"></i>
+            </div>
+
+            <h2 id="confirmTitle" class="text-3xl font-bold text-[#014f38] mb-3">
+                Delete Item
+            </h2>
+
+            <p id="confirmMessage" class="text-gray-600 mb-2">
+                Are you sure?
+            </p>
+
+            <p class="text-gray-400 text-sm mb-8">
+                This action cannot be undone.
+            </p>
+
+            <div class="flex gap-3">
+                <button id="cancelConfirmBtn"
+                    class="flex-1 border border-gray-300 rounded-xl py-3">
+                    Cancel
+                </button>
+
+                <button id="confirmActionBtn"
+                    class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl py-3">
+                    Delete
+                </button>
+            </div>
 
         </div>
 

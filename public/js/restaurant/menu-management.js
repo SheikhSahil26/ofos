@@ -1277,3 +1277,43 @@ document
         "click",
         closeDeleteMenuItemModal
     );
+
+let confirmAction = null;
+
+function openConfirmModal(title, message, callback) {
+
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmMessage").textContent = message;
+
+    confirmAction = callback;
+
+    document.getElementById("confirmModal")
+        .classList.remove("hidden");
+
+    document.getElementById("confirmModal")
+        .classList.add("flex");
+}
+
+function closeConfirmModal() {
+
+    document.getElementById("confirmModal")
+        .classList.add("hidden");
+
+    document.getElementById("confirmModal")
+        .classList.remove("flex");
+
+    confirmAction = null;
+}
+
+document.getElementById("cancelConfirmBtn")
+    .addEventListener("click", closeConfirmModal);
+
+document.getElementById("confirmActionBtn")
+    .addEventListener("click", async () => {
+
+        if (confirmAction) {
+            await confirmAction();
+        }
+
+        closeConfirmModal();
+    });
