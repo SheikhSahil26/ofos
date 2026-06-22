@@ -101,7 +101,8 @@ export class UserService{
         userId: string,
         page = 1,
         limit = 10,
-        filter?: "day" | "week" | "month"
+        type: "all" | "earned" | "redeemed" = "all",
+        date: "all" | "day" | "week" | "month" = "all"
     ): Promise<ServiceResponse<ILoyaltyOverviewResponse>> {
 
         const [
@@ -132,7 +133,8 @@ export class UserService{
                 userId,
                 page,
                 limit,
-                filter
+                type === "all" ? undefined : type,
+                date === "all" ? undefined : date,
             )
         ]);
 

@@ -1,28 +1,113 @@
-<div
-    class="bg-white rounded-3xl border shadow-sm p-8">
+<!-- Transaction History -->
+<div class="bg-white rounded-2xl shadow-sm border p-6 mt-8">
 
-    <h2 class="text-xl font-semibold mb-6">
-        Points Activity
-    </h2>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
 
-    <div
-        id="transactionsContainer"
-        class="space-y-5">
+        <h2 class="text-xl font-semibold">
+            Transaction History
+        </h2>
+
+        <div class="flex gap-3 flex-wrap">
+
+            <select
+                id="transactionTypeFilter"
+                class="border rounded-xl px-4 py-2">
+
+                <option value="all">
+                    All Transactions
+                </option>
+
+                <option value="earned">
+                    Earned
+                </option>
+
+                <option value="redeemed">
+                    Redeemed
+                </option>
+
+            </select>
+
+            <select
+                id="transactionDateFilter"
+                class="border rounded-xl px-4 py-2">
+
+                <option value="all">
+                    All Time
+                </option>
+
+                <option value="day">
+                    Today
+                </option>
+
+                <option value="week">
+                    Last 7 Days
+                </option>
+
+                <option value="month">
+                    Last 30 Days
+                </option>
+
+            </select>
+
+        </div>
 
     </div>
 
+    <div class="overflow-x-auto">
+
+        <table class="w-full">
+
+            <thead>
+
+                <tr class="border-b">
+
+                    <th class="text-left py-3">
+                        Type
+                    </th>
+
+                    <th class="text-left py-3">
+                        Points
+                    </th>
+
+                    <th class="text-left py-3">
+                        Date
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="transactionTableBody">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Pagination -->
     <div
-        id="emptyTransactions"
-        class="hidden text-center py-12">
+        class="flex items-center justify-between mt-6">
 
-        <i
-            class="fa-solid fa-gift text-5xl text-[#ff7a00]">
+        <button
+            id="prevPageBtn"
+            class="border px-4 py-2 rounded-xl">
 
-        </i>
+            Previous
 
-        <h3 class="text-xl font-semibold mt-4">
-            No Activity Yet
-        </h3>
+        </button>
+
+        <span id="pageInfo">
+
+        </span>
+
+        <button
+            id="nextPageBtn"
+            class="border px-4 py-2 rounded-xl">
+
+            Next
+
+        </button>
 
     </div>
 

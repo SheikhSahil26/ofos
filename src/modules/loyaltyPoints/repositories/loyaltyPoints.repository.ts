@@ -125,67 +125,89 @@ export class LoyaltyPointsRepository{
         userId: string,
         page: number,
         limit: number,
-        filter?: "day" | "week" | "month"
+        typeFilter?: "earned" | "redeemed",
+        dateFilter?: "day" | "week" | "month",
     ) {
 
-        const skip = (page - 1) * limit;
+        const skip =
+        (page - 1) * limit;
 
-        let createdAtFilter = {};
+        const where: any = {
+            account: {
+                customerId: userId
+            }
+        };
 
-        if (filter) {
+        // Date filter
+        if (dateFilter) {
 
-            const now = new Date();
+            const now =
+                new Date();
 
-            let startDate = new Date();
+            let startDate =
+                new Date();
 
-            if (filter === "day") {
+            if (dateFilter === "day") {
 
                 startDate.setHours(
                     0, 0, 0, 0
                 );
 
-            } else if (filter === "week") {
+            } else if (
+                dateFilter === "week"
+            ) {
 
                 startDate.setDate(
                     now.getDate() - 7
                 );
 
-            } else if (filter === "month") {
+            } else if (
+                dateFilter === "month"
+            ) {
 
                 startDate.setMonth(
                     now.getMonth() - 1
                 );
             }
 
-            createdAtFilter = {
+            where.createdAt = {
                 gte: startDate
             };
         }
 
-        const where = {
-            account: {
-                customerId: userId
-            },
-            ...(filter && {
-                createdAt: createdAtFilter
+        // Transaction type filter
+        if (typeFilter === "earned") {
+
+            where.points = {
+                gt: 0
+            };
+        }
+
+        if (typeFilter === "redeemed") {
+
+            where.points = {
+                lt: 0
+            };
+        }
+
+        const [
+            transactions,
+            total
+        ] = await Promise.all([
+
+            prisma.loyaltyTransaction.findMany({
+                where,
+                orderBy: {
+                    createdAt: "desc"
+                },
+                skip,
+                take: limit
+            }),
+
+            prisma.loyaltyTransaction.count({
+                where
             })
-        };
-
-        const [transactions, total] =
-            await Promise.all([
-                prisma.loyaltyTransaction.findMany({
-                    where,
-                    orderBy: {
-                        createdAt: "desc"
-                    },
-                    skip,
-                    take: limit
-                }),
-
-                prisma.loyaltyTransaction.count({
-                    where
-                })
-            ]);
+        ]);
 
         return {
             transactions,

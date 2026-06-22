@@ -37,15 +37,35 @@ export class UserController {
 
         const userId = "385d5013-c0c3-4add-972d-e8179f4b9566";
 
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
-        const filter = req.query.filter as
-            "day" |
-            "week" |
-            "month" |
-            undefined;
+        const page =
+            Number(req.query.page) || 1;
 
-        const response = await this.userService.getLoyaltyPointsDashboard(userId, page, limit, filter);
+        const limit =
+            Number(req.query.limit) || 10;
+
+        const type =
+            (req.query.type as
+                "all" |
+                "earned" |
+                "redeemed") || "all";
+
+        const date =
+            (req.query.date as
+                "all" |
+                "day" |
+                "week" |
+                "month") || "all";
+
+        const response =
+            await this.userService.getLoyaltyPointsDashboard(
+                userId,
+                page,
+                limit,
+                type,
+                date
+            );
+
+        console.log(response.data?.transactions);
 
         res.status(response.statusCode || 200).json(response);
     });
