@@ -72,6 +72,10 @@ export class AuthController {
         } = response.data;
 
 
+        const days =
+          loginInfo.rememberMe === "on"
+            ? 30
+            : 7;
 
         res.cookie(
           "refreshToken",
@@ -80,10 +84,10 @@ export class AuthController {
             httpOnly: true,
             secure: false,
             sameSite: "lax",
-            maxAge:
-              loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60
+            maxAge: days * 24 * 60 * 60 * 1000
           }
         );
+
         return res.status(201).json({
           status: "Success",
           statusCode: 200,
@@ -127,15 +131,11 @@ export class AuthController {
   };
 
   // Refresh Token : Comes in picture when the user Access Token expire...
-  refreshToken = async (
-    req: Request,
-    res: Response
-  ) => {
-
+  refreshToken = async (req: Request, res: Response) => {
 
     console.log("refresh token", req.cookies.refreshToken)
 
-    const refreshToken =
+    const refreshToken: string =
       req.cookies.refreshToken;
 
     const response =

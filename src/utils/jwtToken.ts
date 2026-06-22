@@ -15,7 +15,7 @@ export const generateAccessToken = (
 };
 
 export const generateRefreshToken = (
-    userId:string, rememberMe: string
+    userId: string, rememberMe: string
 ) => {
 
     return jwt.sign(
@@ -24,13 +24,13 @@ export const generateRefreshToken = (
         },
         String(process.env.JWT_REFRESH_SECRET),
         {
-            expiresIn: rememberMe === "on" ?  "1m":"1h" 
+            expiresIn: rememberMe === "on" ? "30d" : "7d"
         }
     );
 };
 
 export const generateResetToken = (
-    payload : Express.otpPayload
+    payload: Express.otpPayload
 ) => {
 
     return jwt.sign(
