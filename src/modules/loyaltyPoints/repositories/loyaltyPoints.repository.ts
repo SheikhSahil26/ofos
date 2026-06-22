@@ -64,4 +64,41 @@ export class LoyaltyPointsRepository{
             }
         });
     }
+
+    //get earned points
+    async getEarnedPoints(userId: string){
+        const result =
+            await prisma.loyaltyTransaction.aggregate({
+                where: {
+                    customerId: userId,
+                    points: {
+                        gt: 0
+                    }
+                },
+                _sum: {
+                    points: true
+                }
+            });
+
+        return result._sum.points || 0;
+    }
+
+    //get redeemed points
+    async getRedeemedPoints(userId: string){
+        const result = await prisma.loyaltyTransaction.aggregate({
+            where: {
+                customerId: userId,
+                points: {
+                    lt: 0
+                }
+            },
+            _sum: {
+                points: true
+            }
+        });
+
+        return Math.abs(
+            result._sum.points || 0
+        );
+    }
 }

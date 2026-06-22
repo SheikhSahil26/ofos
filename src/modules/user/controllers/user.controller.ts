@@ -22,8 +22,24 @@ export class UserController {
         const response = await this.userService.getDashboard(userId);
 
         res.status(response.statusCode || 200).json(response);
-    })
-    
+    });
+
+    //get loyalty point dashboard for user
+    getLoyaltyPointDashboard = asyncHandler(async (req: Request, res: Response) => {
+
+        const user = req.user as Express.payload | undefined;
+
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
+
+        const userId = user.userId;
+
+        const response = await this.userService.getLoyaltyPointsDashboard(userId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
     //get profile of authenticated user
     getProfile = asyncHandler(async (req: Request, res: Response) => {
 

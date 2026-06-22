@@ -1,6 +1,7 @@
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { AddressRepository } from "../../address/repositories/address.repository";
+import { ILoyaltyOverviewResponse, ILoyaltyTransactions } from "../../loyaltyPoints/interfaces/loyaltyPoints.interface";
 import { LoyaltyPointsRepository } from "../../loyaltyPoints/repositories/loyaltyPoints.repository";
 import { OrdersRepository } from "../../orders/repositories/orders.repository";
 import { ICurrentOrder, IDashboard, IRecentRestaurant, IUpdateUser, IUser } from "../interfaces/user.interface";
@@ -93,6 +94,48 @@ export class UserService{
             statusCode: 200
         }
 
+    }
+
+    //get loyalty points dashboard
+    async getLoyaltyPointsDashboard (userId: string): Promise<ServiceResponse<ILoyaltyOverviewResponse>>{
+        const [
+            account, 
+            totalEarned,
+            totalRedeemed,
+            transactions
+        ] = await Promise.all([
+            this.loyaltyRepo.getBalanceByCustomerId(userId),
+
+            this.loyaltyRepo.getEarnedPoints(userId),
+
+            this.loyaltyRepo.getRedeemedPoints(userId),
+
+            this.loyaltyRepo.getLoyaltyTransactions(userId),
+        ]);
+
+        const mappedTransactions: ILoyaltyTransactions[] = transactions.map((transaction) => ({
+            id: transaction.id,
+            customerId: userId,
+            points: transaction.points,
+            type: transaction.transactionType,
+            createdAt: transaction.createdAt
+        }));
+
+        const result = {
+            summary: {
+                currentPoints: account?.currentPoints || 0,
+                totalEarned,
+                totalRedeemed
+            },
+            transactions: mappedTransactions
+        }
+
+        return {
+            success: true,
+            data: result,
+            message: "Successfully fetched data for loyalty point dashboard",
+            statusCode: 200
+        }
     }
 
     //get profile of user
