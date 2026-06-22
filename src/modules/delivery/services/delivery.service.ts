@@ -61,11 +61,10 @@ export class DeliveryService{
 
     const order = await this.orderService.getOrderById(orderId)
     //now from this have to fetch the branchId and from that we wil get the lat and long of the branch.
-    const branchDetails = await this.branchService.getBranchDetails(order.data.branchId)
+    const branchDetails = await this.branchService.getBranchDetails(order.data.branchId,order.data.customerId)
 
     if (!branchDetails.data) {
-  throw new Error("Branch not found");
-
+      throw new Error("Branch not found");
     }
 
 if (branchDetails.data.latitude === null || branchDetails.data.longitude === null) {

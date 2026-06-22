@@ -107,7 +107,15 @@ updateOrderStatusByDeliveryPartner = asyncHandler(
     return res.status(result.statusCode).json(result);
   }
 );
+//for polling to get the active orders for staff user
+  getBranchOrdersForStaff = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user as Express.payload // dummy
 
+    const result = await this.ordersService.getBranchOrdersForStaff(user.userId);
+    return res.status(result.statusCode).json(result);
+  }
+);
   
  
 }

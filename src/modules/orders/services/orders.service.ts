@@ -474,7 +474,7 @@ export class OrderService {
       where: { id: orderId },
       include: { branch: true, delivery: true },
     });
-
+    let staffUserIdDummy = "202591c8-b7e9-40d1-be7c-253aa7a0e30a";
     if (!order) {
       return { success: false, error: "Order not found", statusCode: 404 };
     }
@@ -482,7 +482,7 @@ export class OrderService {
     // 2. Verify staff belongs to this branch
     const staffRecord = await this.prisma.restaurantStaff.findFirst({
       where: {
-        userId: staffUserId,
+        userId: staffUserIdDummy, //currently dummy
         branchId: order.branchId,
         isActive: true,
         isDeleted: false,
@@ -755,6 +755,68 @@ async updateOrderStatusByDeliveryPartner(
     console.error("updateOrderStatusByDeliveryPartner error:", error);
     return { success: false, error: "Failed to update delivery status", statusCode: 500 };
   }
+}
+
+//find active orders for a branch polling
+async getBranchOrdersForStaff(
+  staffUserId: string
+): Promise<ServiceResponse<any>> {
+  let staffUserIdDummy = "202591c8-b7e9-40d1-be7c-253aa7a0e30a";
+console.log("Fetching branch orders for staff user:", staffUserIdDummy);
+  // 1. Find staff's branch
+  const staffRecord = await this.prisma.restaurantStaff.findFirst({
+    where: { userId: staffUserIdDummy, isActive: true, isDeleted: false },
+  })
+  //dummy
+  console.log(staffRecord,"staff record for fetching branch orders")
+
+  if (!staffRecord) {
+    return {
+      success: false,
+      error: "You are not assigned to any branch",
+      statusCode: 403,
+    };
+  }
+
+  // 2. Fetch active orders for this branch
+  // Active = not yet fully handed off to delivery partner pickup flow, and not cancelled/delivered
+  const orders = await this.prisma.order.findMany({
+    where: {
+      branchId: staffRecord.branchId,
+      status: {
+        in: ["PLACED", "CONFIRMED", "PREPARING", "READY_FOR_PICKUP"],
+      },
+    },
+    orderBy: { placedAt: "asc" }, // oldest first — fairness, matches kitchen queue logic
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      totalAmount: true,
+      placedAt: true,
+      scheduledAt: true,
+      customer: {
+        select: { fullName: true, mobile: true },
+      },
+      orderItems: {
+        select: {
+          menuItemName: true,
+          quantity: true,
+          specialInstruction: true,
+          modifiers: {
+            select: { modifierName: true },
+          },
+        },
+      },
+    },
+  });
+
+  return {
+    success: true,
+    message: "Branch orders fetched successfully",
+    data: { orders, branchId: staffRecord.branchId },
+    statusCode: 200,
+  };
 }
 
 }
