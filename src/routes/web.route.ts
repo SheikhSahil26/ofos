@@ -6,6 +6,7 @@ import { AdminWebRoutes } from "../modules/admin/routes/admin.web.route";
 import { MenuWebRoutes } from "../modules/menu/routes/menu.web.route";
 import { CartWebRoutes } from "../modules/cart/routes/cart.web.route";
 import { OrderWebRoutes } from "../modules/orders/routes/orders.web.routes";
+import { WebAuthRoutes } from "../modules/auth/routes/auth.web.route";
 
 export function buildWebRoutes(): Router {
     const router = Router();
@@ -17,7 +18,8 @@ export function buildWebRoutes(): Router {
         new AdminWebRoutes(),
         new MenuWebRoutes(),
         new CartWebRoutes(),
-        new OrderWebRoutes()
+        new OrderWebRoutes(),
+        new WebAuthRoutes(),
     ];
 
     routes.forEach((route) => {
