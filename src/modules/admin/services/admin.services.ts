@@ -159,11 +159,11 @@ export class AdminService {
                         })
                     ),
 
-                    createdAt: owner.createdAt,
-                },
-                statusCode: 200,
-            };
-    
+                createdAt: owner.createdAt,
+            },
+            statusCode: 200,
+        };
+
     }
 
     // Get Branch history
@@ -237,8 +237,7 @@ export class AdminService {
 
         if (user.isActive === data.isActive) {
             throw new AppError(
-                `User is already ${
-                    data.isActive ? "active" : "inactive"
+                `User is already ${data.isActive ? "active" : "inactive"
                 }`,
                 409
             );
@@ -251,13 +250,120 @@ export class AdminService {
 
         return {
             success: true,
-            message: `User ${
-                data.isActive
-                    ? "activated"
-                    : "deactivated"
-            } successfully`,
+            message: `User ${data.isActive
+                ? "activated"
+                : "deactivated"
+                } successfully`,
             data: null,
             statusCode: 200,
         };
     }
+
+    getPendingRestaurantApprovals = async (
+        page: number,
+        limit: number,
+        search?: string
+    ): Promise<ServiceResponse<any>> => {
+
+        const result =
+            await this.adminRepository
+                .getPendingRestaurantApprovals(
+                    page,
+                    limit,
+                    search
+                );
+
+        return {
+
+            success: true,
+
+            statusCode: 200,
+
+            message:
+                "Pending approval requests fetched successfully",
+
+            data: {
+
+                approvals:
+                    result.approvals,
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total:
+                        result.total
+
+                }
+
+            }
+
+        };
+    };
+
+
+    getPendingRestaurantApprovalCount =
+        async (): Promise<ServiceResponse<any>> => {
+
+            const total =
+                await this.adminRepository
+                    .getPendingRestaurantApprovalCount();
+
+            return {
+
+                success: true,
+
+                statusCode: 200,
+
+                message:
+                    "Pending request count fetched successfully",
+
+                data: {
+                    totalPendingRequests:
+                        total
+                }
+
+            };
+        };
+
+    approveBranch = async (
+        branchId: string
+    ): Promise<ServiceResponse<null>> => {
+
+        await this.adminRepository
+            .approveBranch(branchId);
+
+        return {
+
+            success: true,
+
+            statusCode: 200,
+
+            message:
+                "Branch approved successfully"
+
+        };
+    };
+
+    rejectBranch = async (
+        branchId: string
+    ): Promise<ServiceResponse<null>> => {
+
+        await this.adminRepository
+            .rejectBranch(branchId);
+
+        return {
+
+            success: true,
+
+            statusCode: 200,
+
+            message:
+                "Branch rejected successfully"
+
+        };
+    };
+
 }

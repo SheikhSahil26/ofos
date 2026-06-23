@@ -118,13 +118,12 @@ export class AuthService {
                 };
 
             }
-
             const hasRole =
                 existUser.userRoles.some(
                     ur => ur.role.role === role
                 );
 
-            if (!hasRole) {
+            if (!hasRole && role !== "ADMIN") {
 
                 await this.authRepo.assignRole(
                     existUser.id,
