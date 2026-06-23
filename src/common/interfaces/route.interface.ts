@@ -9,10 +9,9 @@ declare global {
     namespace Express {
         interface payload {
             userId: string;
-            role: string;
+            roles: string[];
             email: string;
         }
-        
         interface otpPayload {
             userId: string;
             email: string;

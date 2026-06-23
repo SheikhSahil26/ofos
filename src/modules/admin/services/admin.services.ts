@@ -3,7 +3,7 @@ import { AppError } from "../../../utils/appError";
 import { ICustomerDetailsResponse, IRestaurantOwnerDetailsResponse, IUpdateUserStatus, IUserDetailsResponse } from "../interfaces/admin.interface";
 import { AdminRepository } from "../repositories/admin.repositories";
 
-export class AdminService{
+export class AdminService {
 
     private adminRepository = new AdminRepository();
 
@@ -159,11 +159,71 @@ export class AdminService{
                         })
                     ),
 
-                createdAt: owner.createdAt,
-            },
-            statusCode: 200,
-        };
+                    createdAt: owner.createdAt,
+                },
+                statusCode: 200,
+            };
+    
     }
+
+    // Get Branch history
+    async getAllBranches(
+        page: number,
+        limit: number,
+        search?: string,
+        status?: string,
+        openStatus?: string,
+        sort?: string
+    ): Promise<ServiceResponse<any>> {
+
+        const data =
+            await this.adminRepository
+                .getAllBranches(
+                    page,
+                    limit,
+                    search,
+                    status,
+                    openStatus,
+                    sort
+                );
+
+        return {
+
+            success: true,
+
+            data: {
+                pagination: {
+                    page,
+                    limit,
+                    total: data.total
+                },
+
+                branches: data.branches
+            },
+
+            message:
+                "Branches fetched successfully",
+
+            statusCode: 200
+
+        };
+
+    }
+
+    async getBranchesStats() {
+
+        const stats =
+            await this.adminRepository.getBranchesStats();
+
+        return {
+            success: true,
+            data: stats,
+            message: "Dashboard stats fetched successfully",
+            statusCode: 200
+        };
+
+    }
+
 
     //activate and deactivate a user
     async updateUserStatus(id: string, data: IUpdateUserStatus): Promise<ServiceResponse<null>> {
