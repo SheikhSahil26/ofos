@@ -65,8 +65,6 @@ export class UserController {
                 date
             );
 
-        console.log(response.data?.transactions);
-
         res.status(response.statusCode || 200).json(response);
     });
 

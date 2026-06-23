@@ -1,7 +1,7 @@
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { AddressRepository } from "../../address/repositories/address.repository";
-import { ILoyaltyOverviewResponse, ILoyaltyTransactions } from "../../loyaltyPoints/interfaces/loyaltyPoints.interface";
+import { ILoyaltyOverviewResponse, ILoyaltySummary, ILoyaltyTransactions, IPagination } from "../../loyaltyPoints/interfaces/loyaltyPoints.interface";
 import { LoyaltyPointsRepository } from "../../loyaltyPoints/repositories/loyaltyPoints.repository";
 import { OrdersRepository } from "../../orders/repositories/orders.repository";
 import { ICurrentOrder, IDashboard, IRecentRestaurant, IUpdateUser, IUser } from "../interfaces/user.interface";
@@ -138,56 +138,42 @@ export class UserService{
             )
         ]);
 
-        const mappedTransactions =
+        //mapping all the repo results
+
+        const mappedTransactions: ILoyaltyTransactions[] =
             transactionData.transactions.map(
                 transaction => ({
                     id: transaction.id,
                     points: transaction.points,
                     type: transaction.transactionType,
-                    createdAt: transaction.createdAt
+                    createdAt: transaction.createdAt,
                 })
             );
 
+        const mappedSummary: ILoyaltySummary = {
+            currentPoints: account?.currentPoints || 0,
+            totalEarned,
+            totalRedeemed,
+            totalTransactions
+        }
+
+        const mappedPagination: IPagination = {
+            page,
+            limit,
+            total: transactionData.total,
+            totalPages: Math.ceil(transactionData.total / limit)
+        }
+
+        const result: ILoyaltyOverviewResponse = {
+            summary: mappedSummary,
+            transactions: mappedTransactions,
+            pagination: mappedPagination
+        }
+
         return {
             success: true,
-
-            data: {
-
-                summary: {
-
-                    currentPoints:
-                        account?.currentPoints || 0,
-
-                    totalEarned,
-
-                    totalRedeemed,
-
-                    totalTransactions
-                },
-
-                transactions:
-                    mappedTransactions,
-
-                pagination: {
-
-                    page,
-
-                    limit,
-
-                    total:
-                        transactionData.total,
-
-                    totalPages:
-                        Math.ceil(
-                            transactionData.total /
-                            limit
-                        )
-                }
-            },
-
-            message:
-                "Successfully fetched loyalty dashboard",
-
+            data: result,
+            message: "Successfully fetched loyalty dashboard",
             statusCode: 200
         };
     }
