@@ -123,8 +123,6 @@ export interface IUpdateRestaurantBranch {
     city?: string;
     state?: string;
     pincode?: string;
-    gstin?: string;
-    fssaiLicense?: string;
     latitude?: number;
     longitude?: number;
     deliveryRadiusKm?: number;

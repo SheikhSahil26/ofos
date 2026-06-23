@@ -283,25 +283,7 @@ export class BranchService {
       }
     }
 
-    if (payload.gstin && payload.gstin !== branch.gstin) {
-      const existingGST = await this.branchRepo.validateGSTINExists(
-        payload.gstin,
-      );
 
-      if (existingGST) {
-        throw new AppError("GSTIN already exists", 400);
-      }
-    }
-
-    if (payload.fssaiLicense && payload.fssaiLicense !== branch.fssaiLicense) {
-      const existingFSSAI = await this.branchRepo.validateFSSAIExists(
-        payload.fssaiLicense,
-      );
-
-      if (existingFSSAI) {
-        throw new AppError("FSSAI License already exists", 400);
-      }
-    }
 
     if (branch.isPrimary && payload.isPrimary === false) {
       throw new AppError(
@@ -310,9 +292,7 @@ export class BranchService {
       );
     }
 
-    const requiresReverification =
-      (payload.gstin && payload.gstin !== branch.gstin) ||
-      (payload.fssaiLicense && payload.fssaiLicense !== branch.fssaiLicense);
+
 
     const updateData: Prisma.RestaurantBranchUpdateInput = {} as any;
 
@@ -329,9 +309,7 @@ export class BranchService {
     if (payload.state !== undefined) updateData.state = payload.state ?? null;
     if (payload.pincode !== undefined)
       updateData.pincode = payload.pincode ?? null;
-    if (payload.gstin !== undefined) updateData.gstin = payload.gstin ?? null;
-    if (payload.fssaiLicense !== undefined)
-      updateData.fssaiLicense = payload.fssaiLicense ?? null;
+
     if (payload.latitude !== undefined) updateData.latitude = payload.latitude;
     if (payload.longitude !== undefined)
       updateData.longitude = payload.longitude;
@@ -340,9 +318,7 @@ export class BranchService {
     if (payload.isPrimary !== undefined)
       updateData.isPrimary = payload.isPrimary;
 
-    if (requiresReverification) {
-      updateData.verificationStatus = VerificationStatus.PENDING;
-    }
+
 
     if (payload.isPrimary === true) {
       const primaryBranch = await this.branchRepo.getPrimaryBranch(

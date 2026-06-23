@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const statOrdersToday = document.getElementById("statOrdersToday");
     const statTotalRevenue = document.getElementById("statTotalRevenue");
 
-    async function loadDashboard() { 
+    async function loadDashboard() {
         try {
             dashboardLoading.style.display = "flex";
             statsGrid.style.display = "none";
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const resData = await restaurantsRes.json();
-            
+
             // If they have no restaurants, redirect to the create page
             if (resData.success && (!Array.isArray(resData.data) || resData.data.length === 0)) {
                 window.location.href = "/restaurants/create";

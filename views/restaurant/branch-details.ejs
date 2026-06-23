@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title><%= branch.branchName %> | Ziggy Restaurant</title>
+    <title>Branch Details | Ziggy Restaurant</title>
     <%- include('../partials/head.ejs') %>
 </head>
 <body class="bg-[#f8f7f4] min-h-screen">
@@ -35,21 +35,17 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-3 mb-1">
-                                    <h1 class="text-3xl font-bold text-gray-900"><%= branch.branchName %></h1>
-                                    <% if (branch.isActive) { %>
-                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-800">Active</span>
-                                    <% } else { %>
-                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-800">Inactive</span>
-                                    <% } %>
+                                    <h1 id="branchName" class="text-3xl font-bold text-gray-900"></h1>
+                                    <span id="branchStatusBadge"></span>
                                 </div>
                                 <p class="text-gray-500 flex items-center gap-2">
-                                    <i class="fa-solid fa-location-dot"></i> <span><%= branch.addressLine1 %>, <%= branch.city %></span>
+                                    <i class="fa-solid fa-location-dot"></i> <span id="branchAddress"></span>
                                 </p>
                             </div>
                         </div>
 
                         <div class="flex gap-3 relative z-10">
-                            <button class="bg-white border border-[#ececec] text-gray-700 hover:text-[#014f38] hover:border-[#014f38] px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
+                            <button id="openEditBranchModal" class="bg-white border border-[#ececec] text-gray-700 hover:text-[#014f38] hover:border-[#014f38] px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-pen"></i> Edit Branch
                             </button>
                         </div>
@@ -67,28 +63,28 @@
                                     <p class="text-sm text-gray-500 mb-1">Contact Number</p>
                                     <p class="font-semibold text-gray-900 flex items-center gap-2">
                                         <i class="fa-solid fa-phone text-[#ff7a00]"></i>
-                                        <span><%= branch.contactNumber || 'N/A' %></span>
+                                        <span id="branchContact"></span>
                                     </p>
                                 </div>
                                 <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
                                     <p class="text-sm text-gray-500 mb-1">FSSAI License</p>
                                     <p class="font-semibold text-gray-900 flex items-center gap-2">
                                         <i class="fa-solid fa-file-shield text-[#014f38]"></i>
-                                        <span><%= branch.fssaiLicense || 'N/A' %></span>
+                                        <span id="branchFssai"></span>
                                     </p>
                                 </div>
                                 <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
                                     <p class="text-sm text-gray-500 mb-1">GSTIN</p>
                                     <p class="font-semibold text-gray-900 flex items-center gap-2">
                                         <i class="fa-solid fa-file-invoice text-[#014f38]"></i>
-                                        <span><%= branch.gstin || 'N/A' %></span>
+                                        <span id="branchGstin"></span>
                                     </p>
                                 </div>
                                 <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
                                     <p class="text-sm text-gray-500 mb-1">Delivery Radius</p>
                                     <p class="font-semibold text-gray-900 flex items-center gap-2">
                                         <i class="fa-solid fa-route text-[#ff7a00]"></i>
-                                        <span><%= branch.deliveryRadiusKm || 'N/A' %></span> km
+                                        <span id="branchDeliveryRadius"></span> km
                                     </p>
                                 </div>
                             </div>
@@ -103,55 +99,6 @@
                                 </div>
 
                                 <div id="menuContainer" class="space-y-6">
-                                    <% if (!menu || menu.length === 0) { %>
-                                        <div class="text-center py-8 text-gray-500">
-                                            <i class="fa-solid fa-utensils text-3xl mb-3 text-gray-300"></i>
-                                            <p>No menu items found for this branch.</p>
-                                        </div>
-                                    <% } else { %>
-                                        <% menu.forEach(category => { %>
-                                            <div class="menu-category border border-gray-100 rounded-xl overflow-hidden">
-                                                <div class="bg-[#f8f7f4] px-4 py-3 border-b border-gray-100 font-bold text-gray-800 flex justify-between items-center">
-                                                    <span class="category-name"><%= category.name %></span>
-                                                    <span class="category-count text-xs bg-white px-2 py-1 rounded text-gray-500 font-medium border border-gray-200"><%= category.menuItems ? category.menuItems.length : 0 %> items</span>
-                                                </div>
-                                                <div class="category-items divide-y divide-gray-100">
-                                                    <% if (category.menuItems && category.menuItems.length > 0) { %>
-                                                        <% category.menuItems.forEach(item => { %>
-                                                            <div class="menu-item p-4 flex gap-4 hover:bg-[#fffcf9] transition">
-                                                                <div class="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                                                                    <% if (item.imageUrl) { %>
-                                                                        <img src="<%= item.imageUrl %>" alt="<%= item.name %>" class="w-full h-full object-cover">
-                                                                    <% } else { %>
-                                                                        <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                                                            <i class="fa-solid fa-image"></i>
-                                                                        </div>
-                                                                    <% } %>
-                                                                </div>
-                                                                <div class="flex-1">
-                                                                    <div class="flex justify-between items-start">
-                                                                        <h4 class="font-semibold text-gray-900"><%= item.name %></h4>
-                                                                        <span class="font-bold text-[#014f38]">₹<%= Number(item.price).toFixed(2) %></span>
-                                                                    </div>
-                                                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2"><%= item.description || '' %></p>
-                                                                    <div class="mt-2 flex gap-2">
-                                                                        <% const isVeg = item.tags && item.tags.some(t => t.dietaryTag && t.dietaryTag.name && t.dietaryTag.name.toLowerCase().includes('veg')); %>
-                                                                        <% if (isVeg) { %>
-                                                                            <span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-green-200 text-green-700 bg-green-50">VEG</span>
-                                                                        <% } else { %>
-                                                                            <span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-red-200 text-red-700 bg-red-50">NON-VEG</span>
-                                                                        <% } %>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        <% }) %>
-                                                    <% } else { %>
-                                                        <div class="p-4 text-sm text-gray-500 text-center">No items in this category.</div>
-                                                    <% } %>
-                                                </div>
-                                            </div>
-                                        <% }) %>
-                                    <% } %>
                                 </div>
                             </div>
 
@@ -165,23 +112,7 @@
                                 <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fa-regular fa-clock text-[#ff7a00]"></i> Operating Hours
                                 </h2>
-                                <div class="space-y-3 text-sm">
-                                    <% if (!branch.operatingHours || branch.operatingHours.length === 0) { %>
-                                        <p class="text-gray-500">Not configured</p>
-                                    <% } else { %>
-                                        <% branch.operatingHours.forEach(hour => { %>
-                                            <div class="flex justify-between items-center border-b border-gray-50 pb-2 last:border-0 last:pb-0">
-                                                <span class="font-medium text-gray-700 w-24"><%= hour.dayOfWeek %></span>
-                                                <% if (hour.isClosed) { %>
-                                                    <span class="text-red-500 font-medium px-2 py-0.5 bg-red-50 rounded text-xs">Closed</span>
-                                                <% } else { %>
-                                                    <span class="text-gray-900 font-medium">
-                                                        <%= new Date(hour.openTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> - <%= new Date(hour.closeTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
-                                                    </span>
-                                                <% } %>
-                                            </div>
-                                        <% }) %>
-                                    <% } %>
+                                <div id="operatingHoursContainer" class="space-y-3 text-sm">
                                 </div>
                             </div>
 
@@ -189,32 +120,10 @@
                             <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm flex flex-col h-[500px]">
                                 <div class="flex items-center justify-between mb-4">
                                     <h2 class="text-lg font-bold text-gray-900">Recent Orders</h2>
-                                    <span class="bg-[#e6f4f0] text-[#014f38] text-xs font-bold px-2 py-1 rounded"><%= ordersTotal || 0 %></span>
+                                    <span id="ordersTotalBadge" class="bg-[#e6f4f0] text-[#014f38] text-xs font-bold px-2 py-1 rounded">0</span>
                                 </div>
                                 
-                                <div class="flex-1 overflow-y-auto pr-2 space-y-3">
-                                    <% if (!orders || orders.length === 0) { %>
-                                        <div class="text-center py-10 text-gray-500">
-                                            <i class="fa-solid fa-receipt text-3xl mb-3 text-gray-300"></i>
-                                            <p>No orders received yet.</p>
-                                        </div>
-                                    <% } else { %>
-                                        <% orders.forEach(order => { %>
-                                            <div class="p-4 rounded-xl border border-gray-100 bg-[#fbfbfb] hover:border-[#ff7a00] hover:bg-white transition cursor-pointer">
-                                                <div class="flex justify-between items-start mb-2">
-                                                    <span class="font-bold text-gray-900 text-sm">#<%= order.orderNumber %></span>
-                                                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-yellow-100 text-yellow-800"><%= order.status %></span>
-                                                </div>
-                                                <div class="text-xs text-gray-500 mb-2">
-                                                    <i class="fa-regular fa-clock mr-1"></i> <span><%= new Date(order.placedAt).toLocaleString() %></span>
-                                                </div>
-                                                <div class="flex justify-between items-end border-t border-gray-100 pt-2 mt-1">
-                                                    <span class="text-xs font-medium text-gray-700"><%= order.customer ? order.customer.fullName : 'Guest' %></span>
-                                                    <span class="font-bold text-[#014f38]">₹<%= Number(order.totalAmount).toFixed(2) %></span>
-                                                </div>
-                                            </div>
-                                        <% }) %>
-                                    <% } %>
+                                <div id="ordersContainer" class="flex-1 overflow-y-auto pr-2 space-y-3">
                                 </div>
 
                             </div>
@@ -228,7 +137,112 @@
         </div>
     </div>
 
+    <!-- Edit Branch Modal -->
+    <div id="editBranchModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen text-[#ff7a00]"></i> Edit Branch
+                </h2>
+                <button id="closeEditBranchModal" class="text-gray-400 hover:text-gray-600 transition p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="editBranchForm" class="p-6 space-y-5">
+
+                <!-- Branch Name & Contact -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Branch Name</label>
+                        <input type="text" name="branchName" id="edit_branchName"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="e.g. Main Branch" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                        <input type="text" name="contactNumber" id="edit_contactNumber"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="e.g. 9876543210" />
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
+                    <input type="text" name="addressLine1" id="edit_addressLine1"
+                        value=""
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                        placeholder="Street / Building" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 2 <span class="text-gray-400">(optional)</span></label>
+                    <input type="text" name="addressLine2" id="edit_addressLine2"
+                        value=""
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                        placeholder="Area / Landmark" />
+                </div>
+
+                <!-- City, State, Pincode -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                        <input type="text" name="city" id="edit_city"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="City" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                        <input type="text" name="state" id="edit_state"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="State" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
+                        <input type="text" name="pincode" id="edit_pincode"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="e.g. 400001" />
+                    </div>
+                </div>
+
+
+
+                <!-- Delivery Radius -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Radius (km)</label>
+                    <input type="number" name="deliveryRadiusKm" id="edit_deliveryRadiusKm"
+                        value=""
+                        min="1" max="50" step="0.5"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                        placeholder="e.g. 10" />
+                </div>
+
+                <!-- Error message -->
+                <p id="editBranchError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2"></p>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" id="cancelEditBranchBtn"
+                        class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium transition text-sm">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submitEditBranchBtn"
+                        class="px-6 py-2.5 rounded-xl bg-[#014f38] text-white font-semibold hover:bg-[#013d2c] transition text-sm flex items-center gap-2">
+                        <span id="editBranchBtnText">Save Changes</span>
+                        <span id="editBranchBtnSpinner" class="hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="/js/common/toast.js"></script>
+    <script src="/js/common/auth.js"></script>
     <script src="/js/common/api.js"></script>
     <script src="/js/restaurant/branch-details.js"></script>
 
