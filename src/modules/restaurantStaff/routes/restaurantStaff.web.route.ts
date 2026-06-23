@@ -14,7 +14,7 @@ export class RestaurantStaffWebRoutes implements IRoutes{
     private initializeRoutes(){
 
         this.router.get("/staff/order-queue", (req: Request, res: Response) => {
-            res.status(200).render("restaurant-staff/order-queue", {activePage: "order-queue"})
+            res.status(200).render("restaurant-staff/order-queue", {activePage: "order-queue",role:"staff"})
         })
         
        
