@@ -1,8 +1,3 @@
-window.addEventListener("load", () => {
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("content").style.display = "block";
-});
-
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
@@ -38,11 +33,6 @@ document.addEventListener(
 ); 
 
 async function loadProfile() {
-
-    const loader =
-        document.getElementById("loader");
-
-    loader.style.display = "block";
 
     try {
 
