@@ -116,6 +116,7 @@ function renderProfile(user) {
         sidebarProfile.src =
             sidebarProileUrl;
     }
+    sidebarProfile.classList.remove("hidden")
 
     setText(
         "sidebarName",
