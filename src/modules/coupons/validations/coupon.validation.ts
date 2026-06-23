@@ -13,20 +13,18 @@ export const createCouponSchema = Joi.object({
     }),
 
   type: Joi.string()
-    .valid("PERCENTAGE", "FLAT", "FREE_DELICERY", "BOGO")
+    .valid("PERCENTAGE", "FLAT", "FREE_DELIVERY", "BOGO")
     .required()
     .messages({
-      "any.only": "Coupon type must be PERCENTAGE, FIXED, FREE_DELIVERY or BOGO",
+      "any.only": "Coupon type must be PERCENTAGE, FLAT, FREE_DELIVERY or BOGO",
       "any.required": "Coupon type is required",
     }),
 
   discountValue: Joi.number()
     .positive()
-    .required()
     .messages({
       "number.base": "Discount value must be a number",
       "number.positive": "Discount value must be greater than 0",
-      "any.required": "Discount value is required",
     }),
 
   minOrderAmount: Joi.number()
