@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, DayOfWeek, OrderStatus } from "@prisma/client";
 
 export interface ICreateRestaurantBranch {
   branchName: string;
@@ -14,6 +14,12 @@ export interface ICreateRestaurantBranch {
   longitude?: number;
   deliveryRadiusKm?: number;
   isPrimary?: boolean;
+  operatingHours?: {
+    dayOfWeek: DayOfWeek;
+    openTime?: string | Date;
+    closeTime?: string | Date;
+    isClosed: boolean;
+  }[];
 }
 
 export interface IRestaurantBranchResponse {
@@ -35,7 +41,7 @@ export interface IBranchValidation {
 
 export type VerificationStatus = string;
 
-export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+
 
 export interface IRestaurantBranchList {
 

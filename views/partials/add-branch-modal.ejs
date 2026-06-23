@@ -1,0 +1,465 @@
+<!-- ==========================================
+     ADD BRANCH MODAL
+=========================================== -->
+<div
+    id="addBranchModal"
+    class="
+    fixed
+    inset-0
+    bg-black/50
+    hidden
+    z-[999]
+    "
+>
+ 
+    <div
+        class="
+        h-full
+        overflow-y-auto
+        p-4
+        flex
+        items-start
+        justify-center
+        "
+    >
+
+        <div
+            class="
+            bg-white
+            w-full
+            max-w-6xl
+            my-8
+            rounded-[28px]
+            shadow-xl
+            "
+        >
+
+            <!-- Header -->
+            <div
+                class="
+                sticky
+                top-0
+                bg-white
+                z-20
+                px-8
+                py-6
+                border-b
+                border-gray-200
+                flex
+                justify-between
+                items-center
+                "
+            >
+
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">
+                        Add Branch
+                    </h2>
+                    <p class="text-gray-500 mt-1">
+                        Fill all details to register a new branch.
+                    </p>
+                </div>
+
+                <button
+                    id="closeBranchModal"
+                    class="
+                    h-11
+                    w-11
+                    rounded-full
+                    border
+                    border-gray-300
+                    hover:bg-gray-100
+                    "
+                >
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+            </div>
+
+            <!-- Form -->
+            <form id="branchForm" class="p-8">
+
+                <!-- ======================
+                     BRANCH INFO
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Branch Information
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Branch Name *
+                            </label>
+                            <input
+                                type="text"
+                                name="branchName"
+                                required
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Contact Number *
+                            </label>
+                            <input
+                                type="text"
+                                name="contactNumber"
+                                required
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Delivery Radius (KM) *
+                            </label>
+                            <input
+                                type="number"
+                                name="deliveryRadiusKm"
+                                required
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                            >
+                        </div>
+                        
+                        <div class="flex items-center mt-8">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" name="isPrimary" class="w-5 h-5 text-[#ff7a00] rounded focus:ring-[#ff7a00]">
+                                <span class="font-medium text-gray-900">Set as Primary Branch</span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     ADDRESS
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Address Information
+                    </h3>
+
+                    <div class="space-y-6">
+
+                        <input
+                            type="text"
+                            name="addressLine1"
+                            required
+                            placeholder="Address Line 1 *"
+                            class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                        >
+
+                        <input
+                            type="text"
+                            name="addressLine2"
+                            placeholder="Address Line 2"
+                            class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                        >
+
+                        <div
+                            class="
+                            grid
+                            grid-cols-1
+                            md:grid-cols-3
+                            gap-6
+                            "
+                        >
+
+                            <input
+                                type="text"
+                                name="city"
+                                required
+                                placeholder="City *"
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                            >
+
+                            <input
+                                type="text"
+                                name="state"
+                                required
+                                placeholder="State *"
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                            >
+
+                            <input
+                                type="text"
+                                name="pincode"
+                                required
+                                placeholder="Pincode *"
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     LEGAL
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Legal Information
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <input
+                            type="text"
+                            name="gstin"
+                            placeholder="GSTIN"
+                            class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                        >
+
+                        <input
+                            type="text"
+                            name="fssaiLicense"
+                            placeholder="FSSAI License"
+                            class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     LOCATION
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Location Coordinates
+                    </h3>
+
+                    <div
+                        class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-6
+                        "
+                    >
+
+                        <input
+                            type="number"
+                            step="0.000001"
+                            name="latitude"
+                            placeholder="Latitude"
+                            class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                        >
+
+                        <input
+                            type="number"
+                            step="0.000001"
+                            name="longitude"
+                            placeholder="Longitude"
+                            class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100"
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- ======================
+                     OPERATING HOURS
+                ======================= -->
+
+                <div class="mb-10">
+
+                    <h3
+                        class="
+                        text-xl
+                        font-semibold
+                        text-[#014f38]
+                        mb-6
+                        "
+                    >
+                        Operating Hours
+                    </h3>
+
+                    <div
+                        id="operatingHoursContainer"
+                        class="space-y-4"
+                    >
+
+                        <% const days = [
+                        "MONDAY",
+                        "TUESDAY",
+                        "WEDNESDAY",
+                        "THURSDAY",
+                        "FRIDAY",
+                        "SATURDAY",
+                        "SUNDAY"
+                        ] %>
+
+                        <% days.forEach(day => { %>
+
+                        <div
+                            class="
+                            flex
+                            flex-col
+                            md:flex-row
+                            md:items-center
+                            gap-4
+                            border
+                            border-gray-200
+                            rounded-xl
+                            p-4
+                            "
+                        >
+
+                            <div
+                                class="
+                                w-full
+                                md:w-40
+                                font-medium
+                                "
+                            >
+                                <%= day %>
+                            </div>
+
+                            <input
+                                type="time"
+                                name="<%= day %>_open"
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100 flex-1"
+                            >
+
+                            <input
+                                type="time"
+                                name="<%= day %>_close"
+                                class="w-full h-12 px-4 border-2 border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:border-[#ff7a00] focus:ring-2 focus:ring-orange-100 flex-1"
+                            >
+
+                            <label
+                                class="
+                                flex
+                                items-center
+                                gap-2
+                                "
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="<%= day %>_closed"
+                                    class="w-5 h-5 text-[#ff7a00] rounded focus:ring-[#ff7a00]"
+                                >
+
+                                Closed
+                            </label>
+
+                        </div>
+
+                        <% }) %>
+
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+
+                <div
+                    class="
+                    flex
+                    justify-end
+                    gap-4
+                    pt-4
+                    border-t
+                    "
+                >
+
+                    <button
+                        type="button"
+                        id="cancelBranchBtn"
+                        class="
+                        px-6
+                        py-3
+                        rounded-xl
+                        border
+                        border-gray-300
+                        font-medium
+                        hover:bg-gray-50
+                        "
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="submitBranchBtn"
+                        class="
+                        px-8
+                        py-3
+                        rounded-xl
+                        bg-[#ff7a00]
+                        hover:bg-[#eb6f00]
+                        text-white
+                        font-semibold
+                        transition flex items-center gap-2
+                        "
+                    >
+                        Create Branch
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Branches | Ziggy Restaurant</title>
+    <%- include('../partials/head.ejs') %>
+</head>
+<body class="bg-[#f8f7f4] min-h-screen">
+    <p id="toast"></p>
+
+    <div class="flex min-h-screen">
+        <%- include('../partials/restaurant-sidebar.ejs') %>
+
+        <div class="flex-1 flex flex-col">
+            <main class="flex-1 px-4 md:px-8 py-6">
+
+                <!-- Page Heading -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            Your Branches
+                        </h1>
+                        <p class="text-gray-500 mt-1">
+                            Manage all your restaurant locations.
+                        </p>
+                    </div>
+                    <div>
+                        <button id="openAddBranchModal" class="bg-[#ff7a00] hover:bg-[#e66e00] text-white px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Add Branch
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="branchesLoading" class="flex flex-col items-center justify-center py-20">
+                    <i class="fa-solid fa-spinner animate-spin text-3xl text-[#ff7a00]"></i>
+                    <p class="mt-4 text-gray-500">Loading your branches...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="branchesEmpty" class="hidden flex-col items-center justify-center py-20 bg-white rounded-2xl border border-[#ececec]">
+                    <div class="w-20 h-20 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-store-slash text-3xl text-[#ff7a00]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">No Branches Found</h3>
+                    <p class="text-gray-500 mt-2 text-center max-w-md">You haven't added any branches to this restaurant yet.</p>
+                </div>
+
+                <!-- Branches Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden" id="branchesGrid">
+                    <!-- Branch Cards will be injected here via JS -->
+                </div>
+
+                <template id="branchCardTemplate">
+                    <a href="#" class="branch-card block bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm hover:shadow-md hover:border-[#ff7a00] transition group cursor-pointer">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-[#e6f4f0] flex items-center justify-center text-[#014f38] group-hover:bg-[#014f38] group-hover:text-white transition">
+                                    <i class="fa-solid fa-store text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="branch-name text-lg font-bold text-gray-900 group-hover:text-[#ff7a00] transition">Branch Name</h3>
+                                    <p class="branch-type text-xs font-semibold uppercase tracking-wider text-[#014f38] bg-[#e6f4f0] inline-block px-2 py-0.5 rounded mt-1">Primary</p>
+                                </div>
+                            </div>
+                            <span class="branch-status text-xs font-medium px-2.5 py-1 rounded-full">Status</span>
+                        </div>
+
+                        <div class="space-y-2 mt-4 text-sm text-gray-600">
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-location-dot mt-1 text-gray-400 w-4"></i>
+                                <span class="branch-address line-clamp-2">Address here</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-phone text-gray-400 w-4"></i>
+                                <span class="branch-contact">Contact here</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                            <span class="text-sm font-medium text-[#014f38] group-hover:text-[#ff7a00] transition">Manage Branch <i class="fa-solid fa-arrow-right ml-1 text-xs"></i></span>
+                        </div>
+                    </a>
+                </template>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Branch Modal -->
+    <%- include('../partials/add-branch-modal.ejs') %>
+
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/common/api.js"></script>
+    <script src="/js/restaurant/branches.js"></script>
+
+</body>
+</html>

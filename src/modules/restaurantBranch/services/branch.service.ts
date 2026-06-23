@@ -1,5 +1,5 @@
 import { OrderStatus, Prisma, VerificationStatus } from "@prisma/client";
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { RestaurantService } from "../../restaurant/services/restaurant.service";
 import {
@@ -123,7 +123,7 @@ export class BranchService {
     }
 
     //Create branch
-    const branch = await this.branchRepo.createBranch({
+    const createData: Prisma.RestaurantBranchCreateInput = {
       restaurant: {
         connect: {
           id: restaurantId,
@@ -142,7 +142,20 @@ export class BranchService {
       longitude: payload.longitude ?? null,
       deliveryRadiusKm: payload.deliveryRadiusKm ?? null,
       isPrimary: payload.isPrimary ?? false,
-    });
+    };
+
+    if (payload.operatingHours && payload.operatingHours.length > 0) {
+      createData.operatingHours = {
+        create: payload.operatingHours.map(hour => ({
+          dayOfWeek: hour.dayOfWeek,
+          openTime: hour.openTime ? new Date(hour.openTime) : null,
+          closeTime: hour.closeTime ? new Date(hour.closeTime) : null,
+          isClosed: hour.isClosed
+        }))
+      };
+    }
+
+    const branch = await this.branchRepo.createBranch(createData);
 
     return {
       success: true,
@@ -500,6 +513,38 @@ export class BranchService {
         },
       },
       message: "Branch orders fetched successfully",
+      statusCode: 200,
+    };
+  }
+  async getBranchDashboardData(
+    branchId: string,
+    userId: string,
+  ): Promise<ServiceResponse<any>> {
+    // Validate branch ownership
+    await this.validateBranchOwnership(branchId, userId);
+
+    const branch = await this.branchRepo.getBranchDetails(branchId);
+    
+    if (!branch) {
+        throw new AppError("Branch not found", 404);
+    }
+
+    const ordersData = await this.branchRepo.getBranchOrders(branchId, 0, 10);
+    const ordersTotal = await this.branchRepo.countBranchOrders(branchId);
+
+    const MenuServiceModule = (await import("../../menu/services/menu.service")).MenuService;
+    const menuService = new MenuServiceModule();
+    const menu = await menuService.getFullMenu(branchId);
+
+    return {
+      success: true,
+      data: {
+        branch,
+        orders: ordersData,
+        ordersTotal,
+        menu: menu.data,
+      },
+      message: "Branch dashboard data fetched successfully",
       statusCode: 200,
     };
   }

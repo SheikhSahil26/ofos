@@ -3,100 +3,136 @@
     <!-- Logo -->
     <div class="mb-10">
         <h1 class="text-3xl font-bold text-[#ff7a00]">
-            Ziggy Merchant
+            Ziggy
         </h1>
-
-        <p class="text-sm text-white/70 mt-1">
-            Restaurant Portal
-        </p>
     </div>
 
     <!-- Navigation -->
     <nav class="flex flex-col gap-2">
 
-        <button
-            class="sidebar-link w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+        <!-- Dashboard -->
+        <a href="/restaurants/dashboard"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'dashboard'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
 
             <i class="fa-solid fa-chart-line"></i>
+
             <span>Dashboard</span>
 
-        </button>
+        </a>
 
-        <button
-            class="sidebar-link active w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl bg-[#ff7a00]">
+        <!-- Branches -->
+        <a href="/restaurants/branches"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'branches'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-store"></i>
+
+            <span>Branches</span>
+
+        </a>
+
+        <!-- Menu -->
+        <a href="/owner/menu"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'menu'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
 
             <i class="fa-solid fa-utensils"></i>
-            <span>Menu Management</span>
 
-        </button>
+            <span>Menu</span>
 
-        <button
-            class="sidebar-link w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+        </a>
+
+        <!-- Orders -->
+        <a href="/owner/orders"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'orders'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
 
             <i class="fa-solid fa-bag-shopping"></i>
+
             <span>Orders</span>
 
-        </button>
+        </a>
 
-        <button
-            class="sidebar-link w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+        <!-- Promotions -->
+        <a href="/owner/promotions"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'promotions'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
 
             <i class="fa-solid fa-tags"></i>
+
             <span>Promotions</span>
 
-        </button>
+        </a>
 
-        <button
-            class="sidebar-link w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+        <!-- Reviews -->
+        <a href="/owner/reviews"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'reviews'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
 
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Analytics</span>
+            <i class="fa-solid fa-star"></i>
 
-        </button>
+            <span>Reviews</span>
 
-        <button
-            class="sidebar-link w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition">
-
-            <i class="fa-solid fa-wallet"></i>
-            <span>Payouts</span>
-
-        </button>
-
-        <button
-            class="sidebar-link w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition">
-
-            <i class="fa-solid fa-gear"></i>
-            <span>Settings</span>
-
-        </button>
+        </a>
 
     </nav>
 
-    <!-- to get the current branch id -->
-    <input type="hidden" id="branchId" value="a7433933-a96e-4c96-8c29-25d05c5f21c7">
+    <!-- User Profile -->
+    <div class="mt-auto pt-6 border-t border-white/10">
 
-    <!-- Restaurant Profile -->
-    <div class="mt-auto border-t border-white/10 pt-6">
+        <a href="/owner/profile">
 
-        <div class="flex items-center gap-3">
+            <div class="mb-5 flex items-center gap-3">
 
-            <img
-                src="https://ui-avatars.com/api/?name=Pizza+Hub&background=ff7a00&color=fff"
-                class="w-12 h-12 rounded-full border-2 border-white object-cover">
+                <div
+                    class="w-12 h-12 rounded-full bg-[#ff7a00] flex items-center justify-center font-bold">
 
-            <div>
+                    <img
+                        src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(locals.currentUser ? locals.currentUser.fullName : 'Owner') %>&background=ff7a00&color=fff&size=256"
+                        alt="Profile"
+                        class="w-12 h-12 rounded-full border-2 border-white object-cover"
+                        id="sidebarProfile">
 
-                <h3 class="font-medium">
-                    Pizza Hub
-                </h3>
+                </div>
 
-                <p class="text-xs text-gray-300">
-                    Restaurant Owner
-                </p>
+                <div>
+
+                    <h3
+                        class="font-medium"
+                        id="sidebarName">
+                        <%= locals.currentUser ? locals.currentUser.fullName : 'Restaurant Owner' %>
+                    </h3>
+
+                    <p
+                        class="text-xs text-gray-300"
+                        id="sidebarRole">
+                        <%= locals.currentUser ? locals.currentUser.email : 'Restaurant Partner' %>
+                    </p>
+
+                </div>
 
             </div>
 
-        </div>
+        </a>
 
     </div>
 

@@ -2,7 +2,7 @@ import { RestaurantRepository } from "../repositories/restaurant.repository";
 import { UserRepository } from "../../user/repositories/user.repository";
 import { IRestaurantValidation, INearbyItem, IPagination, IRestaurantsResult, IBranch, ICreateRestaurant, IUpdateRestaurant, ICreateReview } from "../interfaces/restaurant.interface";
 import { prisma } from "../../../config/prisma";
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { isBranchOpenNow } from "../../restaurantBranch/utils/branch-open-status.util"
 import { RestaurantPromotionRepository } from "../../restaurantPromotion/repository/promotion.repo";
@@ -44,7 +44,7 @@ export class RestaurantService{
     
 const transformedRestaurants =
         data.restaurants.map(
-            restaurant => ({
+            (restaurant: any) => ({
                 ...restaurant,
                 branches:
                     restaurant.branches.map(
@@ -80,6 +80,8 @@ const transformedRestaurants =
     limit: number
 ): Promise<ServiceResponse<any[]> & { pagination: IPagination }> {
 
+    console.log(ownerId);
+    
     const owner: any =
     await this.userRepo.findUserById(ownerId);
 
@@ -100,9 +102,9 @@ const transformedRestaurants =
 
     const transformedRestaurants =
         data.restaurants.map(
-            restaurant => ({
+            (restaurant: any) => ({
                 ...restaurant,
-                branches: restaurant.branches.map(
+                branches: restaurant.branches?.map(
     (branch: IBranch) => {
         console.log(
             branch.id,
@@ -870,4 +872,15 @@ async getRestaurantPageData(
 
     };
 }
+
+    async getDashboardStats(ownerId: string): Promise<ServiceResponse<any>> {
+        const stats = await this.restaurantRepo.getDashboardStats(ownerId);
+
+        return {
+            success: true,
+            data: stats,
+            message: "Dashboard stats fetched successfully",
+            statusCode: 200
+        };
+    }
 }

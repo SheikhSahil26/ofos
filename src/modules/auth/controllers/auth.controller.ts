@@ -81,7 +81,7 @@ export class AuthController {
             secure: false,
             sameSite: "lax",
             maxAge:
-              loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60
+              (loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60) * 1000
           }
         );
         return res.status(201).json({

@@ -160,6 +160,28 @@ export class RestaurantRepository {
           logoUrl: true,
           isActive: true,
           createdAt: true,
+          branches: {
+            where: {
+              isDeleted: false
+            },
+            select: {
+              id: true,
+              branchName: true,
+              contactNumber: true,
+              city: true,
+              state: true,
+              isPrimary: true,
+              isActive: true,
+              operatingHours: {
+                select: {
+                  dayOfWeek: true,
+                  openTime: true,
+                  closeTime: true,
+                  isClosed: true
+                }
+              }
+            }
+          }
         },
       }),
 
@@ -556,5 +578,55 @@ export class RestaurantRepository {
         reviewText: data.reviewText ?? null,
       },
     });
+  }
+  // Get dashboard statistics for a restaurant owner
+  async getDashboardStats(ownerId: string): Promise<any> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [totalOrders, ordersToday, totalRevenueAgg] = await Promise.all([
+      prisma.order.count({
+        where: {
+          branch: {
+            restaurant: {
+              ownerId: ownerId,
+            },
+          },
+        },
+      }),
+      prisma.order.count({
+        where: {
+          branch: {
+            restaurant: {
+              ownerId: ownerId,
+            },
+          },
+          placedAt: {
+            gte: today,
+          },
+        },
+      }),
+      prisma.order.aggregate({
+        where: {
+          branch: {
+            restaurant: {
+              ownerId: ownerId,
+            },
+          },
+          status: "DELIVERED",
+        },
+        _sum: {
+          subtotal: true
+        },
+      }),
+    ]);
+
+    const totalRevenue = totalRevenueAgg._sum.subtotal;
+
+    return {
+      totalOrders,
+      ordersToday,
+      totalRevenue,
+    };
   }
 }
