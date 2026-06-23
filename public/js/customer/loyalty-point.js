@@ -220,7 +220,7 @@ function initializeFilters() {
 
     document
         .getElementById(
-            "typeFilter"
+            "transactionTypeFilter"
         )
         ?.addEventListener(
             "change",
@@ -237,7 +237,7 @@ function initializeFilters() {
 
     document
         .getElementById(
-            "dateFilter"
+            "transactionDateFilter"
         )
         ?.addEventListener(
             "change",
@@ -320,12 +320,20 @@ function renderTransactions(
 
                     <td class="py-4 font-semibold">
 
-                        ${
-                            isEarned
-                            ? "+"
-                            : "-"
-                        }
-                        ${Math.abs(transaction.points)}
+                        <span class="
+                            ${
+                                isEarned
+                                ? "text-green-600"
+                                : "text-red-500"
+                            }
+                            font-medium">
+                            ${
+                                isEarned
+                                ? "+"
+                                : "-"
+                            }
+                            ${Math.abs(transaction.points)}
+                        </span>
 
                     </td>
 

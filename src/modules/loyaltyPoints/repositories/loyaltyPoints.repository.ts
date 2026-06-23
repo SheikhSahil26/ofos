@@ -201,7 +201,14 @@ export class LoyaltyPointsRepository{
                     createdAt: "desc"
                 },
                 skip,
-                take: limit
+                take: limit,
+                include: {
+                    account: {
+                        select: {
+                            currentPoints: true,
+                        }
+                    }
+                }
             }),
 
             prisma.loyaltyTransaction.count({

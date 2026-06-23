@@ -29,7 +29,7 @@ export class UserWebRoutes implements IRoutes{
             res.status(200).render("customer/addresses", {activePage: "addresses"});
         });
 
-        this.router.get("/loyalty-points", (req: Request, res: Response) => {
+        this.router.get("/ziggy-points", (req: Request, res: Response) => {
             res.status(200).render("customer/loyalty-points", {activePage: "points"});
         });
     }
