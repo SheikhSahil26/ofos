@@ -70,10 +70,6 @@ async function loadProfile() {
             "Failed to load profile",
             "error"
         );
-    }finally {
-
-        loader.style.display = "none";
-
     }
 }
 
@@ -116,6 +112,8 @@ function renderProfile(user) {
         sidebarProfile.src =
             sidebarProileUrl;
     }
+
+    sidebarProfile.classList.remove("hidden");
 
     setText(
         "sidebarName",
