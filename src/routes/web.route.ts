@@ -21,7 +21,7 @@ export function buildWebRoutes(): Router {
         new MenuWebRoutes(),
         new CartWebRoutes(),
         new OrderWebRoutes(),
-        new RestaurantStaffWebRoutes()
+        new RestaurantStaffWebRoutes(),
     ];
 
     routes.forEach((route) => {
