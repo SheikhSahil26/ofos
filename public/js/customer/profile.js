@@ -39,6 +39,11 @@ document.addEventListener(
 
 async function loadProfile() {
 
+    const loader =
+        document.getElementById("loader");
+
+    loader.style.display = "block";
+
     try {
 
         const response =
@@ -75,6 +80,10 @@ async function loadProfile() {
             "Failed to load profile",
             "error"
         );
+    }finally {
+
+        loader.style.display = "none";
+
     }
 }
 
