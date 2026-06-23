@@ -1,3 +1,8 @@
+window.addEventListener("load", () => {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("content").style.display = "block";
+});
+
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
@@ -33,6 +38,11 @@ document.addEventListener(
 ); 
 
 async function loadProfile() {
+
+    const loader =
+        document.getElementById("loader");
+
+    loader.style.display = "block";
 
     try {
 
@@ -70,6 +80,10 @@ async function loadProfile() {
             "Failed to load profile",
             "error"
         );
+    }finally {
+
+        loader.style.display = "none";
+
     }
 }
 
@@ -269,7 +283,7 @@ async function deleteAccount() {
         }
 
         window.location.href =
-            "/api/auth/customer/static/login";
+            "/customer/login";
 
         showToast(
             result.message ||
@@ -284,7 +298,7 @@ async function deleteAccount() {
         setTimeout(() => {
 
             window.location.href =
-                "/api/auth/customer/static/login";
+                "/customer/login";
 
         }, 1500);
 
@@ -377,7 +391,7 @@ async function logout() {
         setTimeout(() => {
 
             window.location.href =
-                "/api/auth/customer/static/login";
+                "/customer/login";
 
         }, 1000);
 

@@ -110,7 +110,7 @@ loginForm.addEventListener('submit',
                 if (role === "restaurant_owner") {
                     window.location.href = "/restaurants/dashboard";
                 } else {
-                    window.location.href = `http://localhost:8080/${role}/dashboard`;
+                    window.location.href = "/home";
                 }
 
             } else {

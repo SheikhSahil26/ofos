@@ -69,6 +69,7 @@ export class AddressController{
         AddressValidation.validateCreateAddress(data);
 
         const response = await this.addressService.createAddress(data, userId);
+        console.log("address added successfully");
 
         res.status(response.statusCode || 200).json(response);
     });
@@ -112,6 +113,8 @@ export class AddressController{
 
         const userId = user.userId;
 
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
+
         if(typeof addressId !== "string"){
             throw new AppError("Invalid address id", 409);
         }
@@ -135,6 +138,8 @@ export class AddressController{
         }
 
         const userId = user.userId;
+
+        // const userId = "428f4215-9945-4bda-92fb-6d46ae145955";
 
         //validating address id and user id
         if(typeof addressId !== "string"){

@@ -1,6 +1,7 @@
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { AddressRepository } from "../../address/repositories/address.repository";
+import { ILoyaltyOverviewResponse, ILoyaltySummary, ILoyaltyTransactions, IPagination } from "../../loyaltyPoints/interfaces/loyaltyPoints.interface";
 import { LoyaltyPointsRepository } from "../../loyaltyPoints/repositories/loyaltyPoints.repository";
 import { OrdersRepository } from "../../orders/repositories/orders.repository";
 import { ICurrentOrder, IDashboard, IRecentRestaurant, IUpdateUser, IUser } from "../interfaces/user.interface";
@@ -93,6 +94,88 @@ export class UserService{
             statusCode: 200
         }
 
+    }
+
+    //get loyalty points dashboard
+    async getLoyaltyPointsDashboard(
+        userId: string,
+        page = 1,
+        limit = 10,
+        type: "all" | "earned" | "redeemed" = "all",
+        date: "all" | "day" | "week" | "month" = "all"
+    ): Promise<ServiceResponse<ILoyaltyOverviewResponse>> {
+
+        const [
+            account,
+            totalEarned,
+            totalRedeemed,
+            totalTransactions,
+            transactionData
+        ] = await Promise.all([
+
+            this.loyaltyRepo.getBalanceByCustomerId(
+                userId
+            ),
+
+            this.loyaltyRepo.getEarnedPoints(
+                userId
+            ),
+
+            this.loyaltyRepo.getRedeemedPoints(
+                userId
+            ),
+
+            this.loyaltyRepo.getTransactionCount(
+                userId
+            ),
+
+            this.loyaltyRepo.getTransactions(
+                userId,
+                page,
+                limit,
+                type === "all" ? undefined : type,
+                date === "all" ? undefined : date,
+            )
+        ]);
+
+        //mapping all the repo results
+
+        const mappedTransactions: ILoyaltyTransactions[] =
+            transactionData.transactions.map(
+                transaction => ({
+                    id: transaction.id,
+                    points: transaction.points,
+                    type: transaction.transactionType,
+                    createdAt: transaction.createdAt,
+                })
+            );
+
+        const mappedSummary: ILoyaltySummary = {
+            currentPoints: account?.currentPoints || 0,
+            totalEarned,
+            totalRedeemed,
+            totalTransactions
+        }
+
+        const mappedPagination: IPagination = {
+            page,
+            limit,
+            total: transactionData.total,
+            totalPages: Math.ceil(transactionData.total / limit)
+        }
+
+        const result: ILoyaltyOverviewResponse = {
+            summary: mappedSummary,
+            transactions: mappedTransactions,
+            pagination: mappedPagination
+        }
+
+        return {
+            success: true,
+            data: result,
+            message: "Successfully fetched loyalty dashboard",
+            statusCode: 200
+        };
     }
 
     //get profile of user
