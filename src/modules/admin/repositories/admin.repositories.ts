@@ -792,4 +792,154 @@ export class AdminRepository {
 
         return true;
     }
+
+
+
+    async getPendingPartners(
+        page: number,
+        limit: number,
+        search?: string
+    ) {
+
+        const skip =
+            (page - 1) * limit;
+
+        const where: any = {
+            status: "PENDING_VERIFICATION"
+        };
+
+        if (search) {
+
+            where.OR = [
+
+                {
+                    user: {
+                        fullName: {
+                            contains: search,
+                            mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    user: {
+                        email: {
+                            contains: search,
+                            mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    user: {
+                        mobile: {
+                            contains: search
+                        }
+                    }
+                },
+
+                {
+                    vehicleNumber: {
+                        contains: search,
+                        mode: "insensitive"
+                    }
+                }
+
+            ];
+        }
+
+        const partners =
+            await prisma.deliveryPartner.findMany({
+
+                where,
+
+                skip,
+
+                take: limit,
+
+                orderBy: {
+                    createdAt: "desc"
+                },
+
+                include: {
+                    user: true
+                }
+            });
+
+        const total =
+            await prisma.deliveryPartner.count({
+                where
+            });
+
+        return {
+            partners,
+            total
+        };
+    }
+
+    async getStats() {
+
+        const pending =
+            await prisma.deliveryPartner.count({
+                where: {
+                    status: "PENDING_VERIFICATION"
+                }
+            });
+
+        const active =
+            await prisma.deliveryPartner.count({
+                where: {
+                    status: "ACTIVE"
+                }
+            });
+
+        const suspended =
+            await prisma.deliveryPartner.count({
+                where: {
+                    status: "SUSPENDED"
+                }
+            });
+
+        return {
+            pending,
+            active,
+            suspended
+        };
+    }
+
+    async approvePartner(
+        partnerId: string
+    ) {
+
+        return await prisma.deliveryPartner.update({
+
+            where: {
+                userId: partnerId
+            },
+
+            data: {
+                status: "INACTIVE"
+            }
+
+        });
+    }
+
+    async rejectPartner(
+        partnerId: string
+    ) {
+
+        return await prisma.deliveryPartner.update({
+
+            where: {
+                userId: partnerId
+
+            },
+
+            data: {
+                status: "SUSPENDED"
+            }
+
+        });
+    }
+
 }

@@ -199,4 +199,105 @@ export class AdminController {
             .json(result);
     });
 
+
+    getPendingPartners = asyncHandler(
+        async (req, res) => {
+
+            const page =
+                Number(req.query.page) || 1;
+
+            const limit =
+                Number(req.query.limit) || 10;
+
+            const search =
+                req.query.search as string;
+
+            const result =
+                await this.adminService.getPendingPartners(
+                    page,
+                    limit,
+                    search
+                );
+
+            res
+                .status(result.statusCode || 200)
+                .json(result);
+        }
+    );
+
+    getStats = asyncHandler(
+        async (
+            req,
+            res
+        ): Promise<void> => {
+
+            const result =
+                await this.adminService.getStats();
+
+            res
+                .status(result.statusCode || 200)
+                .json(result);
+        }
+    );
+
+    approvePartner = asyncHandler(
+        async (
+            req,
+            res
+        ): Promise<void> => {
+
+            const { id } =
+                req.params;
+
+            if (
+                !id ||
+                typeof id !== "string"
+            ) {
+
+                throw new AppError(
+                    "Partner id is required",
+                    400
+                );
+            }
+
+            const result =
+                await this.adminService.approvePartner(
+                    id
+                );
+
+            res.status(result.statusCode || 200).json(result);
+        }
+    );
+
+    rejectPartner = asyncHandler(
+        async (
+            req,
+            res
+        ): Promise<void> => {
+
+            const { id } =
+                req.params;
+
+            if (
+                !id ||
+                typeof id !== "string"
+            ) {
+
+                throw new AppError(
+                    "Partner id is required",
+                    400
+                );
+            }
+
+            const result =
+                await this.adminService.rejectPartner(
+                    id
+                );
+
+            res
+                .status(result.statusCode || 200)
+                .json(result);
+        }
+    );
+
 }

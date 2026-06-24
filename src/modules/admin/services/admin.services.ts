@@ -1,11 +1,13 @@
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
-import { ICustomerDetailsResponse, IRestaurantOwnerDetailsResponse, IUpdateUserStatus, IUserDetailsResponse } from "../interfaces/admin.interface";
+import { DeliveryService } from "../../delivery/services/delivery.service";
+import { ICustomerDetailsResponse, IDeliveryPartnerApprovalStats, IRestaurantOwnerDetailsResponse, IUpdateUserStatus, IUserDetailsResponse } from "../interfaces/admin.interface";
 import { AdminRepository } from "../repositories/admin.repositories";
 
 export class AdminService {
 
     private adminRepository = new AdminRepository();
+
 
     async getUserDetails(id: string): Promise<ServiceResponse<IUserDetailsResponse>> {
 
@@ -365,5 +367,187 @@ export class AdminService {
 
         };
     };
+
+    getPendingPartners = async (
+        page: number,
+        limit: number,
+        search?: string
+
+    ): Promise<ServiceResponse<any>> => {
+
+        const result =
+            await this.adminRepository.getPendingPartners(
+                page,
+                limit,
+                search
+            );
+
+        return {
+
+            success: true,
+
+            message:
+                "Pending delivery partners fetched successfully",
+
+            data: {
+
+                partners:
+                    result.partners.map(
+                        partner => ({
+
+                            id:
+                                partner.user.id,
+
+                            fullName:
+                                partner.user.fullName,
+
+                            email:
+                                partner.user.email,
+
+                            mobile:
+                                partner.user.mobile,
+
+                            vehicleType:
+                                partner.vehicleType,
+
+                            vehicleNumber:
+                                partner.vehicleNumber,
+
+                            governmentId:
+                                partner.governmentId,
+
+                            createdAt:
+                                partner.createdAt
+                        })
+                    ),
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total:
+                        result.total
+                }
+            },
+
+            statusCode: 200
+        };
+    }
+
+    getStats = async (): Promise<ServiceResponse<IDeliveryPartnerApprovalStats>> => {
+
+        const stats =
+            await this.adminRepository.getStats();
+
+        return {
+
+            success: true,
+
+            statusCode: 200,
+
+            message:
+                "Delivery partner approval statistics fetched successfully",
+
+            data: {
+                pending: stats.pending,
+                active: stats.active,
+                suspended: stats.suspended
+            }
+        };
+    }
+    private deliveryService = new DeliveryService();
+
+    approvePartner = async (
+        partnerId: string
+    ): Promise<ServiceResponse<null>> => {
+
+        console.log(partnerId)
+
+        const partner =
+
+            await this.deliveryService.getPartnerProfile(
+                partnerId
+            );
+
+        console.log(partner)
+
+        if (!partner.data) {
+
+            throw new AppError(
+                "Delivery partner not found",
+                404
+            );
+        }
+
+        if (
+            partner.data.status === "ACTIVE"
+        ) {
+
+            throw new AppError(
+                "Partner already approved",
+                400
+            );
+        }
+
+        await this.adminRepository.approvePartner(
+            partnerId
+        );
+
+        return {
+
+            success: true,
+
+            message:
+                "Delivery partner approved successfully",
+
+            statusCode: 200
+        };
+    }
+
+    rejectPartner = async (
+        partnerId: string
+    ): Promise<ServiceResponse<null>> => {
+
+        const partner =
+            await this.deliveryService.getPartnerProfile(
+                partnerId
+            );
+
+        console.log(partner)
+
+        if (!partner.data) {
+
+            throw new AppError(
+                "Delivery partner not found",
+                404
+            );
+        }
+
+        if (
+            partner.data.status === "SUSPENDED"
+        ) {
+
+            throw new AppError(
+                "Partner already rejected",
+                400
+            );
+        }
+
+        await this.adminRepository.rejectPartner(
+            partnerId
+        );
+
+        return {
+
+            success: true,
+
+            message:
+                "Delivery partner rejected successfully",
+
+            statusCode: 200
+        };
+    }
 
 }

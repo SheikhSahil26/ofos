@@ -112,3 +112,42 @@ export interface IAssignRole {
 //         total: number;
 //     };
 // }
+
+export interface IPendingPartner {
+
+    id: string;
+
+    fullName: string;
+
+    email: string;
+
+    mobile: string;
+
+    vehicleType: string;
+
+    vehicleNumber: string;
+
+    governmentId: string;
+
+    createdAt: Date;
+}
+
+export interface IPendingPartnerResponse {
+
+    partners: IPendingPartner[];
+
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+    };
+}
+
+export interface IDeliveryPartnerApprovalStats {
+
+    pending: number;
+
+    active: number;
+
+    suspended: number;
+}
