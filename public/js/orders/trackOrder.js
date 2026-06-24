@@ -95,17 +95,22 @@ window.addEventListener("beforeunload", () => clearInterval(pollTimer));
 // ──────────────────────────────────────────────
 async function fetchTrackingDetails() {
   try {
-    const response = await apiRequest(`/api/orders/${orderId}/tracking-details`, "GET");
+    const response = await apiRequest(`/api/orders/status-history/${orderId}`, "GET");
+    
     const result = await response.json();
 
-    if (!result.success) {
+    console.log(result, "tracking details fetched successfully");
+
+    if (!result) {
       showToast(result.error || "Unable to load order", "error");
       return;
     }
 
-    renderPage(result.data);
+    console.log(result[result.length-1]," tracking details fetched successfully");
 
-    if (result.data.status === "DELIVERED" || result.data.status === "CANCELLED") {
+    renderPage(result[result.length-1]);
+
+    if (result[result.length-1].newStatus === "DELIVERED" || result[result.length-1].newStatus === "CANCELLED") {
       clearInterval(pollTimer);
     }
 
@@ -119,9 +124,9 @@ async function fetchTrackingDetails() {
 // ──────────────────────────────────────────────
 function renderPage(data) {
   document.querySelector("h2.text-3xl").textContent = `#${data.orderNumber}`;
-  renderStatusBadge(data.status);
-  renderStepper(data.status);
-  renderStatusSection(data.status, data.etaMinutes);
+  renderStatusBadge(data.newStatus);
+  renderStepper(data.newStatus);
+  renderStatusSection(data.newStatus, data.etaMinutes);
   renderPartner(data.deliveryPartner);
   renderAddress(data.address);
   renderMap(data.branchLocation, data.partnerLocation);

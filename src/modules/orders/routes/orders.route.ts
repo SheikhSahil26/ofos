@@ -18,7 +18,7 @@ export class OrdersRoutes implements IRoutes {
     this.router.post("/place-order",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.createOrder);
     this.router.get("/list-orders",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.listOrders); // lists all orders of authenticated user
     this.router.get("/get-order/:id",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.getOrder); // fetch a specific order by ID
-    this.router.get(`/status-history/:id`,isAuthenticated,authorizeRoles("CUSTOMER"),authorizeRoles("RESTAURANT_STAFF"),authorizeRoles("DELIVERY_PARTNER"), this.controller.getStatusHistory); // fetch a specific order by ID
+    this.router.get(`/status-history/:id`,isAuthenticated,authorizeRoles("CUSTOMER","DELIVERY_PARTNER","RESTAURANT_STAFF"), this.controller.getStatusHistory); // fetch a specific order by ID
     // this.router.patch("/:id/status",this.controller.updateOrderStatus);
     //will add role middleware later
     this.router.patch("/change-status/:orderId",isAuthenticated, this.controller.updateOrderStatusByStaff); // fetch a specific order by ID

@@ -428,6 +428,8 @@ export class OrderService {
 
     const statusHistory = await this.orderRepo.getStatusHistory(orderId);
 
+    console.log(statusHistory, "Status history fetched for order", orderId);
+
     return {
       success: true,
       data: statusHistory,
