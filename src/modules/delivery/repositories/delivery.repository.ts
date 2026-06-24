@@ -12,7 +12,19 @@ export class DeliveryRepository implements IDeliveryRepository {
   }
 
 
-  async findActivePartners(): Promise<any[]> {}
+  async findActivePartnersByIds(partnerIds: string[]): Promise<any[]> {
+    return this.prisma.deliveryPartner.findMany({
+      where: {
+        id: { in: partnerIds },
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+      },
+    });
+  }
 
   async findOrderWithBranchAndDelivery(orderId: string): Promise<any> {}
 
@@ -337,6 +349,52 @@ async findPartnerRatingStats(partnerId: string): Promise<any> {
   };
 }
 
+// modules/delivery/repositories/delivery.repository.ts
 
+async findPendingOffer(deliveryId: string): Promise<any> {
+  return this.prisma.deliveryAssignment.findFirst({
+    where: {
+      deliveryId,
+      responseStatus: null, // not yet responded = pending
+    },
+  });
+}
+
+async findRejectedPartnerIds(deliveryId: string): Promise<Set<string>> {
+  const rejected = await this.prisma.deliveryAssignment.findMany({
+    where: { deliveryId, responseStatus: "REJECTED" },
+    select: { partnerId: true },
+  });
+  return new Set(rejected.map((r) => r.partnerId));
+}
+
+async findPendingOfferForPartner(partnerUserId: string): Promise<any> {
+  return this.prisma.deliveryAssignment.findFirst({
+    where: {
+      responseStatus: null,
+      partner: { userId: partnerUserId },
+    },
+    orderBy: { assignedAt: "desc" },
+    include: {
+      delivery: {
+        include: {
+          order: {
+            select: {
+              orderNumber: true,
+              totalAmount: true,
+              deliveryFee: true,
+              branch: {
+                select: { branchName: true, addressLine1: true, city: true, latitude: true, longitude: true },
+              },
+              address: {
+                select: { addressLine1: true, city: true, pincode: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
 
 }

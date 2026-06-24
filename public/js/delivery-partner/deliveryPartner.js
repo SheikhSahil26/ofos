@@ -1,6 +1,81 @@
 
 // /public/js/orders/deliveryPartner.js
 
+// js/delivery/partnerOffersPage.js
+
+let offerPollTimer = null;
+let currentOffer = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  pollForOffer();
+  offerPollTimer = setInterval(pollForOffer, 5000);
+});
+
+async function pollForOffer() {
+  // Don't poll if a modal is already showing an offer
+  if (currentOffer) return;
+
+  try {
+    const response = await apiRequest("/api/delivery/pending-offer", "GET");
+    const result = await response.json();
+
+    console.log("Polling for offers:", result);
+
+    if (result.success && result.data) {
+      currentOffer = result.data;
+      console.log("New offer received:", currentOffer);
+      showOfferModal(currentOffer);
+    }
+  } catch (err) {
+    console.error("Failed to poll for offers:", err);
+  }
+}
+
+function showOfferModal(offer) {
+  const modal = document.getElementById("offer-modal");
+  modal.innerHTML = `
+    <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div class="bg-white rounded-3xl p-8 max-w-sm w-full">
+        <h2 class="text-2xl font-bold mb-2">New Delivery Offer!</h2>
+        <p class="text-gray-500 mb-4">Order #${offer.orderNumber}</p>
+        <div class="space-y-2 mb-6">
+          <p><span class="font-semibold">Pickup:</span> ${offer.pickupBranch}</p>
+          <p><span class="font-semibold">Drop:</span> ${offer.dropCity}, ${offer.dropPincode}</p>
+          <p><span class="font-semibold">Earnings:</span> ₹${offer.earnings}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button id="reject-offer-btn" class="border border-red-500 text-red-500 py-3 rounded-xl font-semibold">Reject</button>
+          <button id="accept-offer-btn" class="bg-green-600 text-white py-3 rounded-xl font-semibold">Accept</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("accept-offer-btn").onclick = () => respondToOffer("ACCEPTED");
+  document.getElementById("reject-offer-btn").onclick = () => respondToOffer("REJECTED");
+}
+
+async function respondToOffer(response) {
+  try {
+    const res = await apiRequest(`/api/delivery/offer/${currentOffer.assignmentId}/respond`, "PATCH", { response });
+    const result = await res.json();
+
+    if (result.success) {
+      showToast(response === "ACCEPTED" ? "Offer accepted!" : "Offer rejected", "success");
+      if (response === "ACCEPTED") {
+        window.location.href = `/delivery/active-order/${currentOffer.orderNumber}`;
+      }
+    } else {
+      showToast(result.error || "Failed to respond", "error");
+    }
+  } catch (err) {
+    console.error("Respond to offer failed:", err);
+  } finally {
+    document.getElementById("offer-modal").innerHTML = "";
+    currentOffer = null;
+  }
+}
+
 
 
 let activeOrders = [];

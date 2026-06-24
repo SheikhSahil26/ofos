@@ -20,6 +20,8 @@ export class OrdersControllers {
   const user = req.user as Express.payload
   const { addressId, paymentMethod, couponCode, scheduledAt } = req.body;
 
+  console.log("Request body:", req.body);
+
   if (!addressId || !paymentMethod) {
     return res.status(400).json({
       success: false,

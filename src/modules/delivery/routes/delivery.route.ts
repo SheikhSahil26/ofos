@@ -63,7 +63,19 @@ export class DeliveryRoutes implements IRoutes {
       );
 
     
-    
+    this.router.get(
+  "/pending-offer",
+  isAuthenticated,
+  authorizeRoles("DELIVERY_PARTNER"),
+  this.controller.getPendingOffer
+);
+
+this.router.patch(
+  "/offer/:assignmentId/respond",
+  isAuthenticated,
+  authorizeRoles("DELIVERY_PARTNER"),
+  this.controller.respondToOffer
+);
     
     
   }

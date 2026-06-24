@@ -5,12 +5,13 @@ import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";
 import { OrdersRepository } from "../repositories/orders.repository";
 import { DELIVERY_TRANSITIONS, STAFF_TRANSITIONS } from "../types/order.types";
-import { CreateOrderInput, OrderItemInput } from "../interfaces/orders.interface";
+import { OrderItemInput } from "../interfaces/orders.interface";
+import { DeliveryService } from "../../delivery/services/delivery.service";
 // import { CreateOrderInput, OrderItemInput } from "../types/order.types";
 
 export class OrderService {
   private orderRepo = new OrdersRepository();
-
+  // Assuming you have a DeliveryService class
   constructor(
     private readonly prisma: PrismaClient,
     private readonly cartService: CartService,
@@ -57,6 +58,36 @@ export class OrderService {
       };
     }
 
+    const branchId = cart.restaurantBranchId;
+
+    if (!branchId) {
+      return {
+        success: false,
+        error: "Cart restaurant branch is missing",
+        statusCode: 400,
+      };
+    }
+
+    const normalizedPaymentMethod = paymentMethod.toUpperCase() as PaymentMethodType;
+
+    if (!Object.values(PaymentMethodType).includes(normalizedPaymentMethod)) {
+      return {
+        success: false,
+        error: "Invalid payment method",
+        statusCode: 400,
+      };
+    }
+
+    const scheduledDate = scheduledAt ? new Date(scheduledAt) : null;
+
+    if (scheduledAt && Number.isNaN(scheduledDate?.getTime())) {
+      return {
+        success: false,
+        error: "Invalid scheduledAt date",
+        statusCode: 400,
+      };
+    }
+
     // ── 3. Validate address belongs to this user ────────────────
     // userId from cart is number — convert to string for Prisma
     const userIdStr = String(userId);
@@ -80,7 +111,7 @@ export class OrderService {
     // ── 4. Validate branch is active ────────────────────────────
     const branch = await this.prisma.restaurantBranch.findFirst({
       where: {
-        id: cart.restaurantBranchId,
+        id: branchId,
         isActive: true,
         isDeleted: false,
       },
@@ -95,12 +126,22 @@ export class OrderService {
     }
 
     // ── 5. Fetch ALL menu items in one query ────────────────────
-    const menuItemIds: string[] = cart.items.map((i: any) => i.menuItemId);
+    const menuItemIds = [
+      ...new Set(cart.items.map((item: any) => item.menuItemId).filter(Boolean)),
+    ];
+
+    if (menuItemIds.length === 0) {
+      return {
+        success: false,
+        error: "Cart has no valid menu items",
+        statusCode: 400,
+      };
+    }
 
     const menuItems = await this.prisma.menuItem.findMany({
       where: {
         id: { in: menuItemIds },
-        branchId: cart.restaurantBranchId,
+        branchId,
         isAvailable: true,
         isDeleted: false,
       },
@@ -136,12 +177,39 @@ export class OrderService {
         };
       }
 
+      if (dbItem.price === null) {
+        return {
+          success: false,
+          error: `Menu item ${cartItem.menuItemId} does not have a price`,
+          statusCode: 400,
+        };
+      }
+
+      if (!Number.isInteger(cartItem.quantity) || cartItem.quantity <= 0) {
+        return {
+          success: false,
+          error: `Invalid quantity for menu item ${cartItem.menuItemId}`,
+          statusCode: 400,
+        };
+      }
+
       const basePrice = Number(dbItem.price);
 
-      // Your cart currently has no modifiers — defaults to empty array
-      const modifiers: any[] = cartItem.modifiers || [];
+      const modifiers = (cartItem.modifiers || []).map((mod: any) => ({
+        modifierName: mod.modifierName ?? mod.name ?? "Modifier",
+        extraPrice: Number(mod.extraPrice ?? 0),
+      }));
+
+      if (modifiers.some((mod) => !Number.isFinite(mod.extraPrice))) {
+        return {
+          success: false,
+          error: `Invalid modifier price for menu item ${cartItem.menuItemId}`,
+          statusCode: 400,
+        };
+      }
+
       const modifierTotal = modifiers.reduce(
-        (sum: number, mod: any) => sum + Number(mod.extraPrice),
+        (sum: number, mod) => sum + mod.extraPrice,
         0
       );
 
@@ -155,10 +223,7 @@ export class OrderService {
         quantity: cartItem.quantity,
         unitPrice,                           // snapshot from DB — not from cart
         // specialInstruction: cartItem.specialInstruction ?? null,
-        modifiers: modifiers.map((mod: any) => ({
-          modifierName: mod.modifierName,
-          extraPrice: Number(mod.extraPrice),
-        })),
+        modifiers,
       });
     }
 
@@ -236,6 +301,20 @@ export class OrderService {
       (subtotal + taxAmount + deliveryFee - discountAmount).toFixed(2)
     );
 
+    if (
+      !Number.isFinite(subtotal) ||
+      !Number.isFinite(taxAmount) ||
+      !Number.isFinite(deliveryFee) ||
+      !Number.isFinite(discountAmount) ||
+      !Number.isFinite(totalAmount)
+    ) {
+      return {
+        success: false,
+        error: "Invalid order amount calculation",
+        statusCode: 400,
+      };
+    }
+
     // ── 9. Generate order number ────────────────────────────────
     const orderNumber = `ORD-${Date.now()}-${Math.random()
       .toString(36)
@@ -243,16 +322,19 @@ export class OrderService {
       .toUpperCase()}`;
 
     // ── 10. Prisma transaction ──────────────────────────────────
-    const order = await this.prisma.$transaction(async (tx) => {
+    let order;
+
+    try {
+      order = await this.prisma.$transaction(async (tx) => {
 
       // 10a. Create Order
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
-          customerId: userIdStr,            // string — converted above
-          branchId: cart.restaurantBranchId,
-          addressId,
-          couponId,
+          customer: { connect: { id: userIdStr } },
+          branch: { connect: { id: branchId } },
+          address: { connect: { id: addressId } },
+          ...(couponId ? { coupon: { connect: { id: couponId } } } : {}),
           subtotal,
           taxAmount,
           deliveryFee,
@@ -261,10 +343,9 @@ export class OrderService {
           status: "PLACED",
           paymentStatus: "PENDING",
           placedAt: new Date(),
-          scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+          scheduledAt: scheduledDate,
         },
       });
-
       // 10b. Create OrderItems
       for (const item of orderItems) {
         const orderItem = await tx.orderItem.create({
@@ -317,7 +398,7 @@ export class OrderService {
       await tx.payment.create({
         data: {
           orderId: newOrder.id,
-          paymentMethod: paymentMethod as PaymentMethodType,
+          paymentMethod: normalizedPaymentMethod,
           amount: totalAmount,
           status: "PENDING",
         },
@@ -333,9 +414,22 @@ export class OrderService {
 
       return newOrder;
     });
+    } catch (error) {
+      console.error("createOrder transaction error:", error);
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to create order",
+        statusCode: 500,
+      };
+    }
 
     // ── 11. Clear cart from Redis after successful transaction ──
-    await this.cartService.clearCart(userId);
+    try {
+      await this.cartService.clearCart(userId);
+    } catch (error) {
+      console.error("createOrder clearCart error:", error);
+    }
 
     // ── 12. Return response ─────────────────────────────────────
     return {
@@ -344,7 +438,7 @@ export class OrderService {
       data: {
         orderId: order.id,
         orderNumber: order.orderNumber,
-        branchId: cart.restaurantBranchId,  // needed by controller to trigger assignment
+        branchId,  // needed by controller to trigger assignment
         subtotal,
         taxAmount,
         deliveryFee,
@@ -471,7 +565,7 @@ export class OrderService {
       where: { id: orderId },
       include: { branch: true, delivery: true },
     });
-    let staffUserIdDummy = "202591c8-b7e9-40d1-be7c-253aa7a0e30a";
+    let staffUserIdDummy = staffUserId;
     if (!order) {
       return { success: false, error: "Order not found", statusCode: 404 };
     }
@@ -504,6 +598,12 @@ export class OrderService {
         statusCode: 400,
       };
     }
+
+    if (nextStatus === "PREPARING") {
+  this.deliveryService
+    .assignNearestPartner(orderId)
+    .catch((err) => console.error(`Assignment failed for order ${orderId}:`, err));
+}
 
     const oldStatus = order.status;
     const isReadyForPickup = nextStatus === "READY_FOR_PICKUP";
