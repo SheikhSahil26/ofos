@@ -16,12 +16,15 @@ export class CartController {
             res: Response
         ) => {
 
-            const userId = "1"; // dummy
+            const user = req.user as Express.payload  // dummy
 
+            console.log(user,"user in cart controller")
             const data =
                 await this.cartService.getCart(
-                    userId
+                    user.userId
                 );
+
+                console.log(data,"cart data in controller")
 
             return res
                 .status(
@@ -32,40 +35,36 @@ export class CartController {
     );
 
     addToCart = asyncHandler(
-        async (
-            req: Request,
-            res: Response
-        ) => {
+  async (req: Request, res: Response) => {
+    const user = req.user as Express.payload // dummy
 
-            const userId = "428f4215-9945-4bda-92fb-6d46ae145955"; // dummy
+    const {
+      menuItemId,
+      quantity,
+      modifiers,
+      specialInstruction,
+    }: AddToCartDTO = req.body;
 
-            const {
-    menuItemId,
-    quantity,
-}: AddToCartDTO = req.body;
-
-            const data =
-                await this.cartService.addToCart(
-                    userId,
-                    menuItemId,
-                    Number(quantity)
-                );
-
-            return res
-                .status(
-                    data.statusCode || 200
-                )
-                .json(data);
-        }
+    const data = await this.cartService.addToCart(
+      user.userId,
+      menuItemId,
+      Number(quantity),
+      modifiers || [],
+      specialInstruction,
     );
 
+    return res
+      .status(data.statusCode || 200)
+      .json(data);
+  }
+);
     removeCartItem = asyncHandler(
         async (
             req: Request,
             res: Response
         ) => {
 
-            const userId = "1"; // dummy
+            const user = req.user as Express.payload; // dummy
 
            const params: RemoveCartItemDTO = {
     itemId: req.params.itemId as string,
@@ -73,7 +72,7 @@ export class CartController {
 
             const data =
                 await this.cartService.removeCartItem(
-                    userId,
+                    user.userId,
                     params.itemId
                 );
 
@@ -91,11 +90,11 @@ export class CartController {
         res: Response
     ) => {
 
-        const userId = "1"; // Replace with req.user.userId
+        const user = req.user as Express.payload; // Replace with req.user.userId
 
         const result =
             await this.cartService.clearCart(
-                userId
+                user.userId
             );
 
         return res
@@ -112,11 +111,11 @@ export class CartController {
         res: Response
     ) => {
 
-        const userId = "1"; // replace with req.user.userId
+        const user = req.user as Express.payload; // replace with req.user.userId
 
         const result =
             await this.cartService.validateCart(
-                userId
+                user.userId
             );
 
                const response: ValidateCartResponseDTO =
@@ -139,11 +138,11 @@ export class CartController {
         res: Response
     ) => {
 
-        const userId = "1"; // replace with req.user.userId
+        const user = req.user as Express.payload; // replace with req.user.userId
 
         const result =
             await this.cartService.getCartSummary(
-                userId
+                user.userId
             );
 
        const response: CartSummaryDTO =
@@ -159,4 +158,79 @@ export class CartController {
             });
     }
 );
+
+    deleteEntireItem = asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const user = req.user as Express.payload; // replace with req.user.userId
+
+        const itemId = req.params.itemId as string;
+
+        const result =
+            await this.cartService.deleteEntireItemFromCart(
+                user.userId,
+                itemId
+            );
+
+        return res
+            .status(
+                result.statusCode || 200
+            )
+            .json(result);
+    }
+);
+
+// modules/cart/controllers/cart.controller.ts
+
+updateItemQuantity = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user =req.user as Express.payload; // or your dummy for now
+    const { menuItemId, quantity } = req.body;
+
+    if (!menuItemId || quantity === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "menuItemId and quantity are required",
+      });
+    }
+
+    const result = await this.cartService.updateItemQuantity(
+      user.userId,
+      menuItemId,
+      Number(quantity),
+    );
+
+    return res.status(result.statusCode).json(result);
+  }
+);
+
+removeItem = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user as Express.payload;
+    const menuItemId = req.params.itemId as string;
+
+    const result = await this.cartService.removeItemFromCart(
+      user.userId,
+      menuItemId,
+    );
+
+    return res.status(result.statusCode).json(result);
+  }
+);
+
+// modules/cart/controllers/cart.controller.ts
+
+getCheckoutDetails = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user as Express.payload;
+
+    const result = await this.cartService.getCheckoutDetails(user.userId);
+
+    return res.status(result.statusCode).json(result);
+  }
+);
+
 }

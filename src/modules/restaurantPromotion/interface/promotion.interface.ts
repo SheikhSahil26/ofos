@@ -41,6 +41,12 @@ export interface IDeletePromotionResponse {
     deletedAt:Date | null;
 }
 
+export interface ITogglePromotionResponse {
+    id:string;
+    title:string;
+    isActive:boolean;
+}
+
 export interface IRestaurantPromotion {
     id:string;
     title:string;
@@ -51,6 +57,7 @@ export interface IRestaurantPromotion {
     maximumDiscountAmount:Prisma.Decimal | null;
     startDate:Date;
     endDate:Date;
+    isActive:boolean;
 }
 
 export interface IRestaurantPromotionsResponse {

@@ -2,34 +2,93 @@ import { prisma } from "../../../config/prisma";
 import { CartRepository } from "../repositories/cart.repository";
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { Cart, CartItem, CartModifier } from "../interfaces/cart.interface";
-
+import { CheckoutDetails, CouponSummary, EnrichedCart, EnrichedCartItem } from "../types/cart.types";
+import { AddressService } from "../../address/services/address.service";
+import { CouponService } from "../../coupons/services/coupon.service";
 
 
 export class CartService {
 
     private cartRepo = new CartRepository();
+    private addressService = new AddressService();
+    private couponService = new CouponService();
 
     async getCart(
         userId: string
-    ): Promise<ServiceResponse<Cart>> {
+    ): Promise<ServiceResponse<EnrichedCart>> {
 
-        const cart =
+        const cart:any =
             await this.cartRepo.getCart(userId);
 
-        if (!cart) {
-            return {
-                success: false,
-                error: "Cart not found",
-                statusCode: 404,
-            };
-        }
+            console.log("Cart details:", cart);
 
-        return {
-            success: true,
-            message: "Cart fetched successfully",
-            data: cart,
-            statusCode: 200,
-        };
+            if (!cart) {
+    return {
+      success: true,
+      message: "Cart is empty",
+      data: {
+        userId,
+        restaurantBranchId: "",
+        items: [],
+        subtotal: 0,
+      },
+      statusCode: 200,
+    };
+  }
+
+   const menuItemIds = cart.items.map((item: any) => item.menuItemId);
+
+  const menuItems = await prisma.menuItem.findMany({
+    where: {
+      id: { in: menuItemIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });
+
+  const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  const enrichedItems: EnrichedCartItem[] = cart.items.map((item: any) => {
+    const dbItem = menuItemMap.get(item.menuItemId);
+
+    return {
+      menuItemId: item.menuItemId,
+      name: dbItem?.name ?? "Item unavailable",
+      description: dbItem?.description ?? null,
+      imageUrl: dbItem?.imageUrl ?? null,
+      isVeg: dbItem?.isVeg ?? true,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      modifiers: item.modifiers || [],
+      specialInstruction: item.specialInstruction,
+      itemTotal: item.quantity * item.unitPrice,
+      // Flag if item became unavailable since being added to cart
+      isCurrentlyAvailable: dbItem
+        ? dbItem.isAvailable && !dbItem.isDeleted
+        : false,
+    };
+  });
+
+  const enrichedCart: EnrichedCart = {
+    userId: cart.userId,
+    restaurantBranchId: cart.restaurantBranchId,
+    items: enrichedItems,
+    subtotal: cart.subtotal,
+  };
+
+  return {
+    success: true,
+    message: "Cart fetched successfully",
+    data: enrichedCart,
+    statusCode: 200,
+  };
     }
 
     async addToCart(
@@ -38,7 +97,7 @@ export class CartService {
         quantity: number,
          modifiers: CartModifier[] = [],        // new param — defaults to empty
   specialInstruction?: string,   
-    ): Promise<ServiceResponse<Cart>> {
+    ): Promise<ServiceResponse<EnrichedCart>> {
 
         quantity = Number(quantity);
 
@@ -54,7 +113,7 @@ export class CartService {
                     id: menuItemId,
                 },
                 select: {
-                    branch_id: true,
+                    branchId: true,
                     price: true,
                 },
             });
@@ -64,7 +123,7 @@ export class CartService {
             throw new Error("Menu item not found");
         }
 
-        const branchId = menuItem.branch_id;
+        const branchId = menuItem.branchId;
 
         const existingCart =
             await this.cartRepo.getCart(
@@ -168,19 +227,72 @@ export class CartService {
             existingCart
         );
 
-        return {
-            success: true,
-            message: "Item added to cart successfully",
-            data: existingCart,
-            statusCode: 200,
-        };
+
+         const menuItemIds = existingCart.items.map((item: any) => item.menuItemId);
+
+  const menuItems = await prisma.menuItem.findMany({
+    where: {
+      id: { in: menuItemIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });
+
+  const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  const enrichedItems: EnrichedCartItem[] = existingCart.items.map((item: any) => {
+    const dbItem = menuItemMap.get(item.menuItemId);
+
+    return {
+      menuItemId: item.menuItemId,
+      name: dbItem?.name ?? "Item unavailable",
+      description: dbItem?.description ?? null,
+      imageUrl: dbItem?.imageUrl ?? null,
+      isVeg: dbItem?.isVeg ?? true,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      modifiers: item.modifiers || [],
+      specialInstruction: item.specialInstruction,
+      itemTotal: item.quantity * item.unitPrice,
+      // Flag if item became unavailable since being added to cart
+      isCurrentlyAvailable: dbItem
+        ? dbItem.isAvailable && !dbItem.isDeleted
+        : false,
+    };
+  });
+
+  const enrichedCart: EnrichedCart = {
+    userId: existingCart.userId,
+    restaurantBranchId: existingCart.restaurantBranchId,
+    items: enrichedItems,
+    subtotal: existingCart.subtotal,
+  };
+
+  return {
+    success: true,
+    message: "Cart fetched successfully",
+    data: enrichedCart,
+    statusCode: 200,
+  };
+
+
+
+
+       
     }
 
     //will fix later and make + - button and if item quantity is 0 then only delete it from cart 
   async removeCartItem(
     userId: string,
     itemId: string
-): Promise<ServiceResponse<any>> {
+): Promise<ServiceResponse<EnrichedCart>> {
 
     const existingCart =
         await this.cartRepo.getCart(userId);
@@ -258,15 +370,62 @@ export class CartService {
         existingCart
     );
 
-    return {
-        success: true,
-        message:
-            "Item quantity updated successfully",
-        data: existingCart,
-        statusCode: 200,
-    };
-}
+     const menuItemIds = existingCart.items.map((item: any) => item.menuItemId);
 
+  const menuItems = await prisma.menuItem.findMany({
+    where: {
+      id: { in: menuItemIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });
+
+  const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  const enrichedItems: EnrichedCartItem[] = existingCart.items.map((item: any) => {
+    const dbItem = menuItemMap.get(item.menuItemId);
+
+    return {
+      menuItemId: item.menuItemId,
+      name: dbItem?.name ?? "Item unavailable",
+      description: dbItem?.description ?? null,
+      imageUrl: dbItem?.imageUrl ?? null,
+      isVeg: dbItem?.isVeg ?? true,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      modifiers: item.modifiers || [],
+      specialInstruction: item.specialInstruction,
+      itemTotal: item.quantity * item.unitPrice,
+      // Flag if item became unavailable since being added to cart
+      isCurrentlyAvailable: dbItem
+        ? dbItem.isAvailable && !dbItem.isDeleted
+        : false,
+    };
+  });
+
+  const enrichedCart: EnrichedCart = {
+    userId: existingCart.userId,
+    restaurantBranchId: existingCart.restaurantBranchId,
+    items: enrichedItems,
+    subtotal: existingCart.subtotal,
+  };
+
+  return {
+    success: true,
+    message: "Cart fetched successfully",
+    data: enrichedCart,
+    statusCode: 200,
+  };
+
+    
+}
     //delete entire cart 
 
     async clearCart(
@@ -290,7 +449,7 @@ export class CartService {
 
      }
 
-     async validateCart(
+    async validateCart(
     userId: string
 ): Promise<ServiceResponse<any>> {
 
@@ -466,5 +625,394 @@ export class CartService {
     };
 }
 
+    async deleteEntireItemFromCart(
+        userId: string,
+        itemId: string
+    ): Promise<ServiceResponse<EnrichedCart>> {
+
+        const existingCart =
+            await this.cartRepo.getCart(userId);
+
+        if (!existingCart) {
+            throw new Error(
+                "Cart not found"
+            );
+        }
+
+        const item =
+            existingCart.items.find(
+                (item: any) =>
+                    item.menuItemId === itemId
+            );
+
+        if (!item) {
+            throw new Error(
+                "Item not found in cart"
+            );
+        }       
+        existingCart.items =
+            existingCart.items.filter(
+                (cartItem: any) =>
+                    cartItem.menuItemId !== itemId
+            );
+
+        // Recalculate subtotal
+
+        existingCart.subtotal =
+            existingCart.items.reduce(
+                (
+                    sum: number,
+                    item: any
+                ) =>
+                    sum +
+                    Number(item.quantity) *
+                    Number(item.unitPrice),
+                0
+            );
+
+        // If cart becomes empty
+
+        if (
+            existingCart.items.length === 0
+        ) {
+
+            await this.cartRepo.deleteCart(
+                userId
+            );
+
+            return {
+                success: true,
+                message:
+                    "Cart deleted successfully",
+                     data: {
+            userId,
+            restaurantBranchId: null,
+            items: [],
+            subtotal: 0
+        },
+                statusCode: 200,
+            };
+        }
+
+        // Save updated cart
+
+        await this.cartRepo.saveCart(
+            userId,
+            existingCart
+        );
+
+         const menuItemIds = existingCart.items.map((item: any) => item.menuItemId);
+
+  const menuItems = await prisma.menuItem.findMany({
+    where: {
+      id: { in: menuItemIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });               
+    const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));           
+
+    const enrichedItems: EnrichedCartItem[] = existingCart.items.map((item: any) => {   
+
+        const dbItem = menuItemMap.get(item.menuItemId);
+
+        return {
+            menuItemId: item.menuItemId,
+            name: dbItem?.name ?? "Item unavailable",
+            description: dbItem?.description ?? null,
+            imageUrl: dbItem?.imageUrl ?? null,
+            isVeg: dbItem?.isVeg ?? true,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            modifiers: item.modifiers || [],
+            specialInstruction: item.specialInstruction,
+            itemTotal: item.quantity * item.unitPrice,
+            // Flag if item became unavailable since being added to cart
+            isCurrentlyAvailable: dbItem
+                ? dbItem.isAvailable && !dbItem.isDeleted
+                : false,
+        };
+    });
+
+    const enrichedCart: EnrichedCart = {
+        userId: existingCart.userId,
+        restaurantBranchId: existingCart.restaurantBranchId,
+        items: enrichedItems,
+        subtotal: existingCart.subtotal,
+    };
+
+    return {
+        success: true,
+        message: "Cart fetched successfully",
+        data: enrichedCart,
+        statusCode: 200,
+    };      
+
+
+}
+    
+// modules/cart/services/cart.service.ts
+
+async updateItemQuantity(
+  userId: string,
+  menuItemId: string,
+  newQuantity: number,
+): Promise<ServiceResponse<EnrichedCart>> {
+
+  const existingCart = await this.cartRepo.getCart(userId);
+
+  if (!existingCart) {
+    return {
+      success: false,
+      error: "Cart not found",
+      statusCode: 404,
+    };
+  }
+
+  const item = existingCart.items.find(
+    (i: any) => i.menuItemId === menuItemId
+  );
+
+  if (!item) {
+    return {
+      success: false,
+      error: "Item not found in cart",
+      statusCode: 404,
+    };
+  }
+
+  // If new quantity is 0 or negative — remove the item entirely
+  if (newQuantity <= 0) {
+    return this.removeItemFromCart(userId, menuItemId);
+  }
+
+  // Update quantity directly
+  item.quantity = newQuantity;
+
+  // Recalculate subtotal
+  existingCart.subtotal = existingCart.items.reduce(
+    (sum: number, i: any) => sum + Number(i.quantity) * Number(i.unitPrice),
+    0
+  );
+
+  await this.cartRepo.saveCart(userId, existingCart);
+
+  return this.enrichCart(existingCart);
+}
+
+
+async removeItemFromCart(
+  userId: string,
+  menuItemId: string,
+): Promise<ServiceResponse<EnrichedCart>> {
+
+  const existingCart = await this.cartRepo.getCart(userId);
+
+  if (!existingCart) {
+    return {
+      success: false,
+      error: "Cart not found",
+      statusCode: 404,
+    };
+  }
+
+  const itemExists = existingCart.items.some(
+    (i: any) => i.menuItemId === menuItemId
+  );
+
+  if (!itemExists) {
+    return {
+      success: false,
+      error: "Item not found in cart",
+      statusCode: 404,
+    };
+  }
+
+  existingCart.items = existingCart.items.filter(
+    (i: any) => i.menuItemId !== menuItemId
+  );
+
+  existingCart.subtotal = existingCart.items.reduce(
+    (sum: number, i: any) => sum + Number(i.quantity) * Number(i.unitPrice),
+    0
+  );
+
+  // If cart becomes empty after removal — delete the whole cart key
+  if (existingCart.items.length === 0) {
+    await this.cartRepo.deleteCart(userId);
+
+    return {
+      success: true,
+      message: "Cart is now empty",
+      data: {
+        userId,
+        restaurantBranchId: "",
+        items: [],
+        subtotal: 0,
+      },
+      statusCode: 200,
+    };
+  }
+
+  await this.cartRepo.saveCart(userId, existingCart);
+
+  return this.enrichCart(existingCart);
+}
+
+
+// ── Shared enrichment helper — avoids duplicating this logic ──
+private async enrichCart(cart: any): Promise<ServiceResponse<EnrichedCart>>     {
+
+  const menuItemIds = cart.items.map((i: any) => i.menuItemId);
+
+  const menuItems = await prisma.menuItem.findMany({
+    where: { id: { in: menuItemIds } },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      isVeg: true,
+      isAvailable: true,
+      isDeleted: true,
+    },
+  });
+
+  const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  const enrichedItems: EnrichedCartItem[] = cart.items.map((item: any) => {
+    const dbItem = menuItemMap.get(item.menuItemId);
+
+    return {
+      menuItemId: item.menuItemId,
+      name: dbItem?.name ?? "Item unavailable",
+      description: dbItem?.description ?? null,
+      imageUrl: dbItem?.imageUrl ?? null,
+      isVeg: dbItem?.isVeg ?? true,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      modifiers: item.modifiers || [],
+      specialInstruction: item.specialInstruction,
+      itemTotal: item.quantity * item.unitPrice,
+      isCurrentlyAvailable: dbItem
+        ? dbItem.isAvailable && !dbItem.isDeleted
+        : false,
+    };
+  });
+
+  return {
+    success: true,
+    message: "Cart updated successfully",
+    data: {
+      userId: cart.userId,
+      restaurantBranchId: cart.restaurantBranchId,
+      items: enrichedItems,
+      subtotal: cart.subtotal,
+    },
+    statusCode: 200,
+  };
+}   
+
+    // modules/cart/services/cart.service.ts
+
+async getCheckoutDetails(
+  userId: string
+): Promise<ServiceResponse<CheckoutDetails>> {
+
+  // 1. Get cart first — we need subtotal to check coupon eligibility
+  const cartResult = await this.getCart(userId);
+
+  if (!cartResult.success || !cartResult.data) {
+    return {
+      success: false,
+      error: "Cart not found or empty",
+      statusCode: 404,
+    };
+  }
+
+  const cart = cartResult.data;
+
+  // 2. Fetch addresses and coupons in parallel
+  const [addressesResult, couponsResult] = await Promise.all([
+    this.addressService.getAddresses(userId),
+    this.couponService.getActiveCoupons(),
+  ]);
+
+  if (!addressesResult.success) {
+    return {
+      success: false,
+      error: addressesResult.error || "Failed to fetch addresses",
+      statusCode: addressesResult.statusCode,
+    };
+  }
+
+  if (!couponsResult.success) {
+    return {
+      success: false,
+      error: couponsResult.error || "Failed to fetch coupons",
+      statusCode: couponsResult.statusCode,
+    };
+  }
+
+  const addresses = addressesResult.data || [];
+  const coupons = couponsResult.data || [];
+
+  // 3. Find default address
+  const defaultAddress = addresses.find((a: any) => a.isDefault);
+
+  // 4. Mark coupon eligibility based on cart subtotal
+  const couponsWithEligibility: CouponSummary[] = coupons.map((coupon: any) => {
+    const minOrderAmount = coupon.minOrderAmount
+      ? Number(coupon.minOrderAmount)
+      : null;
+
+    const isEligible = minOrderAmount
+      ? cart.subtotal >= minOrderAmount
+      : true;
+
+    return {
+      id: coupon.id,
+      code: coupon.code,
+      type: coupon.type,
+      discountValue: Number(coupon.discountValue),
+      minOrderAmount,
+      maxDiscount: coupon.maxDiscount ? Number(coupon.maxDiscount) : null,
+      isEligible,
+      ...(!isEligible && {
+        reasonIfNotEligible: `Add items worth ₹${(minOrderAmount! - cart.subtotal).toFixed(2)} more to use this coupon`,
+      }),
+    };
+  });
+
+  return {
+    success: true,
+    message: "Checkout details fetched successfully",
+    data: {
+      cart,
+      addresses: addresses.map((a: any) => ({
+        id: a.id,
+        label: a.label,
+        addressLine1: a.addressLine1,
+        addressLine2: a.addressLine2,
+        city: a.city,
+        state: a.state,
+        pincode: a.pincode,
+        isDefault: a.isDefault,
+      })),
+      defaultAddressId: defaultAddress?.id ?? null,
+      availableCoupons: couponsWithEligibility,
+    },
+    statusCode: 200,
+  };
+}
+    
+     
 
 }

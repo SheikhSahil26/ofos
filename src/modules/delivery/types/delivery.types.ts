@@ -2,7 +2,7 @@
 
 import { DeliveryStatus, VehicleType } from "@prisma/client";
 
-export interface UpdateLocationInput {
+export interface UpdateLocationInputs {
   deliveryUserId: string;
   lat: number;
   lng: number;

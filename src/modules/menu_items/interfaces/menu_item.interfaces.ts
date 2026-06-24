@@ -39,3 +39,14 @@ export interface IToggleBestseller {
 export interface IAddDietaryTags {
     tagIds: string[];
 }
+
+
+export interface CartMenuItemResponse {
+  id: string;
+  name: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  isVeg: boolean;
+  isAvailable: boolean;
+  isDeleted: boolean;
+}

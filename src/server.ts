@@ -45,9 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 app.use(cookieParser())
 app.use(passport.initialize());
-app.use(errorHandler);
 
-//this will initiate all frontend routes
 app.use(buildWebRoutes());
 
 //this will initiate all backend routes 

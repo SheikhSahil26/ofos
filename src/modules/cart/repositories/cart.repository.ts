@@ -18,6 +18,9 @@ export class CartRepository {
                 this.getCartKey(userId)
             );
 
+            
+        
+
         if (!cart) {
             return null;
         }
@@ -61,7 +64,7 @@ export class CartRepository {
             price: true,
             isAvailable: true,
             isDeleted: true,
-            branch_id: true,
+            branchId: true,
         },
     });
 }

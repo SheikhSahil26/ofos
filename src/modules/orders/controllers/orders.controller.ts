@@ -13,13 +13,11 @@ export class OrdersControllers {
 
   );
 
-  
-
       // controllers/order.controller.ts
       createOrder = asyncHandler(
 
       async(req: Request, res: Response) => {
-  const userId = "428f4215-9945-4bda-92fb-6d46ae145955"
+  const user = req.user as Express.payload
   const { addressId, paymentMethod, couponCode, scheduledAt } = req.body;
 
   if (!addressId || !paymentMethod) {
@@ -30,7 +28,7 @@ export class OrdersControllers {
   }
 
   const result : any = await this.ordersService.createOrder(
-    userId,
+    user.userId,
     addressId,
     paymentMethod,
     couponCode,
@@ -43,9 +41,9 @@ export class OrdersControllers {
 
       listOrders = asyncHandler(
         async(req: Request, res: Response) => {
-          const userId = "385d5013-c0c3-4add-972d-e8179f4b9566"; // dummy
+           const user = req.user as Express.payload // dummy
 
-          const result : any = await this.ordersService.listOrders(userId);
+          const result : any = await this.ordersService.listOrders(user.userId);
 
           return res.status(result.statusCode).json(result.data);
         }
@@ -54,7 +52,7 @@ export class OrdersControllers {
       getOrder = asyncHandler(
         async(req: Request, res: Response) => {
           const orderId = req.params.id as string;
-          const userId = "385d5013-c0c3-4add-972d-e8179f4b9566"; // dummy
+          const user = req.user as Express.payload // dummy
 
           const result : any = await this.ordersService.getOrderById(orderId);
 
@@ -67,24 +65,24 @@ export class OrdersControllers {
       getStatusHistory = asyncHandler(
         async(req: Request, res: Response) => {
           const orderId = req.params.id as string;
-          const userId = "385d5013-c0c3-4add-972d-e8179f4b9566"; // dummy
+          const user = req.user as Express.payload // dummy
 
-          const result : any = await this.ordersService.getStatusHistory(orderId, userId);
+          const result : any = await this.ordersService.getStatusHistory(orderId, user.userId);
 
           console.log("Order status history:", result);
 
           return res.status(result.statusCode).json(result.data);
         }
       )
-
+      // changed the user ids will habve to check later if they are working or not!!!
       updateOrderStatusByStaff = asyncHandler(
   async (req: Request, res: Response) => {
-    const staffUserId = "202591c8-b7e9-40d1-be7c-253aa7a0e30a"; // replace with req.user.id
+    const user = req.user as Express.payload // replace with req.user.id
     const  orderId  = req.params.orderId as string;
 
     const result: any= await this.ordersService.updateOrderStatusByStaff(
       orderId,
-      staffUserId,
+      user.userId,
     );
     return res.status(result.statusCode).json(result);
   }
@@ -99,12 +97,12 @@ export class OrdersControllers {
 
 updateOrderStatusByDeliveryPartner = asyncHandler(
   async (req: Request, res: Response) => {
-    const deliveryUserId = "7fe63448-c733-4055-a2a5-3835aaa65372"; // replace with req.user.id
+    const user = req.user as Express.payload; // replace with req.user.id
     const  orderId  = req.params.orderId as string;
 
     const result :any = await this.ordersService.updateOrderStatusByDeliveryPartner(
       orderId,
-      deliveryUserId,
+      user.userId,
     );
     return res.status(result.statusCode).json(result);
   }

@@ -70,6 +70,10 @@ async function loadProfile() {
             "Failed to load profile",
             "error"
         );
+    }finally {
+
+        loader.style.display = "none";
+
     }
 }
 
@@ -112,6 +116,7 @@ function renderProfile(user) {
         sidebarProfile.src =
             sidebarProileUrl;
     }
+    sidebarProfile.classList.remove("hidden")
 
     setText(
         "sidebarName",
@@ -269,7 +274,7 @@ async function deleteAccount() {
         }
 
         window.location.href =
-            "/api/auth/customer/static/login";
+            "/customer/login";
 
         showToast(
             result.message ||
@@ -284,7 +289,7 @@ async function deleteAccount() {
         setTimeout(() => {
 
             window.location.href =
-                "/api/auth/customer/static/login";
+                "/customer/login";
 
         }, 1500);
 
@@ -377,7 +382,7 @@ async function logout() {
         setTimeout(() => {
 
             window.location.href =
-                "/api/auth/customer/static/login";
+                "/customer/login";
 
         }, 1000);
 

@@ -32,7 +32,12 @@ export class RestaurantController {
 
   //get restaurant by owner
   getMyRestaurants = asyncHandler(async (req: Request, res: Response) => {
-    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
 
       const page = Number(req.query.page) || 1;
 
@@ -93,14 +98,12 @@ getNearbyRestaurants = asyncHandler(async(
     res: Response
   ) => {
 
-    // const user = req.user as Express.payload | undefined;
-    // if(!user || typeof user.userId !== "string"){
-    //     throw new AppError("Invalid user id", 409);
-    // }
+    const user = req.user as Express.payload | undefined;
+    if(!user || typeof user.userId !== "string"){
+        throw new AppError("Invalid user id", 409);
+    }
 
-    // const userId = user.userId;
-
-    const userId = "103f7df1-dd58-4bba-8c2c-331d49e8b8d2"
+      const userId = user.userId;
 
 
     const operatingHours =
@@ -408,4 +411,20 @@ asyncHandler(
 
     }
 );
+
+  getDashboardStats = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user as Express.payload | undefined;
+    if (!user || typeof user.userId !== "string") {
+      throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
+
+    const data = await this.restaurantService.getDashboardStats(userId);
+
+    return res.status(200).json({
+      ...data,
+      success: true,
+    });
+  });
 }
