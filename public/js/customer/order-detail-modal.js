@@ -9,8 +9,7 @@ document.addEventListener(
 
         if (!btn) return;
 
-        const orderId =
-            btn.dataset.orderId;
+        const orderId = btn.getAttribute("data-id");
 
         await openOrderModal(
             orderId
@@ -51,8 +50,8 @@ async function openOrderModal(
     try {
 
         const response =
-            await fetch(
-                `/api/orders/${orderId}`
+            await apiRequest(
+                `/api/orders/get-order/${orderId}`
             );
 
         const order =
@@ -174,3 +173,28 @@ function closeOrderModal() {
         "flex"
     );
 }
+
+//re order button
+document.addEventListener(
+    "click",
+    async (e) => {
+
+        const btn =
+            e.target.closest(
+                ".add-again-btn"
+            );
+
+        if (!btn) return;
+
+        const menuItemId =
+            btn.dataset.menuItemId;
+
+        console.log(
+            "Add to cart:",
+            menuItemId
+        );
+
+        //cart service will be called here
+
+    }
+);
