@@ -15,7 +15,7 @@ export class AuthService {
 
     private authRepo = new AuthRepository();
 
-    registerUser = async (userInfo: ISignupDto,role: string): Promise<IApiResponse> => {
+    registerUser = async (userInfo: ISignupDto, role: string): Promise<IApiResponse> => {
         try {
             const existUser =
                 await this.authRepo.findUserByEmail(
@@ -81,94 +81,136 @@ export class AuthService {
         }
     };
 
-    loginUser = async (loginInfo: ILoginDto,role: string): Promise<IApiResponse> => {
+    loginUser = async (
+        loginInfo: ILoginDto,
+        role: string
+    ): Promise<IApiResponse> => {
 
         try {
-            // Here if user on ${role} cumplusory login if it contain email and password
-            // possibilities : 1 user have email and password for this role - Give login to that user
-            // possibilities : 2 user have email and password but not have role on this url than assign that role
-            const existUser = await this.authRepo.findUserByEmail( loginInfo.email);
 
-            // Email exists or not...
+            const existUser =
+                await this.authRepo.findUserByEmail(
+                    loginInfo.email
+                );
+
             if (!existUser) {
+
                 return {
                     status: "Error",
                     statusCode: 400,
                     message: "User not found"
                 };
+
             }
 
-            // verify Password
-            const isValidPassword = await comparePassword(
-                loginInfo.password,
-                existUser.passwordHash
-            );
+            const isValidPassword =
+                await comparePassword(
+                    loginInfo.password,
+                    existUser.passwordHash
+                );
 
             if (!isValidPassword) {
+
                 return {
                     status: "Error",
                     statusCode: 401,
-                    message: "Invalid Credentials..."
+                    message: "Invalid Credentials"
                 };
+
             }
 
-            const accessToken: string = generateAccessToken({ userId: existUser.id, role: role, email: existUser.email });
-            const refreshToken: string = generateRefreshToken(existUser.id, loginInfo.rememberMe);
-
-
-            await this.authRepo.saveRefreshToken(
-                existUser.id,
-                refreshToken,
-                new Date(
-                    Date.now() +
-                    7 * 24 * 60 * 60 * 1000
-                )
-            );
-
-            // Check role Already Assign or Not
             const hasRole =
                 existUser.userRoles.some(
                     ur => ur.role.role === role
                 );
 
-            // Contains Role then logged that user
-            if (hasRole) {
-                return {
-                    status: "Success",
-                    statusCode: 200,
-                    message:
-                        "User Logged in succesfully..",
-                    data: {
-                        accessToken,
-                        refreshToken
-                    }
-                };
-            }
-            // Not contain the role assign role and logged that user
-            else {
+            if (!hasRole) {
 
                 await this.authRepo.assignRole(
                     existUser.id,
                     role
                 );
 
-
-                return {
-                    status: "Success",
-                    statusCode: 201,
-                    message: `${role} role assigned successfully`,
-                    data: {
-                        accessToken,
-                        refreshToken
-                    }
-                };
-
             }
 
+            const accessToken =
+                generateAccessToken({
+
+                    userId:
+                        existUser.id,
+
+                    email:
+                        existUser.email,
+
+                    roles: [role]
+
+                });
+
+            const refreshToken =
+                generateRefreshToken(
+                    existUser.id,
+                    loginInfo.rememberMe
+                );
+
+            const refreshExpiryDays =
+                loginInfo.rememberMe === "on"
+                    ? 30
+                    : 7;
+
+            await this.authRepo.saveRefreshToken(
+
+                existUser.id,
+
+                refreshToken,
+
+                new Date(
+
+                    Date.now() +
+
+                    refreshExpiryDays *
+                    24 *
+                    60 *
+                    60 *
+                    1000
+
+                )
+
+            );
+
+            return {
+
+                status: "Success",
+
+                statusCode:
+                    hasRole
+                        ? 200
+                        : 201,
+
+                message:
+                    hasRole
+                        ? "User logged in successfully"
+                        : `${role} role assigned successfully`,
+
+                data: {
+
+                    accessToken,
+
+                    refreshToken
+
+                }
+
+            };
+
         } catch (error: any) {
-            throw new Error(error.message);
+
+            throw new Error(
+                error.message
+            );
+
         }
+
     };
+
 
 
     refreshToken = async (refreshToken: string): Promise<IApiResponse> => {
@@ -211,7 +253,11 @@ export class AuthService {
             }
 
             // still live that token 
-            if (tokenRecord.expiresAt < new Date()) {
+
+            console.log("Testing Token expireies...........")
+            console.log(tokenRecord.expiresAt.getTime(), Date.now())
+
+            if (tokenRecord.expiresAt.getTime() < Date.now()) {
                 return {
                     status: "Error",
                     statusCode: 401,
@@ -221,7 +267,7 @@ export class AuthService {
             }
 
             const user = await this.authRepo.findUserById(
-                    decoded.userId
+                decoded.userId
             );
 
             // console.log(user)
@@ -234,7 +280,14 @@ export class AuthService {
                 };
             }
 
-            const accessToken: string = generateAccessToken({ userId: user.id, role: decoded.role, email: decoded.email });
+            console.log(decoded);
+            const userRoles =
+                user.userRoles.map(
+                    ur => ur.role.role
+                );
+
+            console.log(user, user.userRoles)
+            const accessToken: string = generateAccessToken({ userId: user.id, roles: userRoles, email: user.email });
 
             return {
                 status: "Success",
@@ -358,7 +411,7 @@ export class AuthService {
         try {
             const hashedPassword =
                 await hashPassword(password);
-                console.log(hashPassword)
+            console.log(hashPassword)
 
             const user = await this.authRepo.updatePasswordByEmail(
                 email,

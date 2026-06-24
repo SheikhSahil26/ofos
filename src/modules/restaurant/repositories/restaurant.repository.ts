@@ -30,7 +30,7 @@ export class RestaurantRepository {
         isDeleted: true,
 
         branches: {
-          where: {       
+          where: {
             isDeleted: false,
             isActive: true,
           },
@@ -108,16 +108,16 @@ export class RestaurantRepository {
     city: true,
     state: true,
 
-    operatingHours: {
-      select: {
-        dayOfWeek: true,
-        openTime: true,
-        closeTime: true,
-        isClosed: true,
-      },
-    },
-  },
-},
+              operatingHours: {
+                select: {
+                  dayOfWeek: true,
+                  openTime: true,
+                  closeTime: true,
+                  isClosed: true,
+                },
+              },
+            },
+          },
         },
       }),
 

@@ -27,15 +27,13 @@ export class UserController {
     //get loyalty point dashboard for user
     getLoyaltyPointDashboard = asyncHandler(async (req: Request, res: Response) => {
 
-        // const user = req.user as Express.payload | undefined;
+        const user = req.user as Express.payload | undefined;
 
-        // if(!user || typeof user.userId !== "string"){
-        //     throw new AppError("Invalid user id", 409);
-        // }
+        if(!user || typeof user.userId !== "string"){
+            throw new AppError("Invalid user id", 409);
+        }
 
-        // const userId = user.userId;
-
-        const userId = "385d5013-c0c3-4add-972d-e8179f4b9566";
+        const userId = user.userId;
 
         const page =
             Number(req.query.page) || 1;
