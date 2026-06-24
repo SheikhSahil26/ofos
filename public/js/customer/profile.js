@@ -112,6 +112,7 @@ function renderProfile(user) {
         sidebarProfile.src =
             sidebarProileUrl;
     }
+    sidebarProfile.classList.remove("hidden")
 
     sidebarProfile.classList.remove("hidden");
 

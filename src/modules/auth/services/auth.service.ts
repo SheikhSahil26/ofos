@@ -230,7 +230,7 @@ export class AuthService {
             const decoded: any =
                 jwt.verify(
                     refreshToken,
-                    process.env.JWT_REFRESH_SECRET!
+                    String(process.env.JWT_REFRESH_SECRET)
                 );
 
             // console.log("Decoded Token :", decoded)

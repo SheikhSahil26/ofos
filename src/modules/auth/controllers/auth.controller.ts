@@ -84,7 +84,8 @@ export class AuthController {
             httpOnly: true,
             secure: false,
             sameSite: "lax",
-            maxAge: days * 24 * 60 * 60 * 1000
+            maxAge:
+              (loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60) * 1000
           }
         );
 
