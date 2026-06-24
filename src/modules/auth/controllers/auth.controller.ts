@@ -71,7 +71,6 @@ export class AuthController {
           refreshToken
         } = response.data;
 
-
         const days =
           loginInfo.rememberMe === "on"
             ? 30
