@@ -34,6 +34,62 @@ export class BranchService {
       userId,
     );
 
+    // Required field validations
+    if (!payload.branchName?.trim()) {
+      throw new AppError("Branch name is required", 400);
+    }
+
+    if (!payload.contactNumber?.trim()) {
+      throw new AppError("Contact number is required", 400);
+    }
+
+    if (!payload.addressLine1?.trim()) {
+      throw new AppError("Address line 1 is required", 400);
+    }
+
+    if (!payload.city?.trim()) {
+      throw new AppError("City is required", 400);
+    }
+
+    if (!payload.state?.trim()) {
+      throw new AppError("State is required", 400);
+    }
+
+    if (!payload.pincode?.trim()) {
+      throw new AppError("Pincode is required", 400);
+    }
+
+    // Latitude and longitude validation
+    if (payload.latitude !== undefined && payload.latitude !== null) {
+      if (payload.latitude < -90 || payload.latitude > 90) {
+        throw new AppError("Invalid latitude. Must be between -90 and 90", 400);
+      }
+    }
+
+    if (payload.longitude !== undefined && payload.longitude !== null) {
+      if (payload.longitude < -180 || payload.longitude > 180) {
+        throw new AppError("Invalid longitude. Must be between -180 and 180", 400);
+      }
+    }
+
+    // Delivery radius validation
+    if (payload.deliveryRadiusKm !== undefined && payload.deliveryRadiusKm !== null) {
+      if (payload.deliveryRadiusKm <= 0) {
+        throw new AppError("Delivery radius must be greater than 0", 400);
+      }
+    }
+
+    // Duplicate branch name check within restaurant
+    const existingBranch = await this.branchRepo.validateBranchNameExists(
+      restaurantId,
+      payload.branchName,
+      "",
+    );
+
+    if (existingBranch) {
+      throw new AppError("Branch name already exists for this restaurant", 400);
+    }
+
     // Primary branch validation
     if (payload.isPrimary) {
       const primaryBranch =
@@ -175,6 +231,7 @@ export class BranchService {
     branchId: string,
     userId: string,
   ): Promise<ServiceResponse<IBranchDetails>> {
+    // Validate branch ownership
     await this.validateBranchOwnership(branchId, userId);
 
     const branch = await this.branchRepo.getBranchDetails(branchId);

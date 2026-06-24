@@ -30,7 +30,7 @@ export class RestaurantRepository {
         isDeleted: true,
 
         branches: {
-          where: {       
+          where: {
             isDeleted: false,
             isActive: true,
           },
@@ -43,7 +43,7 @@ export class RestaurantRepository {
             pincode: true,
             latitude: true,
             longitude: true,
-            isdeleted: true,
+            isDeleted: true,
             deliveryRadiusKm: true,
             verificationStatus: true,
 
@@ -98,14 +98,24 @@ export class RestaurantRepository {
           logoUrl: true,
 
           branches: {
-            where: {
-              isPrimary: true,
-              isDeleted: false,
-            },
-            select: {
-              branchName: true,
-              city: true,
-              state: true,
+  where: {
+    isPrimary: true,
+    isDeleted: false,
+  },
+  select: {
+    id: true,
+    branchName: true,
+    city: true,
+    state: true,
+
+              operatingHours: {
+                select: {
+                  dayOfWeek: true,
+                  openTime: true,
+                  closeTime: true,
+                  isClosed: true,
+                },
+              },
             },
           },
         },

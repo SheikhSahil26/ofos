@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import { RestaurantService } from "../services/restaurant.service";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
 import { AppError } from "../../../utils/appError";
+import { uploadImage } from "../../../services/multer.service";
+import {
+  DayOfWeek
+} from "@prisma/client";
 
 export class RestaurantController {
   private restaurantService = new RestaurantService();
@@ -83,23 +87,96 @@ getNearbyRestaurants = asyncHandler(async(
 });
 
   // create restaurant
-  createRestaurant = asyncHandler(async (req: Request, res: Response) => {
-    const userId = "1eaab1e4-6bd3-458c-a708-65307da24d9e";
+ createRestaurant = asyncHandler(
+  async (
+    req: Request,
+    res: Response
+  ) => {
 
-            const restaurant =
-                await this.restaurantService
-                .createRestaurant(
-                    userId,
-                    req.body
-                );
+    // const user = req.user as Express.payload | undefined;
+    // if(!user || typeof user.userId !== "string"){
+    //     throw new AppError("Invalid user id", 409);
+    // }
 
-            return res.status(201).json({
-                success:true,
-                message:
-                "Restaurant created successfully",
-                data:restaurant
-            });
-    });
+    // const userId = user.userId;
+
+    const userId = "103f7df1-dd58-4bba-8c2c-331d49e8b8d2"
+
+
+    const operatingHours =
+  JSON.parse(
+    req.body.operatingHours
+  )
+  .filter(
+    (day: any) =>
+      !day.isClosed
+  )
+  .map(
+    (day: any) => ({
+      ...day,
+
+      dayOfWeek:
+        DayOfWeek[
+          day.dayOfWeek as keyof typeof DayOfWeek
+        ]
+    })
+  );
+
+    const payload: any = {
+
+      ...req.body,
+
+      latitude:
+        Number(
+          req.body.latitude
+        ),
+
+      longitude:
+        Number(
+          req.body.longitude
+        ),
+
+      deliveryRadiusKm:
+        Number(
+          req.body.deliveryRadiusKm
+        ),
+
+      operatingHours
+
+    };
+
+    // Handle file uploads
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    
+    if (files?.logo && files.logo[0]) {
+      const logoUrl = await uploadImage(
+        files.logo[0].buffer,
+        files.logo[0].originalname,
+        "OFOS/restaurant-logos"
+      );
+      payload.logoUrl = logoUrl;
+    }
+
+    if (files?.coverImage && files.coverImage[0]) {
+      const coverImageUrl = await uploadImage(
+        files.coverImage[0].buffer,
+        files.coverImage[0].originalname,
+        "OFOS/restaurant-cover-images"
+      );
+      payload.coverImageUrl = coverImageUrl;
+    }
+
+    const data =
+      await this.restaurantService
+        .createRestaurant(
+            userId,
+          payload
+        );
+
+    return res.status(201).json(data);
+
+  }
+);
 
   // Update restaurant details
   updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
@@ -302,4 +379,33 @@ createReview = asyncHandler(async(
             data:review
         });
 });
+
+getRestaurantPageData =
+asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const branchId =
+            req.params.branchId as string;
+
+        const user =
+            req.user as Express.payload | undefined;
+
+        const response =
+            await this.restaurantService
+                .getRestaurantPageData(
+                    branchId,
+                    user?.userId
+                );
+
+        return res
+            .status(
+                response.statusCode || 200
+            )
+            .json(response);
+
+    }
+);
 }

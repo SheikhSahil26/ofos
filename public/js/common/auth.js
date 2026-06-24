@@ -12,8 +12,10 @@ async function refreshAccessToken() {
 
         const result =
             await response.json();
+            console.log(result,"result in refeshAccessToken");
 
         if (response.ok) {
+            console.log("==============", result)
 
             localStorage.setItem(
                 "accessToken",
@@ -22,6 +24,10 @@ async function refreshAccessToken() {
 
             return true;
         }
+        showToast(
+            result.message || "Session Expire",
+            "error"
+        );
 
         return false;
 

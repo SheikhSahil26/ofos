@@ -1,19 +1,21 @@
 import { DayOfWeek } from "@prisma/client";
 
 export const isBranchOpenNow = (
-    operatingHours:{
-        dayOfWeek:DayOfWeek;
-        openTime:Date | null;
-        closeTime:Date | null;
-        isClosed:boolean;
+    operatingHours?: {
+        dayOfWeek: DayOfWeek;
+        openTime: Date | null;
+        closeTime: Date | null;
+        isClosed: boolean;
     }[]
 ): boolean => {
 
-    const now =
-    new Date();
+    if (!operatingHours?.length) {
+        return false;
+    }
 
-    const currentDay =
-    [
+    const now = new Date();
+
+    const currentDay = [
         DayOfWeek.SUN,
         DayOfWeek.MON,
         DayOfWeek.TUE,
@@ -23,34 +25,32 @@ export const isBranchOpenNow = (
         DayOfWeek.SAT
     ][now.getDay()];
 
-    const todayHours =
-    operatingHours.find(
-        hour =>
-        hour.dayOfWeek === currentDay
+    const todayHours = operatingHours.find(
+        hour => hour.dayOfWeek === currentDay
     );
 
-    if(
-        !todayHours ||
-        todayHours.isClosed
-    ){
-        return false;
-    }
+    if (
+    !todayHours ||
+    todayHours.isClosed ||
+    !todayHours.openTime ||
+    !todayHours.closeTime
+) {
+    return false;
+}
 
     const currentMinutes =
-    now.getHours() * 60 +
-    now.getMinutes();
+        now.getHours() * 60 + now.getMinutes();
 
     const openMinutes =
-    todayHours.openTime!.getHours() * 60 +
-    todayHours.openTime!.getMinutes();
+        todayHours.openTime!.getHours() * 60 +
+        todayHours.openTime!.getMinutes();
 
     const closeMinutes =
-    todayHours.closeTime!.getHours() * 60 +
-    todayHours.closeTime!.getMinutes();
+        todayHours.closeTime!.getHours() * 60 +
+        todayHours.closeTime!.getMinutes();
 
     return (
         currentMinutes >= openMinutes &&
         currentMinutes <= closeMinutes
     );
-
 };

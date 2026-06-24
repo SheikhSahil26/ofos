@@ -44,14 +44,32 @@ export class AuthRepository {
   }
 
   // Find user by ID
-  async findUserById(
-    userId: string
-  ) {
+  async findUserById(userId: string) {
 
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
+
       where: {
         id: userId
+      },
+
+      include: {
+
+        userRoles: {
+
+          include: {
+
+            role: {
+              select: {
+                role: true
+              }
+            }
+
+          }
+
+        }
+
       }
+
     });
 
   }
@@ -60,7 +78,7 @@ export class AuthRepository {
   async findUserByEmail(email: string) {
     try {
       const user = await prisma.user.findUnique({
-        where: { email },
+        where: { email, isDeleted: false },
         include: { userRoles: { include: { role: true } } }, // include roles if needed
       });
       return user;
@@ -94,6 +112,7 @@ export class AuthRepository {
       const user = await prisma.user.findFirst({
         where: {
           email: email,
+          isDeleted: false,
           userRoles: {
             some: {
               role: {
@@ -148,10 +167,9 @@ export class AuthRepository {
     refreshToken: string,
     expiresAt: Date
   ) {
-
     return await prisma.refreshToken.create({
       data: {
-        userId: userId,
+        userId,
         token: refreshToken,
         expiresAt
       }

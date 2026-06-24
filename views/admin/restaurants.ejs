@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Admin Page"}) %>
+
+    <body class="bg-slate-100">
+        <p id="toast"></p>
+
+        <div class="flex min-h-screen">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- MAIN -->
+
+                <main class="flex-1 p-8">
+                    <div class="p-8">
+
+                        <!-- Header -->
+
+                        <div class="flex justify-between items-center mb-8">
+
+                            <div>
+
+                                <h1 class="text-4xl font-bold">
+                                    Restaurant Management
+                                </h1>
+
+                                <p class="text-gray-500 mt-1">
+                                    Manage all restaurants on Ziggy
+                                </p>
+
+                            </div>
+
+                            <button class="bg-orange-500 text-white px-5 py-3 rounded-xl">
+
+                                Add Restaurant
+
+                            </button>
+
+                        </div>
+
+                        <!-- Restaurant stats -->
+
+
+                        <!-- STATS -->
+
+                        <div class="grid lg:grid-cols-5 gap-6 mb-8">
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Total Restaurants</h3>
+                                <p id="totalRestaurants" class="text-3xl font-bold mt-2">
+                                    0
+                                </p>
+                            </div>
+
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Total Branches</h3>
+                                <p id="totalBranches" class="text-3xl font-bold mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Active Branches</h3>
+                                <p id="activeBranches" class="text-3xl font-bold text-green-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">Blocked Branches</h3>
+                                <p id="blockedBranches" class="text-3xl font-bold text-red-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">New This Month</h3>
+                                <p id="newBranches" class="text-3xl font-bold text-blue-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <!-- SEARCH -->
+
+                        <div class="bg-white rounded-2xl p-5 shadow-sm mb-6">
+
+                            <div class="flex flex-wrap items-center gap-4">
+
+                                <!-- Search -->
+
+                                <div class="flex-1 min-w-[300px]">
+
+                                    <input type="text" id="searchInput"
+                                        placeholder="Search Restaurant, Branch, Head Name, Revenue..." class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4
+                    py-3
+                    outline-none
+                    focus:ring-2
+                    focus:ring-orange-400
+                ">
+
+                                </div>
+
+                                <!-- Active / Blocked -->
+
+                                <select id="statusFilter" class="
+                border
+                rounded-xl
+                px-4
+                py-3
+                bg-white
+            ">
+
+                                    <option value="">
+                                        All Status
+                                    </option>
+
+                                    <option value="ACTIVE">
+                                        Active
+                                    </option>
+
+                                    <option value="BLOCKED">
+                                        Blocked
+                                    </option>
+
+                                </select>
+
+                                <!-- Open / Close -->
+
+                                <select id="openFilter" class="
+                border
+                rounded-xl
+                px-4
+                py-3
+                bg-white
+            ">
+
+                                    <option value="">
+                                        Open / Close
+                                    </option>
+
+                                    <option value="OPEN">
+                                        Open
+                                    </option>
+
+                                    <option value="CLOSED">
+                                        Closed
+                                    </option>
+
+                                </select>
+
+                                <!-- Sort -->
+
+                                <select id="sortFilter" class="
+                border
+                rounded-xl
+                px-4
+                py-3
+                bg-white
+            ">
+
+                                    <option value="branchName">
+                                        Branch Name (A-Z)
+                                    </option>
+
+                                    <option value="restaurantName">
+                                        Restaurant (A-Z)
+                                    </option>
+
+                                    <option value="headName">
+                                        Head Name (A-Z)
+                                    </option>
+
+                                    <option value="revenue">
+                                        Revenue (Low-High)
+                                    </option>
+
+                                    <option value="orders">
+                                        Orders (Low-High)
+                                    </option>
+
+                                </select>
+
+                                <button onclick="loadRestaurants(1)" class="
+                bg-orange-500
+                text-white
+                px-6
+                py-3
+                rounded-xl
+            ">
+                                    Search
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Restaurant Table -->
+
+                        <div class="
+                            bg-white
+                            rounded-2xl
+                            shadow-sm
+                            overflow-hidden
+                        ">
+
+                            <div class="overflow-x-auto">
+
+                                <div class="max-h-[650px] overflow-y-auto">
+
+                                    <table class="w-full min-w-[1200px]">
+
+                                        <thead class="
+                                            bg-slate-100
+                                            sticky
+                                            top-0
+                                            z-10
+                                        ">
+                                            <tr>
+
+                                                <th class="p-4 text-left">
+                                                    Restaurant
+                                                </th>
+
+                                                <th class="p-4 text-left">
+                                                    Branch
+                                                </th>
+
+                                                <th class="p-4 text-left">
+                                                    Branch Head
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Orders
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Revenue
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Rating
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Status
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Verification
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Actions
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="restaurantTableBody">
+
+                                        </tbody>
+
+                                    </table>
+
+
+                                    <!-- Pagination -->
+
+                                    <div id="paginationContainer" class="
+        flex
+        justify-start
+        gap-2
+        mt-10
+        mb-6
+        ml-10
+    "></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </main>
+
+        </div>
+
+        <script src="/js/admin/admin-sidebar.js"></script>
+        <script src="/js/common/api.js"></script>
+        <script src="/js/common/auth.js"></script>
+        <script src="/js/admin/admin-restaurants.js"></script>
+        <script src="/js/common/toast.js"></script>
+
+    </body>
+
+</html>

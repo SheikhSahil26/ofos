@@ -15,6 +15,12 @@ export class AuthController {
 
   private authRepo = new AuthRepository();
   private authService = new AuthService();
+
+  landingPage = async (req: Request, res: Response) => {
+
+    return res.render(`auth/ziggy`);
+  };
+
   registerPage = async (req: Request, res: Response) => {
 
     const role: string = String(req.params.role).toLowerCase();
@@ -26,6 +32,12 @@ export class AuthController {
     const role: string = String(req.params.role).toLowerCase();
     return res.render(`auth/${role}/login`, { role: role });
   };
+
+  roleSelectionPage = async (req: Request, res: Response) => {
+    console.log("Helooo")
+    return res.render(`auth/role-selection`);
+  };
+
 
   // Register user who does not have already Accounts....
   register = async (req: Request, res: Response) => {
@@ -59,7 +71,10 @@ export class AuthController {
           refreshToken
         } = response.data;
 
-
+        const days =
+          loginInfo.rememberMe === "on"
+            ? 30
+            : 7;
 
         res.cookie(
           "refreshToken",
@@ -68,10 +83,10 @@ export class AuthController {
             httpOnly: true,
             secure: false,
             sameSite: "lax",
-            maxAge:
-              loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60
+            maxAge: days * 24 * 60 * 60 * 1000
           }
         );
+
         return res.status(201).json({
           status: "Success",
           statusCode: 200,
@@ -115,15 +130,11 @@ export class AuthController {
   };
 
   // Refresh Token : Comes in picture when the user Access Token expire...
-  refreshToken = async (
-    req: Request,
-    res: Response
-  ) => {
-
+  refreshToken = async (req: Request, res: Response) => {
 
     console.log("refresh token", req.cookies.refreshToken)
 
-    const refreshToken =
+    const refreshToken: string =
       req.cookies.refreshToken;
 
     const response =

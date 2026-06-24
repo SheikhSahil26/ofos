@@ -7,6 +7,8 @@ export interface ICreateMenuItem {
   isVeg?: boolean;
   imageUrl?: string;
   tagIds?: string[];
+  isAvailable?: boolean;
+  isBestseller?: boolean;
 }
 
 export interface ICategoryParams {
@@ -19,6 +21,7 @@ export interface IUpdateMenuItem {
     price?: number;
     isVeg?: boolean;
     categoryId?: string;
+    tagIds?: string[];
 }
 
 export interface IUpdateMenuItemImage {
@@ -35,4 +38,15 @@ export interface IToggleBestseller {
 
 export interface IAddDietaryTags {
     tagIds: string[];
+}
+
+
+export interface CartMenuItemResponse {
+  id: string;
+  name: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  isVeg: boolean;
+  isAvailable: boolean;
+  isDeleted: boolean;
 }

@@ -1,7 +1,7 @@
 // modules/delivery/interfaces/delivery.interface.ts
 
-import { UpdateLocationInput, AssignPartnerInput } from "../types/delivery.types";
-import { ServiceResponse } from "../../../types/service.types";
+import { UpdateLocationInputs, AssignPartnerInput } from "../types/delivery.types";
+import { ServiceResponse } from "../../../common/types/service-response.type";
 
 export interface IDeliveryRepository {
   findPartnerByUserId(userId: string): Promise<any>;
@@ -15,7 +15,7 @@ export interface IDeliveryRepository {
 }
 
 export interface IDeliveryService {
-  updatePartnerLocation(input: UpdateLocationInput): Promise<ServiceResponse<any>>;
+  updatePartnerLocation(input: UpdateLocationInputs): Promise<ServiceResponse<any>>;
   assignNearestPartner(input: AssignPartnerInput): Promise<ServiceResponse<any>>;
   assignNearestPartnerWithRetry(orderId: string, maxRetries?: number, delayMs?: number): Promise<void>;
 }
