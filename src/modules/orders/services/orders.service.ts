@@ -358,9 +358,6 @@ export class OrderService {
 
   }
 
-
-
-
   async listOrders(userId: string): Promise<ServiceResponse<any>> {
     const orders = await this.orderRepo.listOrdersByUserId(userId);
     console.log("Orders fetched for user", userId, orders);
@@ -371,8 +368,6 @@ export class OrderService {
       statusCode: 200,
     }
   }
-
-
 
   async getOrderById(orderId: string): Promise<ServiceResponse<any>> {
     //fetch order details from DB
@@ -763,7 +758,7 @@ async updateOrderStatusByDeliveryPartner(
 async getBranchOrdersForStaff(
   staffUserId: string
 ): Promise<ServiceResponse<any>> {
-  let staffUserIdDummy = "202591c8-b7e9-40d1-be7c-253aa7a0e30a";
+  let staffUserIdDummy = "c9aa8664-31c2-4c0e-9753-ddccd734208a";
 console.log("Fetching branch orders for staff user:", staffUserIdDummy);
   // 1. Find staff's branch
   const staffRecord = await this.prisma.restaurantStaff.findFirst({
