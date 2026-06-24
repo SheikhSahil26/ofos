@@ -45,6 +45,9 @@ export class CartController {
       specialInstruction,
     }: AddToCartDTO = req.body;
 
+    console.log("Add to cart request body:", req.body);
+    
+
     const data = await this.cartService.addToCart(
       user.userId,
       menuItemId,

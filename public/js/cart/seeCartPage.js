@@ -2,7 +2,7 @@ let cartData = null;
 const DELIVERY_FEE = 40;
 const TAX_RATE = 0.05;
 //i will load the cart items from the backend redis
-
+const itemCountSpan = document.getElementById("item-count");
 async function loadCartItems(){
     try {
         const response = await apiRequest("/api/cart");
@@ -21,9 +21,17 @@ async function loadCartItems(){
                    result.error || "Failed to load cart items","error"
                 );
         }
-
+        let itemCount=0;
         console.log("Cart items:", result.data);
 
+        for (const item of result.data.items) {
+            itemCount += item.quantity;
+        }
+
+
+
+
+        itemCountSpan.textContent = `Cart Items (${itemCount})`;
          cartData = result.data;
 
          renderCart(cartData);

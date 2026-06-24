@@ -16,7 +16,10 @@ export class DeliveryWebRoutes implements IRoutes{
         this.router.get("/delivery", (req: Request, res: Response) => {
             res.status(200).render("delivery-partner/delivery-partner");
         });
-        
+          
+        this.router.get("/delivery/profile", (req: Request, res: Response) => {
+            res.status(200).render("delivery-partner/profile");
+        });
 
         
 

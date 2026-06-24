@@ -20,11 +20,11 @@ import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";
 import { BranchService } from "../../restaurantBranch/services/branch.service";
 import redisClient from "../../../config/redis";
-import { DeliveryPartnerStatus } from "@prisma/client";
+import { DeliveryPartnerStatus, VehicleType } from "@prisma/client";
 
 export class DeliveryService{
   private deliveryRepo = new DeliveryRepository(prisma);
-  prisma: any;
+   private prisma = prisma;
   constructor(
    
   ) {}
@@ -213,16 +213,45 @@ async updatePartnerProfile(
 
   const { deliveryUserId, vehicleType, vehicleNumber, governmentId } = input;
 
-  // 1. Find partner
-  const partner = await this.deliveryRepo.findPartnerByUserId(deliveryUserId);
 
-  if (!partner) {
+  // 1. Find partner
+  const partner =
+    await this.deliveryRepo
+    .findPartnerByUserId(
+        deliveryUserId
+    );
+
+if (!partner) {
+
+  if (
+    !vehicleType ||
+    !vehicleNumber ||
+    !governmentId
+) {
     return {
-      success: false,
-      error: "Delivery partner profile not found",
-      statusCode: 404,
+        success: false,
+        error: "Missing required fields",
+        statusCode: 400
     };
-  }
+}
+
+    const createdPartner =
+        await this.deliveryRepo
+        .createDeliveryPartner({
+            userId: deliveryUserId,
+            vehicleType,
+            vehicleNumber,
+            governmentId
+        });
+
+    return {
+        success: true,
+        message: "Profile created",
+        data: createdPartner,
+        statusCode: 201
+    };
+}
+
 
   // 2. Suspended partners cannot update profile
   if (partner.status === "SUSPENDED") {

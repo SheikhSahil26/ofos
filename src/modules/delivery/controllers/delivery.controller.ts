@@ -11,11 +11,18 @@ export class DeliveryController {
   updatePartnerLocation = asyncHandler(
     async (req: Request, res: Response) => {
 
-        const partnerId= req.params.partnerId as string;
+        const user= req.user as Express.payload
+        console.log("User from request:", user);
         const { latitude, longitude } = req.body;
 
+        console.log("Updating partner location:", {
+            userId: user.userId,
+            latitude,
+            longitude,
+        });
+
         const data = await this.deliveryService.updatePartnerLocation(
-            partnerId,
+            user.userId,
             latitude,
             longitude,
         );
@@ -23,6 +30,9 @@ export class DeliveryController {
 
     }
   );
+
+
+
 
   assignNearestPartner = asyncHandler(
   async (req: Request, res: Response) => {
@@ -48,10 +58,10 @@ export class DeliveryController {
   toggleAvailability = asyncHandler(
   async (req: Request, res: Response) => {
     // const deliveryUserId = req.user.id; // from auth middleware
-    const deliveryUserId = "7fe63448-c733-4055-a2a5-3835aaa65372"
+    const user = req.user as Express.payload
 
     const result = await this.deliveryService.toggleAvailability({
-      deliveryUserId,
+      deliveryUserId: user.userId,
     });
 
     return res.status(result.statusCode).json(result);
@@ -61,10 +71,10 @@ export class DeliveryController {
   getPartnerProfile = asyncHandler(
   async (req: Request, res: Response) => {
     // const deliveryUserId = req.user.id;
-    const deliveryUserId = "7fe63448-c733-4055-a2a5-3835aaa65372"
+    const user = req.user as Express.payload
 
     const result = await this.deliveryService.getPartnerProfile(
-      deliveryUserId
+      user.userId
     );
 
     return res.status(result.statusCode).json(result);
@@ -74,11 +84,14 @@ export class DeliveryController {
   updatePartnerProfile = asyncHandler(
   async (req: Request, res: Response) => {
    // const deliveryUserId = req.user.id;
-    const deliveryUserId = "7fe63448-c733-4055-a2a5-3835aaa65372"
+    const user  = req.user as Express.payload
+    console.log("User from request:", user);
     const { vehicleType, vehicleNumber, governmentId } = req.body;
 
+    console.log(req.body)
+
     const result = await this.deliveryService.updatePartnerProfile({
-      deliveryUserId,
+      deliveryUserId: user.userId,
       vehicleType,
       vehicleNumber,
       governmentId,

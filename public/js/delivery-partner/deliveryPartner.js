@@ -1,7 +1,7 @@
 
 // /public/js/orders/deliveryPartner.js
 
-let isAvailable = true;
+
 
 let activeOrders = [];
 
@@ -10,13 +10,221 @@ let currentOrder = null;
 let acceptingOrders = false;
 
 
+
+
+async function loadPartnerProfile() {
+
+    try {
+
+        const response =
+            await apiRequest(
+                "/api/delivery/profile"
+            );
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+
+            renderVerificationPending();
+
+            return false;
+        }
+
+        const partner =
+            result.data;
+
+        console.log(
+            "Partner Profile",
+            partner
+        );
+
+        if (
+            partner.status ===
+            "PENDING_VERIFICATION"
+        ) {
+
+            renderVerificationPending();
+
+            return false;
+        }
+
+        if (
+            partner.status ===
+            "SUSPENDED"
+        ) {
+
+            renderSuspendedAccount();
+
+            return false;
+        }
+
+        const toggle =
+            document.querySelector(
+                'input[type="checkbox"]'
+            );
+
+        if (toggle) {
+
+            toggle.checked =
+                partner.status === "ACTIVE";
+        }
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        renderVerificationPending();
+
+        return false;
+
+    }
+
+}
+
+//if profile is not verified 
+function renderVerificationPending() {
+
+    document.body.innerHTML = `
+
+    <div
+    class="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
+
+        <div
+        class="bg-white rounded-3xl shadow-lg p-12 max-w-lg text-center">
+
+            <div
+            class="w-24 h-24 rounded-full
+            bg-orange-100
+            flex items-center justify-center
+            mx-auto">
+
+                <span class="text-5xl">
+                    ⏳
+                </span>
+
+            </div>
+
+            <h1
+            class="text-3xl font-bold mt-8">
+
+                Verification Pending
+
+            </h1>
+
+            <p
+            class="text-gray-500 mt-4">
+
+                Your delivery partner profile
+                is currently under review.
+
+                Once approved by the admin,
+                you will be able to accept
+                delivery requests.
+
+            </p>
+
+            <button
+            onclick="window.location.href='/delivery/profile'"
+            class="
+            mt-8
+            bg-orange-500
+            hover:bg-orange-600
+            text-white
+            px-8 py-4
+            rounded-2xl">
+
+                View Profile
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+//if profile is suspended
+function renderSuspendedAccount() {
+
+    document.body.innerHTML = `
+
+    <div
+    class="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
+
+        <div
+        class="bg-white rounded-3xl shadow-lg p-12 max-w-lg text-center">
+
+            <div
+            class="w-24 h-24 rounded-full
+            bg-red-100
+            flex items-center justify-center
+            mx-auto">
+
+                <span class="text-5xl">
+                    ⚠️
+                </span>
+
+            </div>
+
+            <h1
+            class="text-3xl font-bold mt-8">
+
+                Account Suspended
+
+            </h1>
+
+            <p
+            class="text-gray-500 mt-4">
+
+                Your delivery partner account
+                has been suspended.
+
+                Please contact support
+                for further assistance.
+
+            </p>
+
+            <button
+            class="
+            mt-8
+            bg-orange-500
+            text-white
+            px-8 py-4
+            rounded-2xl">
+
+                Contact Support
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+
+
 /* ================================
 INIT
 ================================ */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    async () => {
+
+        const canAccess =
+            await loadPartnerProfile();
+
+        if (!canAccess) {
+            return;
+        }
 
         loadDashboard();
 
@@ -79,22 +287,18 @@ function setupAvailabilityToggle() {
                 const response =
                     await apiRequest(
                         "/api/delivery/toggle-availability",
-                        "PATCH",
-                        {
-                            isAvailable:
-                                toggle.checked
-                        }
+                        "PATCH"
+
                     );
 
                 const result =
                     await response.json();
 
-                    console.log(result)
-
-                
+                console.log("availability", result);
 
                 if (
-                    result
+                    result.data.currentStatus ===
+                    "ACTIVE"
                 ) {
 
                     showToast(
@@ -104,10 +308,27 @@ function setupAvailabilityToggle() {
                         "success"
                     );
 
+                    startLocationTracking();
+
+                }
+                else {
+
+                    showToast(
+                        toggle.checked
+                            ? "You are online"
+                            : "You are offline",
+                        "success"
+                    );
+
+                    stopLocationTracking();
+
                 }
 
             }
             catch (err) {
+
+                toggle.checked =
+                    !toggle.checked;
 
                 showToast(
                     "Failed to update availability",
@@ -119,6 +340,171 @@ function setupAvailabilityToggle() {
         }
     );
 
+}
+let locationInterval = null;
+
+async function getCurrentLocation() {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            if (!navigator.geolocation) {
+
+                reject(
+                    new Error(
+                        "Geolocation not supported"
+                    )
+                );
+
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+
+                (position) => {
+
+                    resolve({
+                        latitude:
+                            position.coords.latitude,
+
+                        longitude:
+                            position.coords.longitude
+                    });
+
+                },
+
+                (error) => {
+
+                    reject(error);
+
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+
+            );
+
+        }
+    );
+}
+
+async function sendLocation() {
+
+    try {
+
+        console.log(
+            "Sending location..."
+        );
+
+        const currentLocation =
+            await getCurrentLocation();
+
+        console.log(
+            "Current Location:",
+            currentLocation
+        );
+
+        const response =
+            await apiRequest(
+                "/api/delivery/update-partner-location",
+                "PATCH",
+                {
+                    latitude:
+                        currentLocation.latitude,
+
+                    longitude:
+                        currentLocation.longitude
+                }
+            );
+
+        if (!response) {
+
+            console.error(
+                "apiRequest returned null"
+            );
+
+            return;
+        }
+
+        const result =
+            await response.json();
+
+        console.log(
+            "Location Updated:",
+            result
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Location Tracking Error:",
+            error
+        );
+
+    }
+}
+
+function startLocationTracking() {
+
+    console.log(
+        "Starting location tracking..."
+    );
+
+    if (locationInterval) {
+
+        console.log(
+            "Tracking already running"
+        );
+
+        return;
+    }
+
+    // First call immediately
+    sendLocation();
+
+    // Then poll every 5 sec
+    locationInterval =
+        setInterval(
+            () => {
+
+                console.log(
+                    "Polling..."
+                );
+
+                sendLocation();
+
+            },
+            5000
+        );
+
+    console.log(
+        "Interval Started:",
+        locationInterval
+    );
+}
+
+function stopLocationTracking() {
+
+    console.log(
+        "Stopping location tracking..."
+    );
+
+    if (!locationInterval)
+        return;
+
+    clearInterval(
+        locationInterval
+    );
+
+    locationInterval = null;
+
+    console.log(
+        "Tracking stopped"
+    );
 }
 
 
@@ -335,38 +721,38 @@ PICKED UP
 ================================ */
 
 document
-.getElementById(
-    "picked-up-btn"
-)
-?.addEventListener(
-    "click",
-    async () => {
+    .getElementById(
+        "picked-up-btn"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
 
-        if (!currentOrder)
-            return;
+            if (!currentOrder)
+                return;
 
-        const response =
-            await apiRequest(
-                `/api/orders/${currentOrder.id}/picked-up`,
-                "PATCH"
-            );
+            const response =
+                await apiRequest(
+                    `/api/orders/${currentOrder.id}/picked-up`,
+                    "PATCH"
+                );
 
-        const result =
-            await response.json();
+            const result =
+                await response.json();
 
-        if (
-            result.success
-        ) {
+            if (
+                result.success
+            ) {
 
-            showToast(
-                "Picked up",
-                "success"
-            );
+                showToast(
+                    "Picked up",
+                    "success"
+                );
+
+            }
 
         }
-
-    }
-);
+    );
 
 
 /* ================================
@@ -374,40 +760,40 @@ DELIVERED
 ================================ */
 
 document
-.getElementById(
-    "delivered-btn"
-)
-?.addEventListener(
-    "click",
-    async () => {
+    .getElementById(
+        "delivered-btn"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
 
-        if (!currentOrder)
-            return;
+            if (!currentOrder)
+                return;
 
-        const response =
-            await apiRequest(
-                `/api/orders/${currentOrder.id}/delivered`,
-                "PATCH"
-            );
+            const response =
+                await apiRequest(
+                    `/api/orders/${currentOrder.id}/delivered`,
+                    "PATCH"
+                );
 
-        const result =
-            await response.json();
+            const result =
+                await response.json();
 
-        if (
-            result.success
-        ) {
+            if (
+                result.success
+            ) {
 
-            showToast(
-                "Delivered successfully",
-                "success"
-            );
+                showToast(
+                    "Delivered successfully",
+                    "success"
+                );
 
-            loadDashboard();
+                loadDashboard();
+
+            }
 
         }
-
-    }
-);
+    );
 
 
 /* ================================
