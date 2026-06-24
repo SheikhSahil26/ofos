@@ -123,13 +123,20 @@ export class AuthService {
                     ur => ur.role.role === role
                 );
 
-            if (!hasRole && role !== "ADMIN") {
+            console.log("Has Role", hasRole, "role", role)
 
+            if (!hasRole && role == "ADMIN") {
+                return {
+                    status: "Error",
+                    statusCode: 401,
+                    message: "INvalid Credentials",
+                };
+            }
+            if (!hasRole) {
                 await this.authRepo.assignRole(
                     existUser.id,
                     role
                 );
-
             }
 
             const accessToken =
