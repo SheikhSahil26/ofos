@@ -186,4 +186,39 @@ export class RestaurantPromotionRepository {
         }
     });
 }
+
+  // get active promotions for a restaurant
+  async getActivePromotions(
+    restaurantId: string
+  ): Promise<IRestaurantPromotion[]> {
+    const today = new Date();
+    return await prisma.restaurantPromotion.findMany({
+      where: {
+        restaurantId,
+        isDeleted: false,
+        isActive: true,
+        startDate: {
+          lte: today,
+        },
+        endDate: {
+          gte: today,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        code: true,
+        type: true,
+        discountValue: true,
+        minimumOrderAmount: true,
+        maximumDiscountAmount: true,
+        startDate: true,
+        endDate: true,
+        isActive: true,
+      },
+      orderBy: {
+        startDate: "desc",
+      },
+    });
+  }
 }
