@@ -1,7 +1,7 @@
 import { ServiceResponse } from "../../../common/types/service-response.type";
 import { AppError } from "../../../utils/appError";
 import { DeliveryService } from "../../delivery/services/delivery.service";
-import { ICustomerDetailsResponse, IDeliveryPartnerApprovalStats, IRestaurantOwnerDetailsResponse, IUpdateUserStatus, IUserDetailsResponse } from "../interfaces/admin.interface";
+import { ICustomerDetailsResponse, IDeliveryPartnerApprovalStats, IDeliveryPartnerListResponse, IRestaurantOwnerDetailsResponse, IUpdateUserStatus, IUserDetailsResponse } from "../interfaces/admin.interface";
 import { AdminRepository } from "../repositories/admin.repositories";
 
 export class AdminService {
@@ -550,4 +550,127 @@ export class AdminService {
         };
     }
 
+
+
+    async getAllDeliveryPartners(
+        page: number,
+        limit: number,
+        search?: string,
+        status?: string,
+        vehicleType?: string
+    ): Promise<ServiceResponse<IDeliveryPartnerListResponse>> {
+
+        const result =
+            await this.adminRepository.getDeliveryPartners(
+                page,
+                limit,
+                search,
+                status,
+                vehicleType
+            );
+
+        return {
+
+            success: true,
+
+            statusCode: 200,
+
+            message:
+                "Delivery partners fetched successfully",
+
+            data: {
+
+                partners:
+                    result.partners.map(partner => ({
+
+                        id: partner.id,
+
+                        fullName:
+                            partner.user.fullName,
+
+                        email:
+                            partner.user.email,
+
+                        mobile:
+                            partner.user.mobile,
+
+                        profilePhoto:
+                            partner.user.profilePhoto,
+
+                        vehicleType:
+                            partner.vehicleType,
+
+                        vehicleNumber:
+                            partner.vehicleNumber,
+
+                        status:
+                            partner.status,
+
+                        totalDeliveries:
+                            partner.assignments?.length || 0,
+
+                        totalEarnings:
+                            Number(
+                                partner.deliveryPartnerPayouts
+                                    ?.reduce(
+                                        (sum, payout) =>
+                                            sum +
+                                            Number(
+                                                payout.amount
+                                            ),
+                                        0
+                                    ) || 0
+                            ),
+
+                        rating:
+                            partner.reviews?.length
+                                ? (
+                                    partner.reviews.reduce(
+                                        (sum, review) =>
+                                            sum + (review.deliveryRating || 0),
+                                        0
+                                    ) /
+                                    partner.reviews.filter(
+                                        review => review.deliveryRating !== null
+                                    ).length
+                                )
+                                : 0
+
+                    })),
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total:
+                        result.total
+
+                }
+
+            }
+
+        };
+    }
+
+    getDeliveryPartnerStats = async () => {
+
+        const stats =
+            await this.adminRepository
+                .getDeliveryPartnerStats();
+
+        return {
+
+            success: true,
+
+            statusCode: 200,
+
+            message:
+                "Stats fetched successfully",
+
+            data: stats
+
+        };
+    };
 }

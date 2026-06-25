@@ -151,3 +151,44 @@ export interface IDeliveryPartnerApprovalStats {
 
     suspended: number;
 }
+
+export interface IDeliveryPartnerListItem {
+
+    id: string;
+
+    fullName: string;
+
+    email: string;
+
+    mobile: string;
+
+    profilePhoto: string | null;
+
+    vehicleType: string;
+
+    vehicleNumber: string;
+
+    status: string;
+
+    totalDeliveries: number;
+
+    totalEarnings: number;
+
+    rating: number;
+}
+
+export interface IDeliveryPartnerPagination {
+
+    page: number;
+
+    limit: number;
+
+    total: number;
+}
+
+export interface IDeliveryPartnerListResponse {
+
+    partners: IDeliveryPartnerListItem[];
+
+    pagination: IDeliveryPartnerPagination;
+}

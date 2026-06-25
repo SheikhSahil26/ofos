@@ -74,5 +74,19 @@ export class AdminRoutes implements IRoutes {
             this.controller.rejectPartner
         );
 
+
+
+        // Deliveries partners....
+
+        this.router.get(
+            "/delivery-partners",
+            this.controller.getDeliveryPartners
+        );
+
+        this.router.get(
+            "/delivery-partners/stats",
+            this.controller.getDeliveryPartnerStats
+        );
+
     }
 }

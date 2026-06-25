@@ -942,4 +942,157 @@ export class AdminRepository {
         });
     }
 
+
+    async getDeliveryPartners(
+        page: number,
+        limit: number,
+        search?: string,
+        status?: string,
+        vehicleType?: string
+    ) {
+
+        const skip =
+            (page - 1) * limit;
+
+        const where: any = {
+
+            isDeleted: false
+
+        };
+
+        if (search) {
+
+            where.OR = [
+
+                {
+                    user: {
+                        fullName: {
+                            contains: search,
+                            // mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    user: {
+                        email: {
+                            contains: search,
+                            // mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    vehicleNumber: {
+                        contains: search,
+                        // mode: "insensitive"
+                    }
+                }
+
+            ];
+        }
+
+        if (status) {
+            where.status = status;
+        }
+
+        if (vehicleType) {
+            where.vehicleType = vehicleType;
+        }
+
+        const [partners, total] =
+            await Promise.all([
+
+                prisma.deliveryPartner.findMany({
+
+                    where,
+
+                    skip,
+
+                    take: limit,
+
+                    include: {
+
+                        user: true,
+
+                        deliveries: true,
+
+                        reviews: true,
+
+                        assignments: true,
+
+                        deliveryPartnerPayouts: true
+
+                    }
+
+                }),
+
+                prisma.deliveryPartner.count({
+                    where
+                })
+
+            ]);
+
+        return {
+            partners,
+            total
+        };
+    }
+
+
+    async getDeliveryPartnerStats() {
+
+        const [
+
+            totalPartners,
+            activePartners,
+            inactivePartners,
+            suspendedPartners,
+            onDeliveryPartners
+
+        ] = await Promise.all([
+
+            prisma.deliveryPartner.count(),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "ACTIVE"
+                }
+            }),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "INACTIVE"
+                }
+            }),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "SUSPENDED"
+                }
+            }),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "ON_DELIVERY"
+                }
+            })
+
+        ]);
+
+        return {
+
+            totalPartners,
+
+            activePartners,
+
+            inactivePartners,
+
+            suspendedPartners,
+
+            onDeliveryPartners
+
+        };
+    }
+
 }

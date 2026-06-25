@@ -300,4 +300,52 @@ export class AdminController {
         }
     );
 
+
+    getDeliveryPartners = asyncHandler(
+        async (req, res): Promise<void> => {
+
+            const page =
+                Number(req.query.page) || 1;
+
+            const limit =
+                Number(req.query.limit) || 10;
+
+            const search =
+                req.query.search as string;
+
+            const status =
+                req.query.status as string;
+
+            const vehicleType =
+                req.query.vehicleType as string;
+
+            const result =
+                await this.adminService
+                    .getAllDeliveryPartners(
+                        page,
+                        limit,
+                        search,
+                        status,
+                        vehicleType
+                    );
+
+            res.status(
+                result.statusCode || 200
+            ).json(result);
+        }
+    );
+
+    getDeliveryPartnerStats = asyncHandler(
+        async (req, res): Promise<void> => {
+
+            const result =
+                await this.adminService
+                    .getDeliveryPartnerStats();
+
+            res.status(
+                result.statusCode || 200
+            ).json(result);
+        }
+    );
+
 }
