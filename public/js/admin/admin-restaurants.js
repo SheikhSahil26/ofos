@@ -19,7 +19,7 @@ async function loadRestaurants(page = 1) {
         const sort =
             document.getElementById("sortFilter").value;
 
-        const response = await fetch(
+        const response = await apiRequest(
             `/api/admin/branches?page=${page}&limit=10&search=${encodeURIComponent(search)}&status=${status}&openStatus=${openStatus}&sort=${sort}`
         );
         const result = await response.json();
@@ -455,10 +455,15 @@ async function loadDashboardStats() {
     try {
 
         const response =
-            await fetch(
+            await apiRequest(
                 "/api/admin/branches/stats"
             );
 
+        if (!response?.ok) {
+            setTimeout(() => {
+                window.location.href = "http://localhost:8080/admin/login"
+            }, 1500)
+        }
         const result =
             await response.json();
 
@@ -481,12 +486,12 @@ async function loadDashboardStats() {
             stats.activeBranches ?? 0;
 
         document.getElementById(
-            "blockedBranchess"
+            "blockedBranches"
         ).textContent =
             stats.blockedBranches ?? 0;
 
         document.getElementById(
-            "newBranchess"
+            "newBranches"
         ).textContent =
             stats.newBranchesThisMonth ?? 0;
 
@@ -500,10 +505,3 @@ async function loadDashboardStats() {
     }
 
 }
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-        loadDashboardStats();
-    }
-);

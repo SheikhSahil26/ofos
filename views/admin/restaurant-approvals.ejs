@@ -33,10 +33,9 @@
 
                             </div>
 
-                            <div class="bg-orange-100 text-orange-600 px-4 py-2 rounded-xl font-semibold">
-
-                                12 Pending Requests
-
+                            <div id="pendingRequestCount"
+                                class="bg-orange-100 text-orange-600 px-4 py-2 rounded-xl font-semibold">
+                                0 Pending Requests
                             </div>
 
                         </div>
@@ -51,8 +50,8 @@
                                     Pending Approvals
                                 </p>
 
-                                <h2 class="text-3xl font-bold mt-2 text-orange-500">
-                                    12
+                                <h2 id="totalPendingApprovals" class="text-3xl font-bold mt-2 text-orange-500">
+                                    0
                                 </h2>
 
                             </div>
@@ -62,9 +61,8 @@
                                 <p class="text-gray-500">
                                     Approved Today
                                 </p>
-
-                                <h2 class="text-3xl font-bold mt-2 text-green-600">
-                                    8
+                                <h2 id="approvedToday" class="text-3xl font-bold mt-2 text-green-600">
+                                    0
                                 </h2>
 
                             </div>
@@ -75,8 +73,8 @@
                                     Rejected Today
                                 </p>
 
-                                <h2 class="text-3xl font-bold mt-2 text-red-500">
-                                    2
+                                <h2 id="rejectedToday" class="text-3xl font-bold mt-2 text-red-500">
+                                    0
                                 </h2>
 
                             </div>
@@ -133,11 +131,15 @@
                                         </th>
 
                                         <th class="text-left">
-                                            Owner
+                                            Branch
                                         </th>
 
                                         <th class="text-left">
-                                            Category
+                                            Branch Head
+                                        </th>
+
+                                        <th class="text-left">
+                                            Contact
                                         </th>
 
                                         <th class="text-left">
@@ -156,146 +158,36 @@
 
                                 </thead>
 
-                                <tbody>
-
-                                    <% approvals.forEach(restaurant=> { %>
-
-                                        <tr class="border-t hover:bg-slate-50">
-
-                                            <td class="p-5">
-
-                                                <div class="flex items-center gap-3">
-
-                                                    <img src="<%= restaurant.logo %>"
-                                                        class="w-12 h-12 rounded-xl object-cover">
-
-                                                    <div>
-
-                                                        <h4 class="font-semibold">
-                                                            <%= restaurant.name %>
-                                                        </h4>
-
-                                                        <p class="text-sm text-gray-500">
-                                                            <%= restaurant.city %>
-                                                        </p>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </td>
-
-                                            <td>
-                                                <%= restaurant.owner %>
-                                            </td>
-
-                                            <td>
-                                                <%= restaurant.category %>
-                                            </td>
-
-                                            <td>
-                                                <%= restaurant.submittedAt %>
-                                            </td>
-
-                                            <td>
-
-                                                <div class="flex gap-2">
-
-                                                    <span
-                                                        class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
-
-                                                        GST
-
-                                                    </span>
-
-                                                    <span
-                                                        class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
-
-                                                        FSSAI
-
-                                                    </span>
-
-                                                </div>
-
-                                            </td>
-
-                                            <td>
-
-                                                <div class="flex justify-center gap-2">
-
-                                                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg">
-
-                                                        View
-
-                                                    </button>
-
-                                                    <button class="bg-green-500 text-white px-4 py-2 rounded-lg">
-
-                                                        Approve
-
-                                                    </button>
-
-                                                    <button class="bg-red-500 text-white px-4 py-2 rounded-lg">
-
-                                                        Reject
-
-                                                    </button>
-
-                                                </div>
-
-                                            </td>
-
-                                        </tr>
-
-                                        <% }) %>
+                                <tbody id="approvalTableBody">
 
                                 </tbody>
+
 
                             </table>
 
                             <!-- PAGINATION -->
 
-                            <div class="flex justify-between items-center p-6 border-t">
-
-                                <p class="text-gray-500">
-                                    Page <%= currentPage %> of <%= totalPages %>
-                                </p>
-
-                                <div class="flex gap-2">
-
-                                    <% for(let i=1; i <=totalPages; i++) { %>
-
-                                        <a href="?page=<%= i %>" class="
-                    w-10 h-10
-                    flex items-center
-                    justify-center
-                    rounded-xl
-
-                    <%= i === currentPage
-                    ? 'bg-orange-500 text-white'
-                    : 'border hover:bg-slate-100'
-                    %>">
-
-                                            <%= i %>
-
-                                        </a>
-
-                                        <% } %>
-
-                                </div>
-
-                            </div>
+                            <div id="paginationContainer" class="
+        flex
+        justify-start
+        gap-2
+        mt-10
+        mb-6
+        ml-10
+    "></div>
 
                         </div>
 
                     </div>
 
-                </main>
+        </div>
+
+        </main>
 
         </div>
 
-        <script src="/js/admin-dashboard.js"></script>
         <script src="/js/admin/admin-sidebar.js"></script>
+        <script src="/js/admin/admin-restaurants-approval.js"></script>
 
     </body>
 
