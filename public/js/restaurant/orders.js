@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function createOrderCard(order) {
-        const timeElapsed = getTimeElapsed(order.createdAt);
+        const timeElapsed = getTimeElapsed(order.placedAt);
         const itemCount = order.orderItems ? order.orderItems.length : 0;
         
         let statusColor = "bg-gray-100 text-gray-800";
@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     
                     <h3 class="font-bold text-gray-900 text-lg mb-1">#${order.orderNumber || order.id.substring(0,8).toUpperCase()}</h3>
-                    <p class="text-sm text-gray-600 mb-3 line-clamp-1"><i class="fa-regular fa-user mr-1"></i> ${order.user?.fullName || 'Customer'}</p>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-1"><i class="fa-regular fa-user mr-1"></i> ${order.customer?.fullName || 'Customer'}</p>
                 </div>
                 
                 <div class="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Populate Modal Data
         $("modalOrderId").textContent = `Order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}`;
-        $("modalOrderTime").textContent = new Date(order.createdAt).toLocaleString();
+        $("modalOrderTime").textContent = new Date(order.placedAt).toLocaleString();
         
         // Status Banner
         const statusText = order.status.replace(/_/g, ' ');
@@ -221,13 +221,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         else banner.classList.add("bg-gray-50", "text-gray-700", "border", "border-gray-100");
 
         // Customer
-        $("modalCustomerName").textContent = order.user?.fullName || 'Guest Customer';
-        $("modalCustomerPhone").innerHTML = `<i class="fa-solid fa-phone text-xs mr-1"></i> ${order.user?.phoneNumber || 'N/A'}`;
+        $("modalCustomerName").textContent = order.customer?.fullName || 'Guest Customer';
+        $("modalCustomerPhone").innerHTML = `<i class="fa-solid fa-phone text-xs mr-1"></i> ${order.customer?.mobile || 'N/A'}`;
         
-        if (order.deliveryAddress) {
+        if (order.address) {
             $("modalDeliveryAddressBlock").classList.remove("hidden");
-            const addr = order.deliveryAddress;
-            $("modalDeliveryAddress").textContent = `${addr.streetAddress}, ${addr.city}, ${addr.state} ${addr.pincode}`;
+            const addr = order.address;
+            const parts = [addr.addressLine1, addr.addressLine2, addr.city, addr.state, addr.pincode].filter(Boolean);
+            $("modalDeliveryAddress").textContent = parts.join(", ");
         } else {
             $("modalDeliveryAddressBlock").classList.add("hidden");
         }
@@ -235,27 +236,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Items
         const items = order.orderItems || [];
         $("modalItemsCount").textContent = items.length;
-        $("modalItemsList").innerHTML = items.map(item => `
+        $("modalItemsList").innerHTML = items.map(item => {
+            const mods = item.modifiers && item.modifiers.length > 0 
+                ? item.modifiers.map(m => m.modifierName).join(", ") 
+                : '';
+            return `
             <div class="flex justify-between items-start">
                 <div class="flex gap-3">
                     <span class="bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded text-xs h-fit">${item.quantity}x</span>
                     <div>
-                        <p class="font-medium text-sm text-gray-900">${item.menuItem?.name || 'Unknown Item'}</p>
-                        ${item.customizations ? `<p class="text-xs text-gray-500 mt-0.5">${item.customizations}</p>` : ''}
+                        <p class="font-medium text-sm text-gray-900">${item.menuItemName || 'Unknown Item'}</p>
+                        ${mods ? `<p class="text-xs text-gray-500 mt-0.5">${mods}</p>` : ''}
+                        ${item.specialInstruction ? `<p class="text-xs text-orange-600 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i>${item.specialInstruction}</p>` : ''}
                     </div>
                 </div>
                 <span class="text-sm font-medium text-gray-900">₹${item.price * item.quantity}</span>
             </div>
-        `).join("");
+            `
+        }).join("");
 
         // Financials
-        $("modalSubtotal").textContent = `₹${order.totalAmount - (order.deliveryFee||0) - (order.tax||0) + (order.discount||0)}`;
-        $("modalTax").textContent = `₹${order.tax || 0}`;
+        $("modalSubtotal").textContent = `₹${order.subtotal || 0}`;
+        $("modalTax").textContent = `₹${order.taxAmount || 0}`;
         $("modalDeliveryFee").textContent = `₹${order.deliveryFee || 0}`;
         
-        if (order.discount && order.discount > 0) {
+        if (order.discountAmount && order.discountAmount > 0) {
             $("modalDiscountRow").classList.remove("hidden");
-            $("modalDiscount").textContent = `-₹${order.discount}`;
+            $("modalDiscount").textContent = `-₹${order.discountAmount}`;
+            
+            if (order.coupon) {
+                $("modalCouponBadge").classList.remove("hidden");
+                $("modalCouponBadge").textContent = order.coupon.code;
+            } else {
+                $("modalCouponBadge").classList.add("hidden");
+            }
         } else {
             $("modalDiscountRow").classList.add("hidden");
         }
@@ -263,7 +277,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         $("modalTotal").textContent = `₹${order.totalAmount}`;
 
         // Payment
-        $("modalPaymentStatus").textContent = `PAID VIA ${order.paymentMethod || 'CASH'}`;
+        const paymentMethod = order.payments && order.payments.length > 0 ? order.payments[0].paymentMethod : 'CASH';
+        $("modalPaymentStatus").textContent = `PAID VIA ${paymentMethod}`;
 
         // Actions
         renderActionButtons(order);

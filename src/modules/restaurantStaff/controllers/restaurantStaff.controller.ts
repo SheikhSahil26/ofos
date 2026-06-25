@@ -65,4 +65,41 @@ export class RestaurantStaffController{
 
         res.status(response.statusCode || 200).json(response);
     });
+
+    //check email
+    checkEmail = asyncHandler( async(req: Request, res: Response) => {
+        const branchId = req.params.branchId;
+        const email = req.body.email;
+
+        if(typeof branchId !== "string"){
+            throw new AppError("Invalid branch id");
+        }
+
+        if(!email || typeof email !== "string"){
+            throw new AppError("Invalid email");
+        }
+
+        RestaurantStaffValidation.validateId(branchId, "branch id");
+
+        const response = await this.staffService.checkEmailAndAssign(branchId, email);
+
+        res.status(response.statusCode || 200).json(response);
+    });
+
+    //change branch head
+    changeBranchHead = asyncHandler( async(req: Request, res: Response) => {
+        const branchId = req.params.branchId;
+        const staffId = req.body.staffId;
+
+        if(typeof branchId !== "string" || typeof staffId !== "string"){
+            throw new AppError("Invalid branch or staff id");
+        }
+
+        RestaurantStaffValidation.validateId(branchId, "branch id");
+        RestaurantStaffValidation.validateId(staffId, "staff id");
+
+        const response = await this.staffService.changeBranchHead(branchId, staffId);
+
+        res.status(response.statusCode || 200).json(response);
+    });
 }
