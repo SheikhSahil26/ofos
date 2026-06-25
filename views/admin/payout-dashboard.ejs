@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Payout Dashboard"}) %>
+
+    <body class="bg-slate-100">
+
+        <div class="flex min-h-screen">
+
+            <%- include('../partials/admin/sidebar') %>
+
+                <main class="flex-1 p-8">
+
+                    <!-- HEADER -->
+
+                    <div class="flex justify-between items-center mb-8">
+
+                        <div>
+
+                            <h1 class="text-4xl font-bold">
+                                Payout Dashboard
+                            </h1>
+
+                            <p class="text-gray-500 mt-2">
+                                Manage restaurant and delivery partner settlements
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CARDS -->
+
+                    <div class="grid lg:grid-cols-5 gap-6 mb-8">
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                            <p class="text-gray-500">
+                                Pending Settlements
+                            </p>
+
+                            <h2 id="pendingSettlements" class="text-3xl font-bold text-orange-500 mt-2">
+                                0
+                            </h2>
+
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                            <p class="text-gray-500">
+                                Restaurant Pending
+                            </p>
+
+                            <h2 id="restaurantPending" class="text-3xl font-bold text-blue-500 mt-2">
+                                ₹0
+                            </h2>
+
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                            <p class="text-gray-500">
+                                Delivery Pending
+                            </p>
+
+                            <h2 id="deliveryPending" class="text-3xl font-bold text-purple-500 mt-2">
+                                ₹0
+                            </h2>
+
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                            <p class="text-gray-500">
+                                Today's Settlements
+                            </p>
+
+                            <h2 id="todaySettlements" class="text-3xl font-bold text-green-500 mt-2">
+                                0
+                            </h2>
+
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                            <p class="text-gray-500">
+                                Total Paid
+                            </p>
+
+                            <h2 id="totalPaid" class="text-3xl font-bold text-[#014f38] mt-2">
+                                ₹0
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    <!-- QUICK ACTIONS -->
+
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+
+                        <a href="/admin/payouts/pending" class="
+                bg-white
+                rounded-3xl
+                p-8
+                shadow-sm
+                hover:shadow-md
+                transition">
+
+                            <h3 class="font-bold text-xl mb-2">
+                                Pending Settlements
+                            </h3>
+
+                            <p class="text-gray-500">
+                                Complete pending payout settlements
+                            </p>
+
+                        </a>
+
+                        <a href="/admin/payouts/restaurants" class="
+                bg-white
+                rounded-3xl
+                p-8
+                shadow-sm
+                hover:shadow-md
+                transition">
+
+                            <h3 class="font-bold text-xl mb-2">
+                                Restaurant Settlements
+                            </h3>
+
+                            <p class="text-gray-500">
+                                Create restaurant settlement requests
+                            </p>
+
+                        </a>
+
+                        <a href="/admin/payouts/delivery-partners" class="
+                bg-white
+                rounded-3xl
+                p-8
+                shadow-sm
+                hover:shadow-md
+                transition">
+
+                            <h3 class="font-bold text-xl mb-2">
+                                Delivery Settlements
+                            </h3>
+
+                            <p class="text-gray-500">
+                                Create delivery partner settlements
+                            </p>
+
+                        </a>
+
+                    </div>
+
+                    <!-- RECENT PENDING SETTLEMENTS -->
+
+                    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+
+                        <div class="p-6 border-b">
+
+                            <h3 class="text-xl font-bold">
+                                Recent Pending Settlements
+                            </h3>
+
+                        </div>
+
+                        <table class="w-full">
+
+                            <thead class="bg-slate-50">
+
+                                <tr>
+
+                                    <th class="text-left p-5">
+                                        Settlement Id
+                                    </th>
+
+                                    <th class="text-left">
+                                        Type
+                                    </th>
+
+                                    <th class="text-left">
+                                        Recipient
+                                    </th>
+
+                                    <th class="text-left">
+                                        Amount
+                                    </th>
+
+                                    <th class="text-left">
+                                        Created
+                                    </th>
+
+                                    <th class="text-center">
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="pendingSettlementBody">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </main>
+
+        </div>
+
+        <script src="/js/common/api.js"></script>
+        <script src="/js/common/auth.js"></script>
+        <script src="/js/common/toast.js"></script>
+        <script src="/js/admin/admin-sidebar.js"></script>
+        <script src="/js/admin/admin-payout-dashboard.js"></script>
+
+    </body>
+
+</html>

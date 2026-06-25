@@ -2,6 +2,8 @@ import { OrderStatus, OrderPaymentStatus, PayoutStatus, PrismaClient, Settlement
 
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { PayoutRepository } from "../repository/payout.repository";
+import { AppError } from "../../../utils/appError";
+import { IDashboardStatsResponse, IPayoutHistoryResponse, IPendingSummaryResponse, ISettlementListResponse, ISettlementResponse } from "../interface/payout.interface";
 
 export class PayoutService {
     private payoutRepo: PayoutRepository;
@@ -9,6 +11,28 @@ export class PayoutService {
     constructor(private prisma: PrismaClient) {
         this.payoutRepo = new PayoutRepository(prisma);
     }
+
+    getDashboardStats = async (): Promise<
+        ServiceResponse<IDashboardStatsResponse>
+    > => {
+
+        const stats =
+            await this.payoutRepo
+                .getDashboardStats();
+
+        return {
+
+            success: true,
+
+            message:
+                "Dashboard stats fetched successfully",
+
+            data: stats,
+
+            statusCode: 200
+
+        };
+    };
 
 
     async processPayout(
@@ -182,143 +206,367 @@ export class PayoutService {
         };
     }
 
-    async getPayoutByOrderId(
+
+    // ==========================================
+    // GET PAYOUT BY ORDER ID
+    // ==========================================
+
+    getPayoutByOrderId = async (
         orderId: string
-    ): Promise<ServiceResponse<any>> {
+    ): Promise<ServiceResponse<any>> => {
 
         const payout =
-            await this.payoutRepo.getPayoutByOrderId(orderId);
+            await this.payoutRepo.getPayoutByOrderId(
+                orderId
+            );
 
         if (!payout) {
-            return {
-                success: false,
-                error: "Payout not found",
-                statusCode: 404,
-            };
+            throw new AppError(
+                "Payout not found",
+                404
+            );
         }
 
         return {
             success: true,
+            message:
+                "Payout fetched successfully",
             data: payout,
-            statusCode: 200,
+            statusCode: 200
         };
-    }
+    };
 
 
+    // ==========================================
+    // RESTAURANT PENDING SUMMARY
+    // ==========================================
 
-    async getRestaurantPendingSummary(
+    getRestaurantPendingSummary = async (
         branchHeadId: string
-    ) {
+    ): Promise<ServiceResponse<IPendingSummaryResponse>> => {
 
         const summary =
-            await this.payoutRepo.getRestaurantPendingSummary(
-                branchHeadId
-            );
+            await this.payoutRepo
+                .getRestaurantPendingSummary(
+                    branchHeadId
+                );
 
-        return summary;
-    }
+        return {
+            success: true,
+            message:
+                "Restaurant payout summary fetched successfully",
+            data: summary ?? {
+                totalPendingAmount: 0,
+                totalPendingPayouts: 0,
+                lastSettlementDate: null
+            },
+            statusCode: 200
+        };
+    };
 
-    // payout.service.ts
 
-    async getRestaurantHistory(
+    // ==========================================
+    // DELIVERY PENDING SUMMARY
+    // ==========================================
+
+    getDeliveryPendingSummary = async (
+        deliveryPartnerId: string
+    ): Promise<ServiceResponse<IPendingSummaryResponse>> => {
+
+        const summary =
+            await this.payoutRepo
+                .getDeliveryPendingSummary(
+                    deliveryPartnerId
+                );
+
+        return {
+            success: true,
+            message:
+                "Delivery payout summary fetched successfully",
+            data: summary ?? {
+                totalPendingAmount: 0,
+                totalPendingPayouts: 0,
+                lastSettlementDate: null
+            },
+            statusCode: 200
+        };
+    };
+
+
+    // ==========================================
+    // RESTAURANT HISTORY
+    // ==========================================
+
+    getRestaurantHistory = async (
         branchHeadId: string,
         page: number,
         limit: number
-    ) {
+    ): Promise<ServiceResponse<any>> => {
 
-        return await this.payoutRepo.getRestaurantHistory(
-            branchHeadId,
-            page,
-            limit
-        );
-    }
+        const result =
+            await this.payoutRepo
+                .getRestaurantHistory(
+                    branchHeadId,
+                    page,
+                    limit
+                );
+
+        return {
+            success: true,
+            message:
+                result.payouts.length
+                    ? "Restaurant payout history fetched successfully"
+                    : "No payout history found",
+            data: result,
+            statusCode: 200
+        };
+    };
 
 
-    async getDeliveryPendingSummary(
-        deliveryPartnerId: string
-    ) {
+    // ==========================================
+    // DELIVERY HISTORY
+    // ==========================================
 
-        return await this.payoutRepo.getDeliveryPendingSummary(
-            deliveryPartnerId
-        );
-    }
-
-
-    async getDeliveryHistory(
+    getDeliveryHistory = async (
         deliveryPartnerId: string,
         page: number,
         limit: number
-    ) {
+    ): Promise<ServiceResponse<any>> => {
 
-        return await this.payoutRepo.getDeliveryHistory(
-            deliveryPartnerId,
-            page,
-            limit
-        );
-    }
+        const result =
+            await this.payoutRepo
+                .getDeliveryHistory(
+                    deliveryPartnerId,
+                    page,
+                    limit
+                );
+
+        return {
+            success: true,
+            message:
+                result.payouts.length
+                    ? "Delivery payout history fetched successfully"
+                    : "No payout history found",
+            data: result,
+            statusCode: 200
+        };
+    };
 
 
-    async createRestaurantSettlement(
+    // ==========================================
+    // CREATE RESTAURANT SETTLEMENT
+    // ==========================================
+
+    createRestaurantSettlement = async (
         branchHeadId: string
-    ) {
+    ): Promise<ServiceResponse<any>> => {
 
-        return await this.payoutRepo.createRestaurantSettlement(
-            branchHeadId
-        );
-    }
+        const settlement =
+            await this.payoutRepo
+                .createRestaurantSettlement(
+                    branchHeadId
+                );
+
+        if (!settlement) {
+            throw new AppError(
+                "No pending payouts available",
+                400
+            );
+        }
+
+        return {
+            success: true,
+            message:
+                "Restaurant settlement created successfully",
+            data: settlement,
+            statusCode: 201
+        };
+    };
 
 
-    async createDeliveryPartnerSettlement(
+    // ==========================================
+    // CREATE DELIVERY SETTLEMENT
+    // ==========================================
+
+    createDeliveryPartnerSettlement = async (
         deliveryPartnerId: string
-    ) {
+    ): Promise<ServiceResponse<any>> => {
 
-        return await this.payoutRepo.createDeliveryPartnerSettlement(
-            deliveryPartnerId
-        );
-    }
+        const settlement =
+            await this.payoutRepo
+                .createDeliveryPartnerSettlement(
+                    deliveryPartnerId
+                );
+
+        if (!settlement) {
+            throw new AppError(
+                "No pending payouts available",
+                400
+            );
+        }
+
+        return {
+            success: true,
+            message:
+                "Delivery settlement created successfully",
+            data: settlement,
+            statusCode: 201
+        };
+    };
 
 
-    async getSettlementById(
+    // ==========================================
+    // GET SETTLEMENT BY ID
+    // ==========================================
+
+    getSettlementById = async (
         settlementId: string
-    ) {
-        return await this.payoutRepo.getSettlementById(
+    ): Promise<ServiceResponse<any>> => {
+
+        const settlement =
+            await this.payoutRepo.getSettlementById(
+                settlementId
+            );
+
+        if (!settlement) {
+            throw new AppError(
+                "Settlement not found",
+                404
+            );
+        }
+
+        return {
+            success: true,
+            message:
+                "Settlement fetched successfully",
+            data: settlement,
+            statusCode: 200
+        };
+    };
+
+
+    // ==========================================
+    // COMPLETE SETTLEMENT
+    // ==========================================
+
+    completeSettlement = async (
+        settlementId: string
+    ): Promise<ServiceResponse<null>> => {
+
+        const settlement =
+            await this.payoutRepo.getSettlementById(
+                settlementId
+            );
+
+        if (!settlement) {
+            throw new AppError(
+                "Settlement not found",
+                404
+            );
+        }
+
+        if (
+            settlement.status ===
+            SettlementStatus.SUCCESS
+        ) {
+            throw new AppError(
+                "Settlement already completed",
+                400
+            );
+        }
+
+        await this.payoutRepo.completeSettlement(
             settlementId
         );
-    }
 
-    async completeSettlement(
-        settlementId: string
-    ) {
-        return await this.payoutRepo.completeSettlement(
-            settlementId
-        );
-    }
+        return {
+            success: true,
+            message:
+                "Settlement completed successfully",
+            statusCode: 200
+        };
+    };
 
-    async getPendingSettlements(
+
+    // ==========================================
+    // PENDING SETTLEMENTS
+    // ==========================================
+
+    getPendingSettlements = async (
         page: number,
         limit: number
-    ) {
-        return await this.payoutRepo.getPendingSettlements(
-            page,
-            limit
-        );
-    }
+    ): Promise<ServiceResponse<ISettlementListResponse>> => {
+
+        const result =
+            await this.payoutRepo
+                .getPendingSettlements(
+                    page,
+                    limit
+                );
+
+        return {
+            success: true,
+            message:
+                result.settlements?.length
+                    ? "Pending settlements fetched successfully"
+                    : "No pending settlements found",
+            data: result,
+            statusCode: 200
+        };
+    };
 
 
-    async getSettlementHistory(
+    // ==========================================
+    // SETTLEMENT HISTORY
+    // ==========================================
+
+    getSettlementHistory = async (
         page: number,
         limit: number,
         status?: SettlementStatus,
         type?: SettlementType
-    ) {
+    ): Promise<ServiceResponse<any>> => {
 
-        return await this.payoutRepo.getSettlementHistory(
-            page,
-            limit,
-            status,
-            type
-        );
-    }
+        const result =
+            await this.payoutRepo
+                .getSettlementHistory(
+                    page,
+                    limit,
+                    status,
+                    type
+                );
 
+        return {
+            success: true,
+            message:
+                result.settlements.length
+                    ? "Settlement history fetched successfully"
+                    : "No settlement history found",
+            data: {
+                settlements: result.settlements.map(
+                    settlement => ({
+                        id: settlement.id,
+                        amount: Number(
+                            settlement.totalAmount
+                        ),
+                        status: settlement.status,
+                        settlementType:
+                            settlement.settlementType,
+                        beneficiaryId:
+                            settlement.beneficiaryId,
+                        payoutCount:
+                            settlement.payoutCount,
+                        settledAt:
+                            settlement.settledAt,
+                        createdAt:
+                            settlement.createdAt
+                    })
+                ),
+                pagination:
+                    result.pagination
+            },
+            statusCode: 200
+        };
+    };
 
 }

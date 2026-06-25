@@ -9,6 +9,17 @@ export class PayoutController {
         private payoutService: PayoutService
     ) { }
 
+    getDashboardStats = asyncHandler(async (req, res) => {
+        const result =
+            await this.payoutService
+                .getDashboardStats();
+
+        res.status(
+            result.statusCode || 200
+        ).json(result);
+
+    });
+
     processPayout = asyncHandler(
         async (req: Request, res: Response) => {
 
@@ -181,6 +192,7 @@ export class PayoutController {
 
     getSettlementById = asyncHandler(
         async (req: Request, res: Response) => {
+            console.log("....")
 
             const { settlementId } = req.params;
             if (!settlementId || typeof settlementId !== 'string') {
@@ -223,7 +235,9 @@ export class PayoutController {
     );
 
     getPendingSettlements = asyncHandler(
-        async (req: Request, res: Response) => {
+        async (req, res) => {
+            console.log("Helooooooooooooo")
+            console.log("pending settlements")
 
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 10;

@@ -18,6 +18,11 @@ export class PayoutRoutes implements IRoutes {
 
     private initializeRoutes(): void {
 
+        this.router.get(
+            "/dashboard/stats",
+            this.controller.getDashboardStats
+        );
+
         // Process the payout split and create entry inside the payoutTransaction.
         this.router.post(
             "/process/:orderId",
@@ -70,24 +75,9 @@ export class PayoutRoutes implements IRoutes {
         );
 
         this.router.post(
-            "/settlements/restaurants",
+            "/settlements/delivery-partners",
             this.controller.createDeliveryPartnerSettlement
         );
-
-
-        // Get settlement By id
-        this.router.get(
-            "/settlements/:settlementId",
-            this.controller.getSettlementById
-        );
-
-
-        // tHIS done the settlement of the restaurant OR Delivery Based on settlement Id.
-        this.router.patch(
-            "/settlements/:settlementId/complete",
-            this.controller.completeSettlement
-        );
-
 
         // Admin To wahtch All pending Settlements
         this.router.get(
@@ -103,6 +93,20 @@ export class PayoutRoutes implements IRoutes {
         this.router.get(
             "/settlements/history",
             this.controller.getSettlementHistory
+        );
+
+
+        // Get settlement By id
+        this.router.get(
+            "/settlements/:settlementId",
+            this.controller.getSettlementById
+        );
+
+
+        // tHIS done the settlement of the restaurant OR Delivery Based on settlement Id.
+        this.router.patch(
+            "/settlements/:settlementId/complete",
+            this.controller.completeSettlement
         );
     }
 

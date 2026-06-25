@@ -43,6 +43,9 @@ export class AdminWebRoutes implements IRoutes {
             res.status(200).render("admin/delivery-partners-approvals");
         });
 
+        this.router.get("/payouts", (req: Request, res: Response) => {
+            res.status(200).render("admin/payout-dashboard");
+        });
 
 
     }
