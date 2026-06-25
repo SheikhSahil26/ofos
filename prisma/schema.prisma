@@ -38,6 +38,7 @@ model User {
   supportTicketsAsCustomer SupportTicket[]      @relation("TicketCustomer")
   addresses                UserAddress[]
   userRoles                UserRole[]
+  adminAuditLogs           AdminAuditLog[]
 
   @@map("users")
 }
@@ -866,22 +867,32 @@ model Settlement {
   @@map("settlements")
 }
 
-model admin_audit_logs {
-  id          String   @id
-  admin_id    String
-  action      String   @db.VarChar(100)
-  entity_type String   @db.VarChar(100)
-  entity_id   String
-  old_value   Json?
-  new_value   Json?
-  description String?  @db.Text
-  created_at  DateTime @default(now())
-  users       User     @relation(fields: [admin_id], references: [id])
+model AdminAuditLog {
+  id String @id @default(uuid())
 
+  adminId String @map("admin_id")
+
+  action String @db.VarChar(100)
+
+  entityType String @map("entity_type") @db.VarChar(100)
+
+  entityId String @map("entity_id")
+
+  oldValue Json? @map("old_value")
+
+  newValue Json? @map("new_value")
+
+  description String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([entityType])
+  @@index([entityId])
   @@index([action])
-  @@index([admin_id])
-  @@index([entity_id])
-  @@index([entity_type])
+  @@map("admin_audit_logs")
 }
 
 enum PayoutStatus {

@@ -382,7 +382,7 @@ export class AdminRepository {
             case "restaurantName":
 
                 transformed.sort(
-                    (a : any, b:any) =>
+                    (a: any, b: any) =>
                         a.restaurant.name.localeCompare(
                             b.restaurant.name
                         )
@@ -550,5 +550,246 @@ export class AdminRepository {
                 isActive,
             },
         });
+    }
+
+
+    async getPendingRestaurantApprovals(
+        page: number,
+        limit: number,
+        search?: string
+    ) {
+
+        const skip =
+            (page - 1) * limit;
+
+        const where = {
+
+            isDeleted: false,
+
+            verificationStatus:
+                VerificationStatus.PENDING,
+
+            ...(search && {
+
+                OR: [
+
+                    {
+                        branchName: {
+                            contains: search,
+                            mode: "insensitive"
+                        }
+                    },
+
+                    {
+                        restaurant: {
+                            name: {
+                                contains: search,
+                                mode: "insensitive"
+                            }
+                        }
+                    },
+
+                    {
+                        head: {
+                            user: {
+                                fullName: {
+                                    contains: search,
+                                    mode: "insensitive"
+                                }
+                            }
+                        }
+                    }
+
+                ]
+
+            })
+
+        };
+
+        const total =
+            await prisma.restaurantBranch.count({
+                where
+            });
+
+        const branches =
+            await prisma.restaurantBranch.findMany({
+
+                where,
+
+                skip,
+
+                take: limit,
+
+                orderBy: {
+                    createdAt: "desc"
+                },
+
+                include: {
+
+                    restaurant: {
+
+                        select: {
+
+                            id: true,
+
+                            name: true,
+
+                            logoUrl: true
+
+                        }
+                    },
+
+                    head: {
+
+                        include: {
+
+                            user: {
+
+                                select: {
+
+                                    fullName: true,
+
+                                    mobile: true
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            });
+
+        return {
+
+            total,
+
+            approvals:
+
+                branches.map(branch => ({
+
+                    branchId:
+                        branch.id,
+
+                    restaurantName:
+                        branch.restaurant.name,
+
+                    restaurantLogo: branch.restaurant.logoUrl,
+
+                    branchName:
+                        branch.branchName,
+
+                    branchHead:
+                        branch.head?.user
+                            ?.fullName || "N/A",
+
+                    branchContact:
+                        branch.contactNumber,
+
+                    city: branch.city,
+                    state: branch.state,
+
+                    gstin:
+                        branch.gstin,
+
+                    fssaiLicense:
+                        branch.fssaiLicense,
+
+                    verificationStatus:
+                        branch.verificationStatus,
+
+                    appliedDate:
+                        branch.createdAt.toDateString()
+
+                }))
+        };
+    }
+
+
+    async getPendingRestaurantApprovalCount() {
+
+        return prisma.restaurantBranch.count({
+
+            where: {
+
+                isDeleted: false,
+
+                verificationStatus:
+                    VerificationStatus.PENDING
+            }
+
+        });
+
+    }
+
+    async approveBranch(
+        branchId: string
+    ) {
+
+        const branch =
+            await prisma.restaurantBranch.findUnique({
+
+                where: {
+                    id: branchId
+                }
+
+            });
+
+        if (!branch) {
+
+            throw new Error(
+                "Branch not found"
+            );
+
+        }
+
+        await prisma.restaurantBranch.update({
+
+            where: {
+                id: branchId
+            },
+
+            data: {
+                verificationStatus: "APPROVED"
+            }
+
+        });
+
+        return true;
+    }
+
+    async rejectBranch(
+        branchId: string
+    ) {
+
+        const branch =
+            await prisma.restaurantBranch.findUnique({
+
+                where: {
+                    id: branchId
+                }
+
+            });
+
+        if (!branch) {
+
+            throw new Error(
+                "Branch not found"
+            );
+
+        }
+
+        await prisma.restaurantBranch.update({
+
+            where: {
+                id: branchId
+            },
+
+            data: {
+                verificationStatus: "REJECTED"
+            }
+
+        });
+
+        return true;
     }
 }
