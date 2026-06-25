@@ -1,3 +1,7 @@
+//global states
+let currentMenuItemId = null;
+let currentModifierGroups = [];
+
 document.addEventListener(
     "click",
     async (e) => {
@@ -136,7 +140,7 @@ function renderOrderDetails(
                         class="add-again-btn px-4 py-2 rounded-xl bg-[#014f38] text-white"
                         data-menu-item-id="${item.menuItemId}"
                     >
-                        + Add Again
+                        + Add 
                     </button>
 
                 </div>
@@ -194,7 +198,303 @@ document.addEventListener(
             menuItemId
         );
 
-        //cart service will be called here
+        closeOrderModal();
 
+        //modifier modal service called here
+        await openModifierModal(
+            menuItemId
+        );
     }
 );
+
+//open modifier modal and fetch the data for modifiers
+async function openModifierModal(
+    menuItemId
+) {
+
+    currentMenuItemId =
+        menuItemId;
+
+    const response =
+        await apiRequest(
+            `/api/modifier/menu-items/${menuItemId}/groups`
+        );
+
+    if (!response?.ok) {
+
+        showToast(
+            "Failed to load modifiers",
+            "error"
+        );
+
+        return;
+    }
+
+    const groups =
+        await response.json();
+
+    currentModifierGroups =
+        groups.data;
+
+    console.log(currentModifierGroups);
+
+    renderModifierModal(
+        groups.data
+    );
+
+    const modal =
+        document.getElementById(
+            "modifierModal"
+        );
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+    modal.classList.add(
+        "flex"
+    );
+}
+
+//render modifier modal
+function renderModifierModal(
+    groups
+) {
+
+    const body =
+        document.getElementById(
+            "modifierModalBody"
+        );
+
+    body.innerHTML = `
+
+        <form id="modifierForm">
+
+            ${groups.map(group => {
+
+                const inputType =
+                    group.maxSelection === 1
+                        ? "radio"
+                        : "checkbox";
+
+                return `
+
+                    <div class="mb-6">
+
+                        <div class="mb-3">
+
+                            <h3 class="font-semibold">
+                                ${group.name}
+                                ${group.isRequired
+                                    ? '<span class="text-red-500">*</span>'
+                                    : ''
+                                }
+                            </h3>
+
+                            <p class="text-sm text-gray-500">
+
+                                ${
+                                    group.maxSelection === 1
+                                    ? "Choose 1"
+                                    : `Choose up to ${group.maxSelection}`
+                                }
+
+                            </p>
+
+                        </div>
+
+                        <div class="space-y-2">
+
+                            ${group.options.map(option => `
+
+                                <label
+                                    class="flex items-center justify-between border rounded-xl p-3 cursor-pointer"
+                                >
+
+                                    <div class="flex items-center gap-3">
+
+                                        <input
+                                            class="modifier-option"
+                                            type="${inputType}"
+                                            name="group-${group.id}"
+                                            value="${option.id}"
+                                            data-name="${option.name}"
+                                            data-price="${option.extraPrice}"
+                                        >
+
+                                        <span>
+                                            ${option.name}
+                                        </span>
+
+                                    </div>
+
+                                    <span
+                                        class="text-sm text-gray-500"
+                                    >
+                                        +₹${option.extraPrice}
+                                    </span>
+
+                                </label>
+
+                            `).join("")}
+
+                        </div>
+
+                    </div>
+
+                `;
+            }).join("")}
+
+            <div class="mb-6">
+
+                <label
+                    class="block font-semibold mb-2"
+                >
+                    Special Instructions
+                </label>
+
+                <textarea
+                    id="specialInstruction"
+                    rows="3"
+                    class="w-full border rounded-xl p-3"
+                    placeholder="Any special requests?"
+                ></textarea>
+
+            </div>
+
+            <button
+                type="submit"
+                class="w-full bg-[#014f38] text-white py-3 rounded-xl"
+            >
+                Add To Cart
+            </button>
+
+        </form>
+
+    `;
+
+    attachModifierFormSubmit();
+}
+
+//it will handle submit
+function attachModifierFormSubmit() {
+
+    const form =
+        document.getElementById(
+            "modifierForm"
+        );
+
+    form.addEventListener(
+        "submit",
+        async (e) => {
+
+            e.preventDefault();
+
+            try {
+
+                validateModifierGroups();
+
+                const payload = {
+
+                    menuItemId:
+                        currentMenuItemId,
+
+                    quantity: 1,
+
+                    modifiers:
+                        getSelectedModifiers(),
+
+                    specialInstruction:
+                        document
+                            .getElementById(
+                                "specialInstruction"
+                            )
+                            .value
+                            .trim()
+                };
+
+                const response =
+                    await apiRequest(
+                        "/api/cart/add-to-cart",
+                        "POST",
+                        payload
+                    );
+
+                if (!response?.ok) {
+
+                    const error =
+                        await response.json();
+
+                    throw new Error(
+                        error.message ||
+                        "Failed to add item"
+                    );
+                }
+
+                closeModifierModal();
+
+                showToast(
+                    "Item added to cart",
+                    "success"
+                );
+
+            } catch (error) {
+
+                showToast(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+    );
+}
+
+//selected modifiers
+function getSelectedModifiers() {
+
+    return [
+        ...document.querySelectorAll(
+            ".modifier-option:checked"
+        )
+    ].map(input => ({
+
+        modifierName:
+            input.dataset.name,
+
+        extraPrice:
+            Number(
+                input.dataset.price
+            )
+    }));
+}
+
+//close modifier modal
+function closeModifierModal() {
+
+    const modal =
+        document.getElementById(
+            "modifierModal"
+        );
+
+    modal.classList.add(
+        "hidden"
+    );
+
+    modal.classList.remove(
+        "flex"
+    );
+
+    currentMenuItemId = null;
+
+    currentModifierGroups = [];
+}
+
+//close button
+document
+    .getElementById(
+        "closeModifierModal"
+    )
+    ?.addEventListener(
+        "click",
+        closeModifierModal
+    );

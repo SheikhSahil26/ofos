@@ -83,7 +83,7 @@ function createOrderCard(order) {
                 </span>
 
                 <button
-                    class="view-order-btn px-4 py-2 rounded-xl bg-[#014f38] text-white hover:bg-[#013728]"
+                    class="view-order-btn px-4 py-2 rounded-xl bg-[#ff7a00] text-white hover:bg-[#ff7a00]"
                     data-id="${order.id}"
                 >
                     View Details
@@ -100,8 +100,6 @@ function createOrderCard(order) {
 
 //order status colors
 function getStatusClass(status) {
-
-    console.log(status);
 
     const styles = {
 
