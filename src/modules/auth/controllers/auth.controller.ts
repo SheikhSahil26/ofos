@@ -72,6 +72,10 @@ export class AuthController {
         } = response.data;
 
 
+        const days =
+          loginInfo.rememberMe === "on"
+            ? 30
+            : 7;
 
         res.cookie(
           "refreshToken",
@@ -84,6 +88,7 @@ export class AuthController {
               (loginInfo.rememberMe === "on" ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60) * 1000
           }
         );
+
         return res.status(201).json({
           status: "Success",
           statusCode: 200,

@@ -15,7 +15,7 @@ export class UserWebRoutes implements IRoutes{
         
         this.router.get("/home", (req: Request, res: Response) => {
             res.status(200).render("customer/home", {activePage: "home"})
-        })
+        });
         
         this.router.get("/profile", (req: Request, res: Response) => {
             res.status(200).render("customer/profile", {activePage: "profile"});
@@ -31,6 +31,10 @@ export class UserWebRoutes implements IRoutes{
 
         this.router.get("/ziggy-points", (req: Request, res: Response) => {
             res.status(200).render("customer/loyalty-points", {activePage: "points"});
+        });
+
+        this.router.get("/orders", (req: Request, res: Response) => {
+            res.status(200).render("customer/orders", {activePage: "orders"});
         });
     }
 }
