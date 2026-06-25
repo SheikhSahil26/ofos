@@ -40,8 +40,17 @@ export class DeliveryService{
    latitude: number,
    longitude: number
   ): Promise<ServiceResponse<any>> {
+
+    const partner = await this.deliveryRepo.findPartnerByUserId(partnerId);
+    if (!partner) {
+      return {
+        success: false,
+        error: "Delivery partner profile not found",
+        statusCode: 404,
+      };
+    }
         
-    const updateLocation = await this.deliveryRepo.updatePartnerLocation(partnerId, latitude, longitude);
+    const updateLocation = await this.deliveryRepo.updatePartnerLocation(partner.id, latitude, longitude);
 
     return {   
         success: true,
