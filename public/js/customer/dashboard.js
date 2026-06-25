@@ -136,9 +136,11 @@ function renderRecentRestaurants(restaurants) {
         return;
     }
 
+    console.log("restaurants dashboard", restaurants);
+
     container.innerHTML =
         restaurants.map(restaurant => `
-            <div>
+            <a href="/restaurants/detail/${restaurant.branchId}">
 
                 <img
                     src="${restaurant.logoUrl || '/images/default-restaurant.png'}"
@@ -158,7 +160,7 @@ function renderRecentRestaurants(restaurants) {
                     ${formatDate(restaurant.placedAt)}
                 </p>
 
-            </div>
+            </a>
         `).join("");
 }
 
