@@ -2,7 +2,7 @@ import { RestaurantRepository } from "../repositories/restaurant.repository";
 import { UserRepository } from "../../user/repositories/user.repository";
 import { IRestaurantValidation, INearbyItem, IPagination, IRestaurantsResult, IBranch, ICreateRestaurant, IUpdateRestaurant, ICreateReview } from "../interfaces/restaurant.interface";
 import { prisma } from "../../../config/prisma";
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { isBranchOpenNow } from "../../restaurantBranch/utils/branch-open-status.util"
 import { RestaurantPromotionRepository } from "../../restaurantPromotion/repository/promotion.repo";
@@ -40,24 +40,24 @@ export class RestaurantService {
                 search
             );
 
-        // console.log(data.restaurants[0].branches.operatingHours[0]);
-
-        const transformedRestaurants =
-            data.restaurants.map(
-                restaurant => ({
-                    ...restaurant,
-                    branches:
-                        restaurant.branches.map(
-                            (branch: IBranch) => ({
-                                ...branch,
-                                isOpenNow:
-                                    isBranchOpenNow(
-                                        branch.operatingHours
-                                    )
-                            })
-                        )
-                })
-            );
+    // console.log(data.restaurants[0].branches.operatingHours[0]);
+    
+const transformedRestaurants =
+        data.restaurants.map(
+            (restaurant: any) => ({
+                ...restaurant,
+                branches:
+                    restaurant.branches.map(
+                        (branch: IBranch) => ({
+                            ...branch,
+                            isOpenNow:
+                                isBranchOpenNow(
+                                    branch.operatingHours
+                                )
+                        })
+                    )
+            })
+        );
 
         return {
             success: true,
@@ -74,14 +74,16 @@ export class RestaurantService {
 
 
     //GET owner restaurants
-    async getMyRestaurants(
-        ownerId: string,
-        page: number,
-        limit: number
-    ): Promise<ServiceResponse<any[]> & { pagination: IPagination }> {
+   async getMyRestaurants(
+    ownerId: string,
+    page: number,
+    limit: number
+): Promise<ServiceResponse<any[]> & { pagination: IPagination }> {
 
-        const owner: any =
-            await this.userRepo.findUserById(ownerId);
+    console.log(ownerId);
+    
+    const owner: any =
+    await this.userRepo.findUserById(ownerId);
 
         if (!owner) {
             throw new Error("User not found");
@@ -98,16 +100,16 @@ export class RestaurantService {
                 limit
             );
 
-        const transformedRestaurants =
-            data.restaurants.map(
-                restaurant => ({
-                    ...restaurant,
-                    branches: restaurant.branches.map(
-                        (branch: IBranch) => {
-                            console.log(
-                                branch.id,
-                                branch.operatingHours
-                            );
+    const transformedRestaurants =
+        data.restaurants.map(
+            (restaurant: any) => ({
+                ...restaurant,
+                branches: restaurant.branches?.map(
+    (branch: IBranch) => {
+        console.log(
+            branch.id,
+            branch.operatingHours
+        );
 
                             return {
                                 ...branch,
@@ -868,4 +870,15 @@ async getRestaurantPageData(
 
     };
 }
+
+    async getDashboardStats(ownerId: string): Promise<ServiceResponse<any>> {
+        const stats = await this.restaurantRepo.getDashboardStats(ownerId);
+
+        return {
+            success: true,
+            data: stats,
+            message: "Dashboard stats fetched successfully",
+            statusCode: 200
+        };
+    }
 }

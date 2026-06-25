@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Promotions | Ziggy Restaurant</title>
+    <%- include('../partials/head.ejs') %>
+</head>
+<body class="bg-[#f8f7f4] min-h-screen">
+    <p id="toast"></p>
+
+    <!-- Dashboard Layout -->
+    <div class="flex min-h-screen">
+
+        <%- include('../partials/restaurant-sidebar.ejs') %>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-y-auto">
+            <main class="flex-1 px-4 md:px-8 py-6 max-w-7xl mx-auto w-full">
+
+                <!-- Page Heading -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            Promotions
+                        </h1>
+                        <p class="text-gray-500 mt-1">
+                            Manage discounts and offers for your restaurant.
+                        </p>
+                    </div>
+                    <button id="openCreatePromotionModal" class="bg-[#014f38] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-[#013d2c] transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Create Promotion
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="promotionsLoading" class="flex flex-col items-center justify-center py-20">
+                    <div class="w-10 h-10 border-4 border-[#e6f4f0] border-t-[#014f38] rounded-full animate-spin"></div>
+                    <p class="text-gray-500 mt-4 font-medium">Loading promotions...</p>
+                </div>
+
+                <!-- Promotions Container -->
+                <div id="promotionsContainer" class="hidden flex-col gap-8 w-full">
+                    <!-- Active Promotions -->
+                    <div id="activePromotionsContainer" class="hidden">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span> Active Promotions
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="activePromotionsGrid"></div>
+                    </div>
+                    
+                    <!-- Paused Promotions -->
+                    <div id="pausedPromotionsContainer" class="hidden">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-gray-400"></span> Paused Promotions
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="pausedPromotionsGrid"></div>
+                    </div>
+
+                    <!-- Expired Promotions -->
+                    <div id="expiredPromotionsContainer" class="hidden">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span> Expired Promotions
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="expiredPromotionsGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="promotionsEmpty" class="hidden flex-col items-center justify-center py-20 bg-white rounded-2xl border border-[#ececec] shadow-sm">
+                    <div class="w-20 h-20 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-tags text-3xl text-[#ff7a00]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">No Promotions Yet</h3>
+                    <p class="text-gray-500 max-w-md text-center">You haven't created any promotions. Boost your sales by creating your first offer!</p>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Create Promotion Modal -->
+    <div id="createPromotionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-tag text-[#ff7a00]"></i> Create New Promotion
+                </h2>
+                <button id="closeCreatePromotionModal" class="text-gray-400 hover:text-gray-600 transition p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto">
+                <form id="createPromotionForm" class="space-y-6">
+                    
+                    <!-- Basic Info -->
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Basic Info</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Promotion Title *</label>
+                                <input type="text" id="promoTitle" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition" placeholder="e.g. Summer Special" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Promo Code (Optional)</label>
+                                <input type="text" id="promoCode" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition uppercase" placeholder="e.g. SUMMER20" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+                                <input type="date" id="promoStartDate" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
+                                <input type="date" id="promoEndDate" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Type & Values -->
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Type & Value</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Promotion Type *</label>
+                                <select id="promoType" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition bg-white">
+                                    <option value="PERCENTAGE">Percentage (%)</option>
+                                    <option value="FIXED">Fixed Amount (₹)</option>
+                                    <option value="FREE_DELIVERY">Free Delivery</option>
+                                    <option value="BOGO">Buy One Get One (BOGO)</option>
+                                </select>
+                            </div>
+                            <div id="discountValueContainer">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Discount Value *</label>
+                                <input type="number" id="promoDiscountValue" min="1" step="0.01" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition" placeholder="e.g. 20" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Constraints -->
+                    <div id="constraintsContainer">
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">3. Constraints</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div id="minOrderContainer">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Min Order Amount (₹)</label>
+                                <input type="number" id="promoMinOrder" min="0" step="1" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition" placeholder="e.g. 500" />
+                            </div>
+                            <div id="maxDiscountContainer">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Max Discount Amount (₹)</label>
+                                <input type="number" id="promoMaxDiscount" min="1" step="1" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition" placeholder="e.g. 100" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOGO Menu Items Selection -->
+                    <div id="bogoContainer" class="hidden">
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">4. Select Items for BOGO</h3>
+                        <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-xl mb-4">
+                            <i class="fa-solid fa-circle-info mr-1"></i> First select a branch, then choose the menu items that this BOGO applies to.
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Select Branch</label>
+                                <select id="promoBranchSelect" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition bg-white">
+                                    <option value="">-- Choose Branch --</option>
+                                </select>
+                            </div>
+
+                            <div id="menuItemsSelectionBlock" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Select Menu Items *</label>
+                                <div id="promoMenuItemsList" class="border border-gray-200 rounded-xl max-h-48 overflow-y-auto p-3 space-y-2 bg-gray-50">
+                                    <!-- Checkboxes will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error message -->
+                    <p id="createPromotionError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3"></p>
+
+                </form>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+                <button type="button" id="cancelCreatePromotionBtn" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 font-medium transition text-sm">
+                    Cancel
+                </button>
+                <button type="submit" form="createPromotionForm" id="submitCreatePromotionBtn" class="px-6 py-2.5 rounded-xl bg-[#014f38] text-white font-semibold hover:bg-[#013d2c] transition text-sm flex items-center gap-2">
+                    <span id="createPromotionBtnText">Create Promotion</span>
+                    <span id="createPromotionBtnSpinner" class="hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/common/auth.js"></script>
+    <script src="/js/common/api.js"></script>
+    <script src="/js/restaurant/promotions.js"></script>
+
+</body>
+</html>

@@ -62,7 +62,7 @@ app.get("/redis-test",async(req:any,res:any)=>{
 })
 
 app.use(notFoundMiddleware);
-
+app.use(errorHandler);
 
 
 
