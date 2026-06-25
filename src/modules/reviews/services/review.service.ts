@@ -1,0 +1,136 @@
+import { OrderStatus, Review } from "@prisma/client";
+import { AppError } from "../../../utils/appError";
+import { OrdersRepository } from "../../orders/repositories/orders.repository";
+import { ICreateReview, ICreateReviewDto } from "../interfaces/review.interface";
+import { ReviewRepository } from "../repositories/review.repository";
+import { DeliveryRepository } from "../../delivery/repositories/delivery.repository";
+import { ServiceResponse } from "../../../common/types/service-response.types";
+import { BranchRepository } from "../../restaurantBranch/repositories/branch.repo";
+
+export class ReviewService{
+
+    private reviewRepository = new ReviewRepository();
+    private orderRepository = new OrdersRepository();
+    private branchRepository = new BranchRepository();
+    
+    async createReview(
+        userId: string,
+        data: ICreateReviewDto
+    ): Promise<ServiceResponse<Review>> {
+        const order =
+            await this.orderRepository.getOrderById(data.orderId);
+
+        if (!order) {
+            throw new AppError(
+                "Order not found",
+                404
+            );
+        }
+
+        if (order.address.userId !== userId) {
+            throw new AppError(
+                "You can only review your own orders",
+                403
+            );
+        }
+
+        if (order.status !== OrderStatus.DELIVERED) {
+            throw new AppError(
+                "Only delivered orders can be reviewed",
+                400
+            );
+        }
+
+        const existingReview =
+            await this.reviewRepository.getReviewByOrderId(
+                data.orderId
+            );
+
+        if (existingReview) {
+            throw new AppError(
+                "Review already submitted for this order",
+                409
+            );
+        }
+
+        const delivery =
+            await this.reviewRepository.getDeliveryByOrderId(
+                data.orderId
+            );
+
+        const review = await this.reviewRepository.createReview({
+            orderId: order.id,
+            userId,
+            branchId: order.branchId,
+            deliveryPartnerId: delivery?.currentPartnerId ?? undefined,
+            foodRating: data.foodRating,
+            deliveryRating: data.deliveryRating,
+            packagingRating: data.packagingRating,
+            reviewText: data.reviewText,
+        } as ICreateReview);
+
+          return {
+            success: true,
+            data: review,
+            message: "Review created successfully",
+            statusCode: 201,
+        };
+    }
+
+    //get all reviews of a branch
+    async getBranchReviews(
+        branchId: string,
+        ownerId: string,
+        page: number,
+        limit: number
+    ): Promise<ServiceResponse<any>> {
+
+        const branch =
+            await this.branchRepository.validateBranchById(branchId);
+
+        if (!branch) {
+            throw new AppError("Branch not found", 404);
+        }
+
+        // Adjust this check according to your Branch model
+        if (branch.restaurantId !== ownerId) {
+            throw new AppError(
+                "You are not authorized to view these reviews",
+                403
+            );
+        }
+
+        const { reviews, total } =
+            await this.reviewRepository.getBranchReviews(
+                branchId,
+                page,
+                limit
+            );
+
+        // const formattedReviews = reviews.map((review) => ({
+        //     ...review,
+        //     overallRating: Number(
+        //         (
+        //             ((review.foodRating ?? 0) +
+        //                 (review.deliveryRating ?? 0) +
+        //                 (review.packagingRating ?? 0)) / 3
+        //         ).toFixed(1)
+        //     ),
+        // }));
+
+        return {
+            success: true,
+            data: {
+                reviews,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
+                },
+            },
+            message: "Reviews fetched successfully",
+            statusCode: 200,
+        };
+    }
+}

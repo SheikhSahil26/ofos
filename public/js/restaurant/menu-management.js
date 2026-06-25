@@ -915,18 +915,26 @@ async function createMenuItem() {
             'input[name="foodType"]:checked'
         ).value
     );
+
+    const tagIdsTemp = [];
+
+    // selectedTags.forEach(
+    //     tagId => formData.append(
+    //         "tagIds",
+    //         tagId
+    //     )
+    // );
+
     selectedTags.forEach(
-        tagId => formData.append(
-            "tagIds",
+        tagId => tagIdsTemp.push(
+            
             tagId
         )
     );
 
-    clone.querySelector(".delete-item-btn")
-    .addEventListener(
-        "click",
-        () => openDeleteMenuItemModal(item.id)
-    );
+    formData.append("tagIds", tagIdsTemp);
+
+    console.log(formData);
 
     const imageFile =
         document.getElementById(

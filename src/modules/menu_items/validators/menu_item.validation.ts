@@ -46,13 +46,14 @@ export const createMenuItemSchema = Joi.object({
         .uri()
         .optional(),
 
-    tagIds: Joi.array()
-        .items(
-            Joi.string().uuid().messages({
-                "string.guid": "Invalid dietary tag ID",
-            })
-        )
-        .optional(),
+   tagIds: Joi.array()
+    .items(
+        Joi.string().uuid().messages({
+            "string.guid": "Invalid dietary tag ID",
+        })
+    )
+    .single()
+    .optional(),
 
     isAvailable: Joi.boolean().optional(),
 
