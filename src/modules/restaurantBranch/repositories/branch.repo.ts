@@ -493,12 +493,52 @@ export class BranchRepository {
                 orderNumber: true,
                 status: true,
                 paymentStatus: true,
+                subtotal: true,
+                taxAmount: true,
+                deliveryFee: true,
+                discountAmount: true,
                 totalAmount: true,
                 placedAt: true,
                 customer: {
                     select: {
                         id: true,
-                        fullName: true
+                        fullName: true,
+                        mobile: true
+                    }
+                },
+                address: {
+                    select: {
+                        addressLine1: true,
+                        addressLine2: true,
+                        city: true,
+                        state: true,
+                        pincode: true
+                    }
+                },
+                orderItems: {
+                    select: {
+                        id: true,
+                        menuItemName: true,
+                        price: true,
+                        quantity: true,
+                        specialInstruction: true,
+                        modifiers: {
+                            select: {
+                                modifierName: true,
+                                extraPrice: true
+                            }
+                        }
+                    }
+                },
+                payments: {
+                    select: {
+                        paymentMethod: true
+                    }
+                },
+                coupon: {
+                    select: {
+                        code: true,
+                        type: true
                     }
                 }
             },

@@ -38,6 +38,10 @@ export class RestaurantWebRoutes implements IRoutes {
             res.render("restaurant/promotions", { activePage: "promotions" })
         });
 
+        this.router.get("/staff", (req: Request, res: Response) => {
+            res.render("restaurant/staff", { activePage: "staff" })
+        });
+
         this.router.get("/branches/:branchId", this.branchWebController.renderBranchDetails);
     }
 }
