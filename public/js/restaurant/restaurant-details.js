@@ -932,14 +932,16 @@ document.addEventListener(
             return;
         }
 
-        addToCart(
-            itemId
-        );
+        addToCartWithModifiers(
+            itemId,[]
+        );  //passing modifiers as empty array since item has no modifiers
 
     }
 
 
 );
+
+
 
 /* =====================================
 MODIFIER MODAL
@@ -1062,6 +1064,50 @@ function openModifierModal(
 
 
 }
+
+    async function addToCartWithModifiers(menuItemId, modifiers) {
+
+        // const branchId = getBranchIdFromUrl();
+
+        
+
+        const payload = {
+            menuItemId,
+            modifiers
+        };
+        console.log("Adding to cart with modifiers:", payload);
+        try {
+
+            const response = await apiRequest(
+                "/api/cart/add-to-cart",
+                "POST",
+                {menuItemId, modifiers}
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to add item to cart");
+            }
+
+            const result = await response.json();
+
+            console.log("Item added to cart:", result);
+
+            // Optionally, you can show a success message or update the cart UI here
+            console.log("Item added to cart:", result);
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to add item to cart. Please try again.");
+        }
+
+    }
+
+
+
+
+
+
+
 
 closeModifierModalBtn
     ?.addEventListener(

@@ -20,6 +20,8 @@ export class OrdersControllers {
   const user = req.user as Express.payload
   const { addressId, paymentMethod, couponCode, scheduledAt } = req.body;
 
+  console.log("Request body:", req.body);
+
   if (!addressId || !paymentMethod) {
     return res.status(400).json({
       success: false,
@@ -107,7 +109,15 @@ updateOrderStatusByDeliveryPartner = asyncHandler(
     return res.status(result.statusCode).json(result);
   }
 );
+//for polling to get the active orders for staff user
+  getBranchOrdersForStaff = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user as Express.payload // dummy
 
+    const result = await this.ordersService.getBranchOrdersForStaff(user.userId);
+    return res.status(result.statusCode).json(result);
+  }
+);
   
  
 }

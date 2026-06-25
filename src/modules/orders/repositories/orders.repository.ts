@@ -45,6 +45,8 @@ export class OrdersRepository {
             },
         });
 
+        console.log("Order fetched from repository:", order);
+
         return order;
     }
 

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { IRoutes } from "../../../common/interfaces/route.interface";
 import { DeliveryController } from "../controllers/delivery.controller";
 import { authorizeRoles } from "../../../middlewares/roleMiddlware";
+import { isAuthenticated } from "../../../middlewares/authenticateMiddlware";
 
 export class DeliveryRoutes implements IRoutes {
   path = "/delivery";
@@ -13,9 +14,18 @@ export class DeliveryRoutes implements IRoutes {
   }
 
   private initializeRoutes(): void {
+
+
+
+    // deliveryPartner.routes.ts
+
     // Update delivery partner location
+
+
+
+
     this.router.patch(
-      "/update-partner-location/:partnerId",
+      "/update-partner-location",isAuthenticated,
       this.controller.updatePartnerLocation
     );
 
@@ -26,19 +36,19 @@ export class DeliveryRoutes implements IRoutes {
     );
 
     this.router.patch(
-      "/toggle-availability",
+      "/toggle-availability",isAuthenticated,
       this.controller.toggleAvailability
     );
     
     this.router.get(
       "/profile",
-      
+      isAuthenticated,
       this.controller.getPartnerProfile
     );
 
     this.router.put(
       "/profile",
-      
+      isAuthenticated,
       this.controller.updatePartnerProfile
     );
 
@@ -53,7 +63,19 @@ export class DeliveryRoutes implements IRoutes {
       );
 
     
-    
+    this.router.get(
+  "/pending-offer",
+  isAuthenticated,
+  authorizeRoles("DELIVERY_PARTNER"),
+  this.controller.getPendingOffer
+);
+
+this.router.patch(
+  "/offer/:assignmentId/respond",
+  isAuthenticated,
+  authorizeRoles("DELIVERY_PARTNER"),
+  this.controller.respondToOffer
+);
     
     
   }

@@ -8,7 +8,7 @@ import "../../../config/jwtAuth.js";
 import { Payload } from "@prisma/client/runtime/library";
 
 
-export class AuthWebRoutes implements IRoutes {
+export class WebAuthRoutes implements IRoutes {
   path = '/';
   router = Router();
   controller = new AuthController();

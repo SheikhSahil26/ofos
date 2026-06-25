@@ -20,11 +20,11 @@ import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";
 import { BranchService } from "../../restaurantBranch/services/branch.service";
 import redisClient from "../../../config/redis";
-import { DeliveryPartnerStatus } from "@prisma/client";
+import { DeliveryPartnerStatus, VehicleType } from "@prisma/client";
 
 export class DeliveryService{
   private deliveryRepo = new DeliveryRepository(prisma);
-  prisma: any;
+   private prisma = prisma;
   constructor(
    
   ) {}
@@ -51,53 +51,116 @@ export class DeliveryService{
     }
   }
 
-  async assignNearestPartner(
-    orderId:string
-  ): Promise<ServiceResponse<any>> {
-    //here
-    //the nearest partner with the status active in the platform and free to take delivery are being searched and the best match gets assigned the delivery!!!
+async assignNearestPartner(orderId: string): Promise<ServiceResponse<any>> {
 
-    //find the order from order service 
+  const orderResult = await this.orderService.getOrderById(orderId);
+  if (!orderResult.success || !orderResult.data) {
+    return { success: false, error: "Order not found", statusCode: 404 };
+  }
+  const order = orderResult.data;
 
-    const order = await this.orderService.getOrderById(orderId)
-    //now from this have to fetch the branchId and from that we wil get the lat and long of the branch.
-    const branchDetails = await this.branchService.getBranchDetails(order.data.branchId)
+  if (!order.delivery) {
+    return { success: false, error: "Delivery record not found for this order", statusCode: 404 };
+  }
+  if (order.delivery.currentPartnerId) {
+    return { success: false, error: "A delivery partner is already assigned to this order", statusCode: 409 };
+  }
 
-    if (!branchDetails.data) {
-  throw new Error("Branch not found");
+  // Check no PENDING offer already exists for this delivery — avoid duplicate offers
+  const existingPendingOffer = await this.deliveryRepo.findPendingOffer(order.delivery.id);
+  if (existingPendingOffer) {
+    return { success: false, error: "An offer is already pending for this order", statusCode: 409 };
+  }
 
-    }
+  const branchResult = await this.branchService.getBranchDetails(order.branchId, order.customerId);
+  if (!branchResult.data) {
+    return { success: false, error: "Branch not found", statusCode: 404 };
+  }
 
-if (branchDetails.data.latitude === null || branchDetails.data.longitude === null) {
-  throw new Error("Branch coordinates not configured");
-}
+  const branchLat = branchResult.data.latitude;
+  const branchLng = branchResult.data.longitude;
 
+  if (branchLat === null || branchLng === null) {
+    return { success: false, error: "Branch coordinates not configured", statusCode: 400 };
+  }
 
-const nearbyPartners = await redisClient.sendCommand([
-  "GEORADIUS",
-  "delivery_partners",
-  branchDetails.data.longitude.toNumber().toString(),
-  branchDetails.data.latitude.toNumber().toString(),
-  "10",
-  "km"
-]);
+  const nearbyResults = await this.redis.sendCommand([
+    "GEORADIUS",
+    "delivery_partners",
+    branchLng.toString(),
+    branchLat.toString(),
+    "10",
+    "km",
+    "WITHDIST",
+    "ASC",
+    "COUNT", "20",
+  ]);
 
-console.log(nearbyPartners);
+  if (!nearbyResults || nearbyResults.length === 0) {
+    return { success: false, error: "No delivery partners found nearby", statusCode: 503 };
+  }
 
-  console.log(nearbyPartners)
+  const candidateIds: string[] = (nearbyResults as [string, string][]).map((r) => r[0]);
 
+  // Exclude partners who already REJECTED this delivery — don't re-offer to them
+  const rejectedPartnerIds = await this.deliveryRepo.findRejectedPartnerIds(order.delivery.id);
 
+  const activePartners = await this.deliveryRepo.findActivePartnersByIds(candidateIds);
+  const activePartnerIds = new Set(
+    activePartners
+      .filter((p) => !rejectedPartnerIds.has(p.id))
+      .map((p) => p.id)
+  );
 
+  let chosen: { partnerId: string; distanceKm: number } | null = null;
 
-
-
-    return {
-        success: true,
-        message: "Partner assigned successfully",
-        data: null, 
-        statusCode: 200,
+  for (const [partnerId, distance] of nearbyResults as [string, string][]) {
+    if (activePartnerIds.has(partnerId)) {
+      chosen = { partnerId, distanceKm: parseFloat(distance) };
+      break;
     }
   }
+
+  if (!chosen) {
+    return { success: false, error: "No active delivery partners available right now", statusCode: 503 };
+  }
+
+  const chosenPartner = activePartners.find((p) => p.id === chosen!.partnerId)!;
+
+  // ── Create OFFER only — do not touch delivery.currentPartnerId yet ──
+  await this.prisma.$transaction(async (tx) => {
+
+    await tx.deliveryAssignment.create({
+      data: {
+        deliveryId: order.delivery.id,
+        partnerId: chosen!.partnerId,
+        assignedAt: new Date(),
+        // responseStatus and respondedAt stay null = "pending offer"
+      },
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: chosenPartner.userId,
+        title: "New Delivery Offer",
+        message: `New order ${order.orderNumber} available, ${chosen!.distanceKm.toFixed(1)} km away. Accept now!`,
+        notificationType: "ORDER_UPDATE",
+        status: "PENDING",
+      },
+    });
+  });
+
+  return {
+    success: true,
+    message: "Delivery offer sent to nearest partner",
+    data: {
+      orderId,
+      offeredPartnerId: chosen.partnerId,
+      distanceFromBranch: `${chosen.distanceKm.toFixed(2)} km`,
+    },
+    statusCode: 200,
+  };
+}
 
   async assignNearestPartnerWithRetry(
     orderId: string,
@@ -214,16 +277,45 @@ async updatePartnerProfile(
 
   const { deliveryUserId, vehicleType, vehicleNumber, governmentId } = input;
 
-  // 1. Find partner
-  const partner = await this.deliveryRepo.findPartnerByUserId(deliveryUserId);
 
-  if (!partner) {
+  // 1. Find partner
+  const partner =
+    await this.deliveryRepo
+    .findPartnerByUserId(
+        deliveryUserId
+    );
+
+if (!partner) {
+
+  if (
+    !vehicleType ||
+    !vehicleNumber ||
+    !governmentId
+) {
     return {
-      success: false,
-      error: "Delivery partner profile not found",
-      statusCode: 404,
+        success: false,
+        error: "Missing required fields",
+        statusCode: 400
     };
-  }
+}
+
+    const createdPartner =
+        await this.deliveryRepo
+        .createDeliveryPartner({
+            userId: deliveryUserId,
+            vehicleType,
+            vehicleNumber,
+            governmentId
+        });
+
+    return {
+        success: true,
+        message: "Profile created",
+        data: createdPartner,
+        statusCode: 201
+    };
+}
+
 
   // 2. Suspended partners cannot update profile
   if (partner.status === "SUSPENDED") {
@@ -442,5 +534,114 @@ async getPartnerRatings(
     statusCode: 200,
   };
 }
+
+
+// modules/delivery/services/delivery.service.ts
+
+async respondToOffer(
+  partnerUserId: string,
+  assignmentId: string,
+  response: "ACCEPTED" | "REJECTED",
+): Promise<ServiceResponse<any>> {
+
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const assignment = await this.prisma.deliveryAssignment.findFirst({
+    where: { id: assignmentId, partnerId: partner.id },
+    include: { delivery: { include: { order: true } } },
+  });
+
+  if (!assignment) {
+    return { success: false, error: "Offer not found", statusCode: 404 };
+  }
+
+  if (assignment.responseStatus !== null) {
+    return { success: false, error: "This offer has already been responded to", statusCode: 409 };
+  }
+
+  // Someone else may have already been accepted while this partner was deciding
+  if (assignment.delivery.currentPartnerId) {
+    return { success: false, error: "This order has already been assigned to another partner", statusCode: 409 };
+  }
+
+  await this.prisma.$transaction(async (tx) => {
+
+    await tx.deliveryAssignment.update({
+      where: { id: assignmentId },
+      data: {
+        responseStatus: response,
+        respondedAt: new Date(),
+      },
+    });
+
+    if (response === "ACCEPTED") {
+      await tx.delivery.update({
+        where: { id: assignment.deliveryId },
+        data: { currentPartnerId: partner.id },
+      });
+
+      await tx.deliveryPartner.update({
+        where: { id: partner.id },
+        data: { status: "ON_DELIVERY" },
+      });
+    }
+  });
+
+  // If rejected — automatically try the next nearest partner
+  if (response === "REJECTED") {
+    this.assignNearestPartner(assignment.delivery.orderId)
+      .catch((err) => console.error("Re-assignment after rejection failed:", err));
+  }
+
+  return {
+    success: true,
+    message: response === "ACCEPTED" ? "Offer accepted" : "Offer rejected",
+    data: { assignmentId, response },
+    statusCode: 200,
+  };
+}
+
+
+// ── Polling endpoint — delivery partner app checks for pending offers ──
+async getPendingOffer(partnerUserId: string): Promise<ServiceResponse<any>> {
+  console.log("Fetching pending offer for partner:", partnerUserId);
+  const offer = await this.deliveryRepo.findPendingOfferForPartner(partnerUserId);
+
+  console.log("Pending offer fetched for partner:", offer);
+
+  if (!offer) {
+    return {
+      success: true,
+      message: "No pending offers",
+      data: null,
+      statusCode: 200,
+    };
+  }
+
+  const order = offer.delivery.order;
+
+  return {
+    success: true,
+    message: "Pending offer found",
+    data: {
+      assignmentId: offer.id,
+      orderNumber: order.orderNumber,
+      earnings: Number(order.deliveryFee),
+      pickupBranch: order.branch.branchName,
+      pickupAddress: order.branch.addressLine1,
+      dropCity: order.address.city,
+      dropPincode: order.address.pincode,
+      assignedAt: offer.assignedAt,
+    },
+    statusCode: 200,
+  };
+}
+
+
+
+
 
 }

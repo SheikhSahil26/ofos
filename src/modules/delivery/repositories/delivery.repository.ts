@@ -12,7 +12,19 @@ export class DeliveryRepository implements IDeliveryRepository {
   }
 
 
-  async findActivePartners(): Promise<any[]> {}
+  async findActivePartnersByIds(partnerIds: string[]): Promise<any[]> {
+    return this.prisma.deliveryPartner.findMany({
+      where: {
+        userId: { in: partnerIds },
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+      },
+    });
+  }
 
   async findOrderWithBranchAndDelivery(orderId: string): Promise<any> {}
 
@@ -100,6 +112,41 @@ async findPartnerProfileByUserId(userId: string): Promise<any> {
       },
     },
   });
+}
+
+async createDeliveryPartner(
+    data: {
+        userId: string;
+        vehicleType: VehicleType;
+        vehicleNumber: string;
+        governmentId: string;
+    }
+) {
+
+    return await this.prisma.deliveryPartner.create({
+
+        data: {
+
+            userId:
+                data.userId,
+
+            vehicleType:
+                data.vehicleType,
+
+            vehicleNumber:
+                data.vehicleNumber,
+
+            governmentId:
+                data.governmentId,
+
+            status:
+                DeliveryPartnerStatus
+                .PENDING_VERIFICATION
+
+        }
+
+    });
+
 }
   
   async updatePartnerProfile(
@@ -302,6 +349,52 @@ async findPartnerRatingStats(partnerId: string): Promise<any> {
   };
 }
 
+// modules/delivery/repositories/delivery.repository.ts
 
+async findPendingOffer(deliveryId: string): Promise<any> {
+  return this.prisma.deliveryAssignment.findFirst({
+    where: {
+      deliveryId,
+      responseStatus: null, // not yet responded = pending
+    },
+  });
+}
+
+async findRejectedPartnerIds(deliveryId: string): Promise<Set<string>> {
+  const rejected = await this.prisma.deliveryAssignment.findMany({
+    where: { deliveryId, responseStatus: "REJECTED" },
+    select: { partnerId: true },
+  });
+  return new Set(rejected.map((r) => r.partnerId));
+}
+
+async findPendingOfferForPartner(partnerUserId: string): Promise<any> {
+  return this.prisma.deliveryAssignment.findFirst({
+    where: {
+      responseStatus: null,
+      partner: { userId: partnerUserId },
+    },
+    orderBy: { assignedAt: "desc" },
+    include: {
+      delivery: {
+        include: {
+          order: {
+            select: {
+              orderNumber: true,
+              totalAmount: true,
+              deliveryFee: true,
+              branch: {
+                select: { branchName: true, addressLine1: true, city: true, latitude: true, longitude: true },
+              },
+              address: {
+                select: { addressLine1: true, city: true, pincode: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
 
 }
