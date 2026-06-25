@@ -28,7 +28,7 @@ let orderTimers = {}; // tracks "time ago" labels without re-fetching
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchBranchOrders();
-  pollTimer = setInterval(fetchBranchOrders, 5000);
+  pollTimer = setInterval(fetchBranchOrders, 500000);
 });
 
 window.addEventListener("beforeunload", () => clearInterval(pollTimer));

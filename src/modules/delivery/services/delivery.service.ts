@@ -607,8 +607,10 @@ async respondToOffer(
 
 // ── Polling endpoint — delivery partner app checks for pending offers ──
 async getPendingOffer(partnerUserId: string): Promise<ServiceResponse<any>> {
-
+  console.log("Fetching pending offer for partner:", partnerUserId);
   const offer = await this.deliveryRepo.findPendingOfferForPartner(partnerUserId);
+
+  console.log("Pending offer fetched for partner:", offer);
 
   if (!offer) {
     return {

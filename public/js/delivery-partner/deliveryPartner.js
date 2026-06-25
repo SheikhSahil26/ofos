@@ -8,7 +8,7 @@ let currentOffer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   pollForOffer();
-  offerPollTimer = setInterval(pollForOffer, 5000);
+  offerPollTimer = setInterval(pollForOffer, 300000);
 });
 
 async function pollForOffer() {

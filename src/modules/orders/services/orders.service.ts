@@ -7,11 +7,14 @@ import { OrdersRepository } from "../repositories/orders.repository";
 import { DELIVERY_TRANSITIONS, STAFF_TRANSITIONS } from "../types/order.types";
 import { OrderItemInput } from "../interfaces/orders.interface";
 import { DeliveryService } from "../../delivery/services/delivery.service";
+import { OrderAssignmentService } from "./orderAssignment.service";
 // import { CreateOrderInput, OrderItemInput } from "../types/order.types";
 
 export class OrderService {
   private orderRepo = new OrdersRepository();
   // Assuming you have a DeliveryService class
+  private orderAssignmentService = new OrderAssignmentService();
+  
   constructor(
     private readonly prisma: PrismaClient,
     private readonly cartService: CartService,
@@ -570,6 +573,8 @@ export class OrderService {
       return { success: false, error: "Order not found", statusCode: 404 };
     }
 
+    console.log(staffUserIdDummy,"staff user id for updating order status by staff")
+
     // 2. Verify staff belongs to this branch
     const staffRecord = await this.prisma.restaurantStaff.findFirst({
       where: {
@@ -591,6 +596,7 @@ export class OrderService {
     // 3. Check transition is valid for staff
     console.log(order,"order")
     const nextStatus = STAFF_TRANSITIONS[order.status];
+    console.log(nextStatus,"next status for order")
     if (!nextStatus) {
       return {
         success: false,
@@ -600,7 +606,11 @@ export class OrderService {
     }
 
     if (nextStatus === "PREPARING") {
-  this.deliveryService
+
+      console.log(`Order ${orderId} is now READY_FOR_PICKUP. Assigning nearest delivery partner...`);
+
+
+    await this.orderAssignmentService
     .assignNearestPartner(orderId)
     .catch((err) => console.error(`Assignment failed for order ${orderId}:`, err));
 }
@@ -858,7 +868,7 @@ async updateOrderStatusByDeliveryPartner(
 async getBranchOrdersForStaff(
   staffUserId: string
 ): Promise<ServiceResponse<any>> {
-  let staffUserIdDummy = "c9aa8664-31c2-4c0e-9753-ddccd734208a";
+  let staffUserIdDummy = staffUserId
 console.log("Fetching branch orders for staff user:", staffUserIdDummy);
   // 1. Find staff's branch
   const staffRecord = await this.prisma.restaurantStaff.findFirst({

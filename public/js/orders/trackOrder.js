@@ -85,7 +85,7 @@ const orderId = window.location.pathname.split("/").pop();
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   fetchTrackingDetails();
-  pollTimer = setInterval(fetchTrackingDetails, 5000);
+  pollTimer = setInterval(fetchTrackingDetails, 500000);
 });
 
 window.addEventListener("beforeunload", () => clearInterval(pollTimer));

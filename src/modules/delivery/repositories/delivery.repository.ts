@@ -15,7 +15,7 @@ export class DeliveryRepository implements IDeliveryRepository {
   async findActivePartnersByIds(partnerIds: string[]): Promise<any[]> {
     return this.prisma.deliveryPartner.findMany({
       where: {
-        id: { in: partnerIds },
+        userId: { in: partnerIds },
         isDeleted: false,
       },
       select: {
