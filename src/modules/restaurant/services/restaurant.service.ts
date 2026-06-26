@@ -843,7 +843,7 @@ async getRestaurantPageData(
             ),
 
             this.promotionRepository
-                .getActivePromotions(
+                .getAllPromotions(
                     restaurantId
                 )
 
