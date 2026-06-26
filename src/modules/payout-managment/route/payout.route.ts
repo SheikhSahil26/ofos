@@ -18,6 +18,11 @@ export class PayoutRoutes implements IRoutes {
 
     private initializeRoutes(): void {
 
+        this.router.get(
+            "/dashboard/stats",
+            this.controller.getDashboardStats
+        );
+
         // Process the payout split and create entry inside the payoutTransaction.
         this.router.post(
             "/process/:orderId",
@@ -35,16 +40,26 @@ export class PayoutRoutes implements IRoutes {
 
         // THis fetxh helkps to findout the branch pending payouts and lastSettledPayout Date.
         this.router.get(
-            "/restaurants/:branchHeadId/pending-summary",
+            "/restaurants/:branchId/pending-summary",
             this.controller.getRestaurantPendingSummary
         );
 
         // GET /api/payouts/restaurants/BH001/history?status=PENDING&page=1&limit=10
         // Payout History's..............
         this.router.get(
-            "/restaurants/:branchHeadId/history",
+            "/restaurants/:branchId/history",
             this.controller.getRestaurantHistory
         );
+
+        // This route will make the create settlement pending entry insdide the settlememt table and also assign the settlement id to the restaurantPayout Table
+        this.router.post(
+            "/settlements/restaurants",
+            this.controller.createRestaurantSettlement
+        );
+
+
+
+
 
 
         //  Delivery Partner Module...............
@@ -58,20 +73,27 @@ export class PayoutRoutes implements IRoutes {
             this.controller.getDeliveryHistory
         );
 
-
+        this.router.post(
+            "/settlements/delivery-partners",
+            this.controller.createDeliveryPartnerSettlement
+        );
 
 
         // Settlements Routes Builded specially for Admin perspctive
 
-        // This route will make the create settlement pending entry insdide the settlememt table and also assign the settlement id to the restaurantPayout Table
-        this.router.post(
-            "/settlements/restaurants",
-            this.controller.createRestaurantSettlement
+        // Admin To wahtch All pending Settlements
+        this.router.get(
+            "/settlements/pending",
+            this.controller.getPendingSettlements
         );
 
-        this.router.post(
-            "/settlements/restaurants",
-            this.controller.createDeliveryPartnerSettlement
+        // Settelment History..
+        // GET /api/payouts/settlements/history?page=1&limit=10
+        // GET /api/payouts/settlements/history?status=SUCCESS
+
+        this.router.get(
+            "/settlements/history",
+            this.controller.getSettlementHistory
         );
 
 
@@ -86,23 +108,6 @@ export class PayoutRoutes implements IRoutes {
         this.router.patch(
             "/settlements/:settlementId/complete",
             this.controller.completeSettlement
-        );
-
-
-        // Admin To wahtch All pending Settlements
-        this.router.get(
-            "/settlements/pending",
-            this.controller.getPendingSettlements
-        );
-
-
-        // Settelment History..
-        // GET /api/payouts/settlements/history?page=1&limit=10
-        // GET /api/payouts/settlements/history?status=SUCCESS
-
-        this.router.get(
-            "/settlements/history",
-            this.controller.getSettlementHistory
         );
     }
 

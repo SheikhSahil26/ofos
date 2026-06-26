@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { PaymentService } from "../services/payment.service";
 import { asyncHandler } from "../../../middlewares/asyncHandler";
+import { PayoutService } from "../../payout-managment/services/payout.service";
+import { prisma } from "../../../config/prisma";
 
 export class PaymentController {
   constructor(
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    // private payoutService: PayoutService
   ) { }
 
   getPaymentByOrderId = asyncHandler(
@@ -20,6 +23,7 @@ export class PaymentController {
     }
   );
 
+
   paymentSuccess = asyncHandler(
     async (req: Request, res: Response) => {
 
@@ -29,7 +33,6 @@ export class PaymentController {
         await this.paymentService.processPaymentSuccess(
           paymentId
         );
-
       return res
         .status(response.statusCode || 200)
         .json(response);

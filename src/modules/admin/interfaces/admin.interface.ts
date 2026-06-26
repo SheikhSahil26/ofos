@@ -112,3 +112,140 @@ export interface IAssignRole {
 //         total: number;
 //     };
 // }
+
+export interface IPendingPartner {
+
+    id: string;
+
+    fullName: string;
+
+    email: string;
+
+    mobile: string;
+
+    vehicleType: string;
+
+    vehicleNumber: string;
+
+    governmentId: string;
+
+    createdAt: Date;
+}
+
+export interface IPendingPartnerResponse {
+
+    partners: IPendingPartner[];
+
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+    };
+}
+
+export interface IDeliveryPartnerApprovalStats {
+
+    pending: number;
+
+    active: number;
+
+    suspended: number;
+}
+
+export interface IDeliveryPartnerListItem {
+
+    id: string;
+
+    fullName: string;
+
+    email: string;
+
+    mobile: string;
+
+    profilePhoto: string | null;
+
+    vehicleType: string;
+
+    vehicleNumber: string;
+
+    status: string;
+
+    totalDeliveries: number;
+
+    totalEarnings: number;
+
+    rating: number;
+}
+
+export interface IDeliveryPartnerPagination {
+
+    page: number;
+
+    limit: number;
+
+    total: number;
+}
+
+export interface IDeliveryPartnerListResponse {
+
+    partners: IDeliveryPartnerListItem[];
+
+    pagination: IDeliveryPartnerPagination;
+}
+
+
+export interface IPagination {
+
+    page: number;
+
+    limit: number;
+
+    total: number;
+
+    totalPages: number;
+}
+
+export interface IRestaurantPendingPayout {
+
+    branchHeadId: string;
+
+    restaurantName: string;
+
+    ownerName: string;
+
+    pendingAmount: number;
+
+    pendingOrders: number;
+
+    lastSettlement: Date | null;
+}
+
+export interface IRestaurantPendingPayoutResponse {
+
+    restaurants: IRestaurantPendingPayout[];
+
+    pagination: IPagination;
+}
+
+export interface IDeliveryPartnerPendingPayout {
+
+    deliveryPartnerId: string;
+
+    partnerName: string;
+
+    vehicleNumber: string;
+
+    pendingAmount: number;
+
+    pendingOrders: number;
+
+    lastSettlement: Date | null;
+}
+
+export interface IDeliveryPartnerPendingPayoutResponse {
+
+    partners: IDeliveryPartnerPendingPayout[];
+
+    pagination: IPagination;
+}
+

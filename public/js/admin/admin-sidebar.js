@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const currentPath = window.location.pathname;
+    console.log(currentPath)
 
     document.querySelectorAll("nav a").forEach(link => {
 

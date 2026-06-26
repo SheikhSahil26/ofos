@@ -1,11 +1,126 @@
-import { PrismaClient, PayoutStatus, RestaurantPayout, SettlementStatus, SettlementType, DeliveryPartnerPayout } from "@prisma/client";
-import { any } from "joi";
+import {
+    PrismaClient,
+    SettlementStatus,
+    SettlementType,
+    RestaurantPayout,
+    DeliveryPartnerPayout
+} from "@prisma/client";
+import { ISettlementListResponse } from "../interface/payout.interface";
 
 export class PayoutRepository {
-    constructor(private prisma: PrismaClient) { }
 
-    async getOrderById(orderId: string) {
-        return this.prisma.order.findUnique({
+    constructor(
+        private prisma: PrismaClient
+    ) { }
+
+    getDashboardStats = async () => {
+
+        const today =
+            new Date();
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        const [
+
+            pendingSettlements,
+
+            restaurantPending,
+
+            deliveryPending,
+
+            todaySettlements,
+
+            totalPaid
+
+        ] = await Promise.all([
+
+            this.prisma.settlement.count({
+                where: {
+                    status:
+                        SettlementStatus.PENDING
+                }
+            }),
+
+            this.prisma.restaurantPayout.aggregate({
+                where: {
+                    status:
+                        SettlementStatus.PENDING
+                },
+                _sum: {
+                    amount: true
+                }
+            }),
+
+            this.prisma.deliveryPartnerPayout.aggregate({
+                where: {
+                    status:
+                        SettlementStatus.PENDING
+                },
+                _sum: {
+                    amount: true
+                }
+            }),
+
+            this.prisma.settlement.count({
+                where: {
+                    status:
+                        SettlementStatus.SUCCESS,
+                    settledAt: {
+                        gte: today
+                    }
+                }
+            }),
+
+            this.prisma.settlement.aggregate({
+                where: {
+                    status:
+                        SettlementStatus.SUCCESS
+                },
+                _sum: {
+                    totalAmount: true
+                }
+            })
+
+        ]);
+
+        return {
+
+            pendingSettlements,
+
+            restaurantPendingAmount:
+                Number(
+                    restaurantPending._sum.amount || 0
+                ),
+
+            deliveryPendingAmount:
+                Number(
+                    deliveryPending._sum.amount || 0
+                ),
+
+            todaySettlements,
+
+            totalPaidAmount:
+                Number(
+                    totalPaid._sum.totalAmount || 0
+                )
+
+        };
+    };
+
+    // ==========================================
+    // ORDER / PAYOUT
+    // ==========================================
+
+    getOrderById = async (
+        orderId: string
+    ) => {
+
+        return await this.prisma.order.findUnique({
             where: {
                 id: orderId
             },
@@ -14,42 +129,36 @@ export class PayoutRepository {
                 delivery: true
             }
         });
-    }
 
-    async getPayoutByOrderId(orderId: string) {
-        return this.prisma.payoutTransaction.findUnique({
-            where: { orderId },
+    };
+
+    getPayoutByOrderId = async (
+        orderId: string
+    ) => {
+
+        return await this.prisma.payoutTransaction.findUnique({
+            where: {
+                orderId
+            }
         });
-    }
 
-    // async createPayoutTransaction(
-    //     orderId: string,
-    //     grossAmount: number,
-    //     restaurantAmount: number,
-    //     deliveryAmount: number,
-    //     platformFee: number
-    // ) {
-    //     return this.prisma.payoutTransaction.create({
-    //         data: {
-    //             orderId,
-    //             grossAmount,
-    //             restaurantAmount,
-    //             deliveryAmount,
-    //             platformFee,
-    //             status: PayoutStatus.COMPLETED,
-    //             processedAt: new Date(),
-    //         },
-    //     });
-    // }
+    };
 
-    async getRestaurantPendingSummary(branchHeadId: string) {
+    // ==========================================
+    // RESTAURANT SUMMARY
+    // ==========================================
+
+    getRestaurantPendingSummary = async (
+        branchId: string
+    ) => {
 
         const [pending, lastSettlement] =
             await Promise.all([
+
                 this.prisma.restaurantPayout.aggregate({
                     where: {
-                        branchHeadId,
-                        status: "PENDING"
+                        branchId,
+                        status: SettlementStatus.PENDING
                     },
                     _sum: {
                         amount: true
@@ -61,9 +170,11 @@ export class PayoutRepository {
 
                 this.prisma.settlement.findFirst({
                     where: {
-                        beneficiaryId: branchHeadId,
-                        settlementType: "RESTAURANT",
-                        status: "SUCCESS"
+                        beneficiaryId: branchId,
+                        settlementType:
+                            SettlementType.RESTAURANT,
+                        status:
+                            SettlementStatus.SUCCESS
                     },
                     orderBy: {
                         settledAt: "desc"
@@ -73,77 +184,26 @@ export class PayoutRepository {
             ]);
 
         return {
-            branchHeadId,
-            pendingAmount:
-                pending._sum.amount || 0,
-            pendingPayouts:
+            totalPendingAmount:
+                Number(
+                    pending._sum.amount || 0
+                ),
+
+            totalPendingPayouts:
                 pending._count.id,
+
             lastSettlementDate:
                 lastSettlement?.settledAt || null
         };
-    }
+    };
 
-    // payout.repository.ts
+    // ==========================================
+    // DELIVERY SUMMARY
+    // ==========================================
 
-    async getRestaurantHistory(
-        branchHeadId: string,
-        page: number,
-        limit: number
-    ) {
-
-        const skip = (page - 1) * limit;
-
-        const [records, total] = await Promise.all([
-
-            this.prisma.restaurantPayout.findMany({
-                where: {
-                    branchHeadId
-                },
-                include: {
-                    payoutTransaction: {
-                        select: {
-                            orderId: true,
-                            grossAmount: true,
-                            processedAt: true
-                        }
-                    },
-                    settlement: {
-                        select: {
-                            id: true,
-                            status: true,
-                            settledAt: true
-                        }
-                    }
-                },
-                orderBy: {
-                    createdAt: "desc"
-                },
-                skip,
-                take: limit
-            }),
-
-            this.prisma.restaurantPayout.count({
-                where: {
-                    branchHeadId
-                }
-            })
-
-        ]);
-
-        return {
-            records,
-            pagination: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit)
-            }
-        };
-    }
-
-    async getDeliveryPendingSummary(
+    getDeliveryPendingSummary = async (
         deliveryPartnerId: string
-    ) {
+    ) => {
 
         const [pending, lastSettlement] =
             await Promise.all([
@@ -151,7 +211,7 @@ export class PayoutRepository {
                 this.prisma.deliveryPartnerPayout.aggregate({
                     where: {
                         deliveryPartnerId,
-                        status: "PENDING"
+                        status: SettlementStatus.PENDING
                     },
                     _sum: {
                         amount: true
@@ -163,9 +223,13 @@ export class PayoutRepository {
 
                 this.prisma.settlement.findFirst({
                     where: {
-                        beneficiaryId: deliveryPartnerId,
-                        settlementType: "DELIVERY_PARTNER",
-                        status: "SUCCESS"
+                        beneficiaryId:
+                            deliveryPartnerId,
+                        settlementType:
+                            SettlementType
+                                .DELIVERY_PARTNER,
+                        status:
+                            SettlementStatus.SUCCESS
                     },
                     orderBy: {
                         settledAt: "desc"
@@ -175,255 +239,311 @@ export class PayoutRepository {
             ]);
 
         return {
-            deliveryPartnerId,
-            pendingAmount: pending._sum.amount || 0,
-            pendingPayouts: pending._count.id,
+            totalPendingAmount:
+                Number(
+                    pending._sum.amount || 0
+                ),
+
+            totalPendingPayouts:
+                pending._count.id,
+
             lastSettlementDate:
                 lastSettlement?.settledAt || null
         };
-    }
+    };
 
-    async getDeliveryHistory(
-        deliveryPartnerId: string,
+    // ==========================================
+    // RESTAURANT HISTORY
+    // ==========================================
+
+    getRestaurantHistory = async (
+        branchId: string,
         page: number,
         limit: number
-    ) {
+    ) => {
 
-        const skip = (page - 1) * limit;
+        const skip =
+            (page - 1) * limit;
 
-        const [records, total] = await Promise.all([
+        const [payouts, total] =
+            await Promise.all([
 
-            this.prisma.deliveryPartnerPayout.findMany({
-                where: {
-                    deliveryPartnerId
-                },
-                include: {
-                    payoutTransaction: {
-                        select: {
-                            orderId: true,
-                            grossAmount: true,
-                            processedAt: true
-                        }
+                this.prisma.restaurantPayout.findMany({
+                    where: {
+                        branchId
                     },
-                    settlement: {
-                        select: {
-                            id: true,
-                            status: true,
-                            settledAt: true
-                        }
+                    include: {
+                        payoutTransaction: true,
+                        settlement: true
+                    },
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    skip,
+                    take: limit
+                }),
+
+                this.prisma.restaurantPayout.count({
+                    where: {
+                        branchId
                     }
-                },
-                orderBy: {
-                    createdAt: "desc"
-                },
-                skip,
-                take: limit
-            }),
+                })
 
-            this.prisma.deliveryPartnerPayout.count({
-                where: {
-                    deliveryPartnerId
-                }
-            })
-
-        ]);
+            ]);
 
         return {
-            records,
+            payouts,
             pagination: {
                 total,
                 page,
                 limit,
-                totalPages: Math.ceil(total / limit)
+                totalPages:
+                    Math.ceil(total / limit)
             }
         };
-    }
+    };
 
+    // ==========================================
+    // DELIVERY HISTORY
+    // ==========================================
 
-    async createRestaurantSettlement(
-        branchHeadId: string
-    ) {
+    getDeliveryHistory = async (
+        deliveryPartnerId: string,
+        page: number,
+        limit: number
+    ) => {
+
+        const skip =
+            (page - 1) * limit;
+
+        const [payouts, total] =
+            await Promise.all([
+
+                this.prisma.deliveryPartnerPayout.findMany({
+                    where: {
+                        deliveryPartnerId
+                    },
+                    include: {
+                        payoutTransaction: true,
+                        settlement: true
+                    },
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    skip,
+                    take: limit
+                }),
+
+                this.prisma.deliveryPartnerPayout.count({
+                    where: {
+                        deliveryPartnerId
+                    }
+                })
+
+            ]);
+
+        return {
+            payouts,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages:
+                    Math.ceil(total / limit)
+            }
+        };
+    };
+
+    // ==========================================
+    // CREATE RESTAURANT SETTLEMENT
+    // ==========================================
+
+    createRestaurantSettlement = async (
+        branchId: string
+    ) => {
 
         return await this.prisma.$transaction(
-            async (tx) => {
+            async tx => {
 
-                //Finding Restaurant pending payouts..
                 const pendingPayouts =
                     await tx.restaurantPayout.findMany({
                         where: {
-                            branchHeadId,
-                            status: "PENDING",
+                            branchId,
+                            status:
+                                SettlementStatus.PENDING,
                             settlementId: null
                         }
                     });
 
                 if (!pendingPayouts.length) {
-                    throw new Error(
-                        "No pending payouts found"
-                    );
+                    return null;
                 }
 
-                // Reduce pending ayouts total amounts
                 const totalAmount =
-                    pendingPayouts.reduce((sum: number,
-                        payout: RestaurantPayout) =>
-                        sum + Number(payout.amount),
+                    pendingPayouts.reduce(
+                        (
+                            sum,
+                            payout: RestaurantPayout
+                        ) =>
+                            sum +
+                            Number(
+                                payout.amount
+                            ),
                         0
                     );
 
-
-                // Create settlemanet with pending status of that payouts
                 const settlement =
                     await tx.settlement.create({
                         data: {
-                            settlementType: "RESTAURANT",
-                            beneficiaryId: branchHeadId,
+                            settlementType:
+                                SettlementType.RESTAURANT,
+
+                            beneficiaryId:
+                                branchId,
+
                             totalAmount,
+
                             payoutCount:
                                 pendingPayouts.length,
-                            status: "PENDING"
+
+                            status:
+                                SettlementStatus.PENDING
                         }
                     });
 
-
-                // Assign the  settlment id to the each restaurantPayout 
                 await tx.restaurantPayout.updateMany({
                     where: {
                         id: {
-                            in: pendingPayouts.map(
-                                (payout: RestaurantPayout) => payout.id
-                            )
+                            in:
+                                pendingPayouts.map(
+                                    payout =>
+                                        payout.id
+                                )
                         }
                     },
                     data: {
-                        settlementId: settlement.id
+                        settlementId:
+                            settlement.id
                     }
-
                 });
 
                 return settlement;
             }
         );
-    }
+    };
 
-    async createDeliveryPartnerSettlement(
+    // ==========================================
+    // CREATE DELIVERY SETTLEMENT
+    // ==========================================
+
+    createDeliveryPartnerSettlement = async (
         deliveryPartnerId: string
-    ) {
+    ) => {
 
         return await this.prisma.$transaction(
-            async (tx) => {
+            async tx => {
 
-                //Finding Restaurant pending payouts..
                 const pendingPayouts =
                     await tx.deliveryPartnerPayout.findMany({
                         where: {
                             deliveryPartnerId,
-                            status: "PENDING",
+                            status:
+                                SettlementStatus.PENDING,
                             settlementId: null
                         }
                     });
 
                 if (!pendingPayouts.length) {
-                    throw new Error(
-                        "No pending payouts found"
-                    );
+                    return null;
                 }
 
-                // Reduce pending ayouts total amounts
-                const totalAmount = pendingPayouts.reduce((sum: number,
-                        payout: DeliveryPartnerPayout) =>sum + Number(payout.amount),
+                const totalAmount =
+                    pendingPayouts.reduce(
+                        (
+                            sum,
+                            payout: DeliveryPartnerPayout
+                        ) =>
+                            sum +
+                            Number(
+                                payout.amount
+                            ),
                         0
                     );
 
-
-                // Create settlemanet with pending status of that payouts
                 const settlement =
                     await tx.settlement.create({
                         data: {
-                            settlementType: SettlementType.DELIVERY_PARTNER,
-                            beneficiaryId: deliveryPartnerId,
+                            settlementType:
+                                SettlementType
+                                    .DELIVERY_PARTNER,
+
+                            beneficiaryId:
+                                deliveryPartnerId,
+
                             totalAmount,
+
                             payoutCount:
                                 pendingPayouts.length,
-                            status: "PENDING"
+
+                            status:
+                                SettlementStatus.PENDING
                         }
                     });
 
-
-                // Assign the  settlment id to the each restaurantPayout 
-                await tx.restaurantPayout.updateMany({
+                await tx.deliveryPartnerPayout.updateMany({
                     where: {
                         id: {
-                            in: pendingPayouts.map(
-                                (payout: DeliveryPartnerPayout) => payout.id
-                            )
+                            in:
+                                pendingPayouts.map(
+                                    payout =>
+                                        payout.id
+                                )
                         }
                     },
                     data: {
-                        settlementId: settlement.id
+                        settlementId:
+                            settlement.id
                     }
-
                 });
 
                 return settlement;
             }
         );
-    }
+    };
 
+    // ==========================================
+    // SETTLEMENT
+    // ==========================================
 
-    async getSettlementById(
+    getSettlementById = async (
         settlementId: string
-    ) {
+    ) => {
 
-        const settlement =
-            await this.prisma.settlement.findUnique({
-                where: {
-                    id: settlementId
-                },
-                include: {
-
-                    restaurantPayouts: {
-                        include: {
-                            payoutTransaction: {
-                                select: {
-                                    orderId: true,
-                                    grossAmount: true,
-                                    processedAt: true
-                                }
-                            }
-                        }
-                    },
-
-                    deliveryPayouts: {
-                        include: {
-                            payoutTransaction: {
-                                select: {
-                                    orderId: true,
-                                    grossAmount: true,
-                                    processedAt: true
-                                }
-                            }
-                        }
+        return await this.prisma.settlement.findUnique({
+            where: {
+                id: settlementId
+            },
+            include: {
+                restaurantPayouts: {
+                    include: {
+                        payoutTransaction: true
                     }
-
+                },
+                deliveryPayouts: {
+                    include: {
+                        payoutTransaction: true
+                    }
                 }
-            });
+            }
+        });
+    };
 
-        if (!settlement) {
-            throw new Error(
-                "Settlement not found"
-            );
-        }
-
-        return settlement;
-    }
-
-    async completeSettlement(
+    completeSettlement = async (
         settlementId: string
-    ) {
+    ) => {
 
         return await this.prisma.$transaction(
-            async (tx) => {
+            async tx => {
 
                 const settlement =
                     await tx.settlement.findUnique({
@@ -432,33 +552,23 @@ export class PayoutRepository {
                         }
                     });
 
-                if (!settlement) {
-                    throw new Error(
-                        "Settlement not found"
-                    );
-                }
-
-                if (settlement.status === "SUCCESS") {
-                    throw new Error(
-                        "Settlement already completed"
-                    );
-                }
-
-                const now = new Date();
+                const now =
+                    new Date();
 
                 await tx.settlement.update({
                     where: {
                         id: settlementId
                     },
                     data: {
-                        status: "SUCCESS",
+                        status:
+                            SettlementStatus.SUCCESS,
                         settledAt: now
                     }
                 });
 
                 if (
-                    settlement.settlementType ===
-                    "RESTAURANT"
+                    settlement?.settlementType ===
+                    SettlementType.RESTAURANT
                 ) {
 
                     await tx.restaurantPayout.updateMany({
@@ -466,8 +576,10 @@ export class PayoutRepository {
                             settlementId
                         },
                         data: {
-                            status: "SUCCESS",
-                            transferredAt: now
+                            status:
+                                SettlementStatus.SUCCESS,
+                            transferredAt:
+                                now
                         }
                     });
 
@@ -478,27 +590,28 @@ export class PayoutRepository {
                             settlementId
                         },
                         data: {
-                            status: "SUCCESS",
-                            transferredAt: now
+                            status:
+                                SettlementStatus.SUCCESS,
+                            transferredAt:
+                                now
                         }
                     });
 
                 }
 
-                return {
-                    settlementId,
-                    status: "SUCCESS",
-                    settledAt: now
-                };
+                return settlement;
             }
         );
-    }
+    };
 
+    // ==========================================
+    // PENDING SETTLEMENTS
+    // ==========================================
 
-    async getPendingSettlements(
+    getPendingSettlements = async (
         page: number,
         limit: number
-    ) {
+    ): Promise<ISettlementListResponse> => {
 
         const skip = (page - 1) * limit;
 
@@ -507,7 +620,7 @@ export class PayoutRepository {
 
                 this.prisma.settlement.findMany({
                     where: {
-                        status: "PENDING"
+                        status: SettlementStatus.PENDING
                     },
                     orderBy: {
                         createdAt: "asc"
@@ -518,32 +631,42 @@ export class PayoutRepository {
 
                 this.prisma.settlement.count({
                     where: {
-                        status: "PENDING"
+                        status: SettlementStatus.PENDING
                     }
                 })
 
             ]);
 
         return {
-            settlements,
+            settlements: settlements.map(
+                settlement => ({
+                    ...settlement,
+                    totalAmount: Number(
+                        settlement.totalAmount
+                    )
+                })
+            ),
             pagination: {
                 total,
                 page,
                 limit,
-                totalPages:
-                    Math.ceil(total / limit)
+                totalPages: Math.ceil(total / limit)
             }
         };
-    }
+    };
+    // ==========================================
+    // SETTLEMENT HISTORY
+    // ==========================================
 
-    async getSettlementHistory(
+    getSettlementHistory = async (
         page: number,
         limit: number,
         status?: SettlementStatus,
         type?: SettlementType
-    ) {
+    ) => {
 
-        const skip = (page - 1) * limit;
+        const skip =
+            (page - 1) * limit;
 
         const where = {
             ...(status && { status }),
@@ -580,5 +703,6 @@ export class PayoutRepository {
                     Math.ceil(total / limit)
             }
         };
-    }
+    };
+
 }
