@@ -88,5 +88,18 @@ export class AdminRoutes implements IRoutes {
             this.controller.getDeliveryPartnerStats
         );
 
+
+
+        // Restaurant Pending List
+        this.router.get(
+            "/payouts/restaurants",
+            this.controller.getRestaurantPendingPayouts
+        );
+
+        // Delivery Pending List
+        this.router.get(
+            "/payouts/delivery-partners",
+            this.controller.getDeliveryPartnerPendingPayouts
+        );
     }
 }

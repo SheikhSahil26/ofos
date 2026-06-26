@@ -78,11 +78,11 @@ export class PayoutService {
             };
         }
 
-        const branchOwnerId = order.branch?.headId
-        if (!branchOwnerId) {
+        const branchId = order.branch?.id
+        if (!branchId) {
             return {
                 success: false,
-                error: "Branch owner not found",
+                error: "Branch not found",
                 statusCode: 400
             };
         }
@@ -97,7 +97,7 @@ export class PayoutService {
         }
 
 
-        console.log(deliveryPartnerId, " ID ", branchOwnerId)
+        // console.log(deliveryPartnerId, " ID ", branchId)
 
 
         const grossAmount =
@@ -158,8 +158,8 @@ export class PayoutService {
                                 payoutTransactionId:
                                     payoutRecord.id,
 
-                                branchHeadId:
-                                    branchOwnerId,
+                                branchId:
+                                    branchId,
 
                                 amount:
                                     branchAmount,
@@ -200,7 +200,7 @@ export class PayoutService {
 
         return {
             success: true,
-            message: "Payout processed successfully",
+            message: "Payment and Payout processed successfully",
             data: payout,
             statusCode: 201
         };
@@ -242,13 +242,13 @@ export class PayoutService {
     // ==========================================
 
     getRestaurantPendingSummary = async (
-        branchHeadId: string
+        branchId: string
     ): Promise<ServiceResponse<IPendingSummaryResponse>> => {
 
         const summary =
             await this.payoutRepo
                 .getRestaurantPendingSummary(
-                    branchHeadId
+                    branchId
                 );
 
         return {
@@ -298,7 +298,7 @@ export class PayoutService {
     // ==========================================
 
     getRestaurantHistory = async (
-        branchHeadId: string,
+        branchId: string,
         page: number,
         limit: number
     ): Promise<ServiceResponse<any>> => {
@@ -306,7 +306,7 @@ export class PayoutService {
         const result =
             await this.payoutRepo
                 .getRestaurantHistory(
-                    branchHeadId,
+                    branchId,
                     page,
                     limit
                 );
@@ -358,13 +358,13 @@ export class PayoutService {
     // ==========================================
 
     createRestaurantSettlement = async (
-        branchHeadId: string
+        branchId: string
     ): Promise<ServiceResponse<any>> => {
 
         const settlement =
             await this.payoutRepo
                 .createRestaurantSettlement(
-                    branchHeadId
+                    branchId
                 );
 
         if (!settlement) {

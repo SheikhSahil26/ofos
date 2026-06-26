@@ -348,4 +348,74 @@ export class AdminController {
         }
     );
 
+
+    // ===========================================
+    // RESTAURANT PENDING PAYOUTS
+    // ===========================================
+
+    getRestaurantPendingPayouts = asyncHandler(
+        async (
+            req,
+            res
+        ): Promise<void> => {
+
+            const page =
+                Number(req.query.page) || 1;
+
+            const limit =
+                Number(req.query.limit) || 10;
+
+            const search =
+                req.query.search as string;
+
+            const result =
+                await this.adminService
+                    .getRestaurantPendingPayouts(
+                        page,
+                        limit,
+                        search
+                    );
+
+            res.status(
+                result.statusCode || 200
+            ).json(result);
+        }
+    );
+
+
+    // ===========================================
+    // DELIVERY PARTNER PENDING PAYOUTS
+    // ===========================================
+
+    getDeliveryPartnerPendingPayouts = asyncHandler(
+        async (
+            req,
+            res
+        ): Promise<void> => {
+
+            const page =
+                Number(req.query.page) || 1;
+
+            const limit =
+                Number(req.query.limit) || 10;
+
+            const search =
+                req.query.search as string;
+
+            const result =
+                await this.adminService
+                    .getDeliveryPartnerPendingPayouts(
+                        page,
+                        limit,
+                        search
+                    );
+
+            res.status(
+                result.statusCode || 200
+            ).json(result);
+        }
+    );
+
+
+
 }

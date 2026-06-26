@@ -55,15 +55,15 @@ export class PayoutController {
     getRestaurantPendingSummary = asyncHandler(
         async (req: Request, res: Response) => {
 
-            const { branchHeadId } = req.params;
+            const { branchId } = req.params;
 
-            if (!branchHeadId || typeof branchHeadId !== 'string') {
+            if (!branchId || typeof branchId !== 'string') {
                 throw new AppError("Branch id must be Required...", 409)
             }
 
             const result =
                 await this.payoutService.getRestaurantPendingSummary(
-                    branchHeadId
+                    branchId
                 );
 
             return res.status(200).json({
@@ -76,9 +76,9 @@ export class PayoutController {
     getRestaurantHistory = asyncHandler(
         async (req: Request, res: Response) => {
 
-            const { branchHeadId } = req.params;
+            const { branchId } = req.params;
 
-            if (!branchHeadId || typeof branchHeadId !== 'string') {
+            if (!branchId || typeof branchId !== 'string') {
                 throw new AppError("Branch id must be Required...", 409)
             }
 
@@ -87,7 +87,7 @@ export class PayoutController {
 
             const result =
                 await this.payoutService.getRestaurantHistory(
-                    branchHeadId,
+                    branchId,
                     page,
                     limit
                 );
@@ -148,15 +148,15 @@ export class PayoutController {
     createRestaurantSettlement = asyncHandler(
         async (req: Request, res: Response) => {
 
-            const { branchHeadId } = req.body;
-            if (!branchHeadId) {
+            const { branchId } = req.body;
+            if (!branchId) {
                 throw new AppError("Branch Head id must be Required...", 409)
             }
 
 
             const result =
                 await this.payoutService.createRestaurantSettlement(
-                    branchHeadId
+                    branchId
                 );
 
             return res.status(201).json({
@@ -236,8 +236,6 @@ export class PayoutController {
 
     getPendingSettlements = asyncHandler(
         async (req, res) => {
-            console.log("Helooooooooooooo")
-            console.log("pending settlements")
 
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 10;
@@ -248,10 +246,7 @@ export class PayoutController {
                     limit
                 );
 
-            return res.status(200).json({
-                success: true,
-                data: result
-            });
+            return res.status(200).json(result);
         }
     );
 

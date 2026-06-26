@@ -673,4 +673,53 @@ export class AdminService {
 
         };
     };
+
+
+
+    // =============================================
+
+    getRestaurantPendingPayouts = async (
+        page: number,
+        limit: number,
+        search?: string
+    ) => {
+
+        const data =
+            await this.adminRepository
+                .getRestaurantPendingPayouts(
+                    page,
+                    limit,
+                    search
+                );
+
+        return {
+            success: true,
+            message: "Restaurant pending payouts fetched successfully",
+            data,
+            statusCode: 200
+        };
+    };
+
+
+    getDeliveryPartnerPendingPayouts = async (
+        page: number,
+        limit: number,
+        search?: string
+    ) => {
+
+        const data =
+            await this.adminRepository
+                .getDeliveryPartnerPendingPayouts(
+                    page,
+                    limit,
+                    search
+                );
+
+        return {
+            success: true,
+            message: "Delivery partner pending payouts fetched successfully",
+            data,
+            statusCode: 200
+        };
+    };
 }

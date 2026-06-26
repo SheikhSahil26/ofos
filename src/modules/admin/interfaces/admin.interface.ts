@@ -192,3 +192,60 @@ export interface IDeliveryPartnerListResponse {
 
     pagination: IDeliveryPartnerPagination;
 }
+
+
+export interface IPagination {
+
+    page: number;
+
+    limit: number;
+
+    total: number;
+
+    totalPages: number;
+}
+
+export interface IRestaurantPendingPayout {
+
+    branchHeadId: string;
+
+    restaurantName: string;
+
+    ownerName: string;
+
+    pendingAmount: number;
+
+    pendingOrders: number;
+
+    lastSettlement: Date | null;
+}
+
+export interface IRestaurantPendingPayoutResponse {
+
+    restaurants: IRestaurantPendingPayout[];
+
+    pagination: IPagination;
+}
+
+export interface IDeliveryPartnerPendingPayout {
+
+    deliveryPartnerId: string;
+
+    partnerName: string;
+
+    vehicleNumber: string;
+
+    pendingAmount: number;
+
+    pendingOrders: number;
+
+    lastSettlement: Date | null;
+}
+
+export interface IDeliveryPartnerPendingPayoutResponse {
+
+    partners: IDeliveryPartnerPendingPayout[];
+
+    pagination: IPagination;
+}
+

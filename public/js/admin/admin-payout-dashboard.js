@@ -4,9 +4,35 @@ document.addEventListener(
 
         loadDashboardStats();
         loadPendingSettlements();
+        bindDashboardEvents();
 
     }
 );
+
+function bindDashboardEvents() {
+
+    document
+        .getElementById("pendingCard")
+        .addEventListener(
+            "click",
+            loadPendingSettlements
+        );
+
+    document
+        .getElementById("restaurantCard")
+        .addEventListener(
+            "click",
+            loadRestaurantPending
+        );
+
+    document
+        .getElementById("deliveryCard")
+        .addEventListener(
+            "click",
+            loadDeliveryPending
+        );
+
+}
 
 async function loadDashboardStats() {
 
@@ -69,7 +95,7 @@ async function loadPendingSettlements() {
 
         const result = await response.json();
 
-        console.log(result.data.settlements)
+        console.log(result.data)
         renderPendingSettlements(
             result.data.settlements
         );
@@ -85,6 +111,8 @@ async function loadPendingSettlements() {
 function renderPendingSettlements(
     settlements
 ) {
+
+    console.log(settlements)
 
     const tbody =
         document.getElementById(
@@ -160,7 +188,7 @@ async function completeSettlement(
 
         const response =
             await apiRequest(
-                `/payouts/settlements/${settlementId}/complete`,
+                `http://localhost:8080/api/payouts/settlements/${settlementId}/complete`,
                 "PATCH"
             );
 
@@ -181,4 +209,266 @@ async function completeSettlement(
         );
 
     }
+}
+
+async function loadRestaurantPending() {
+
+    document.getElementById(
+        "tableTitle"
+    ).innerText =
+        "Restaurant Pending Payouts";
+
+    const response =
+        await apiRequest(
+            "/api/admin/payouts/restaurants",
+            "GET"
+        );
+
+    const result =
+        await response.json();
+
+    console.log("result.data.restaurants", result.data.restaurants)
+
+    renderRestaurantTable(
+        result.data.restaurants
+    );
+
+}
+
+async function loadDeliveryPending() {
+
+    document.getElementById(
+        "tableTitle"
+    ).innerText =
+        "Delivery Partner Pending Payouts";
+
+    const response =
+        await apiRequest(
+            "/api/admin/payouts/delivery-partners",
+            "GET"
+        );
+
+    const result =
+        await response.json();
+
+
+    console.log("result.data.deliveryPartners", result.data.deliveryPartners)
+    renderDeliveryTable(
+        result.data.deliveryPartners
+    );
+
+}
+
+async function loadPendingSettlements() {
+
+    document.getElementById(
+        "tableTitle"
+    ).innerText =
+        "Recent Pending Settlements";
+
+    const response =
+        await apiRequest(
+            "/api/payouts/settlements/pending",
+            "GET"
+        );
+
+    const result =
+        await response.json();
+
+    renderPendingSettlements(
+        result.data.settlements
+    );
+
+}
+
+function renderRestaurantTable(restaurants) {
+
+    const tbody =
+        document.getElementById(
+            "pendingSettlementBody"
+        );
+
+    tbody.innerHTML = "";
+
+    restaurants.forEach(branch => {
+
+        tbody.innerHTML += `
+
+        <tr class="border-b">
+
+            <td class="p-4">
+
+                ${branch.branchName}
+
+            </td>
+
+            <td>
+
+                ${branch.restaurantName}
+
+            </td>
+
+            <td>
+
+                ₹${branch.pendingAmount}
+
+            </td>
+
+            <td>
+
+                ${branch.pendingOrders}
+
+            </td>
+
+            <td>
+
+                ${branch.lastSettlement
+                ? new Date(
+                    branch.lastSettlement
+                ).toLocaleDateString()
+                : "-"
+            }
+
+            </td>
+
+            <td class="text-center">
+
+                <button
+                    onclick="createRestaurantSettlement('${branch.branchId}')"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+
+                    Settle
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+function renderDeliveryTable(partners) {
+
+    const tbody =
+        document.getElementById(
+            "pendingSettlementBody"
+        );
+
+    tbody.innerHTML = "";
+
+    if (partners.length == 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td
+                    colspan="7"
+                    class="text-center p-10 text-gray-500"
+                >
+                    No pending settlments
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    partners.forEach(partner => {
+
+        tbody.innerHTML += `
+
+        <tr class="border-b">
+
+            <td class="p-4">
+
+                ${partner.deliveryPartnerName}
+
+            </td>
+
+            <td>
+
+                ${partner.mobile}
+
+            </td>
+
+            <td>
+
+                ₹${partner.pendingAmount}
+
+            </td>
+
+            <td>
+
+                ${partner.pendingOrders}
+
+            </td>
+
+            <td>
+
+                ${partner.lastSettlement
+                ? new Date(
+                    partner.lastSettlement
+                ).toLocaleDateString()
+                : "-"
+            }
+
+            </td>
+
+            <td class="text-center">
+
+                <button
+                    onclick="createDeliverySettlement('${partner.deliveryPartnerId}')"
+                    class="bg-purple-500 text-white px-4 py-2 rounded-lg">
+
+                    Settle
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+async function createRestaurantSettlement(branchId) {
+
+    const response =
+        await apiRequest(
+            `http://localhost:8080/api/payouts/settlements/restaurants`,
+            "POST",
+            { branchId }
+        );
+
+    const result =
+        await response.json();
+
+    showToast(result.message, "success");
+
+    loadDashboardStats();
+    loadRestaurantPending();
+
+}
+
+async function createDeliverySettlement(partnerId) {
+
+    const response =
+        await apiRequest(
+            `/api/payouts/delivery-partners/${partnerId}/settlement`,
+            "POST"
+        );
+
+    const result =
+        await response.json();
+
+    showToast(result.message, "success");
+
+    loadDashboardStats();
+    loadDeliveryPending();
+
 }

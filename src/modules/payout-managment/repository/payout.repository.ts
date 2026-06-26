@@ -149,7 +149,7 @@ export class PayoutRepository {
     // ==========================================
 
     getRestaurantPendingSummary = async (
-        branchHeadId: string
+        branchId: string
     ) => {
 
         const [pending, lastSettlement] =
@@ -157,7 +157,7 @@ export class PayoutRepository {
 
                 this.prisma.restaurantPayout.aggregate({
                     where: {
-                        branchHeadId,
+                        branchId,
                         status: SettlementStatus.PENDING
                     },
                     _sum: {
@@ -170,7 +170,7 @@ export class PayoutRepository {
 
                 this.prisma.settlement.findFirst({
                     where: {
-                        beneficiaryId: branchHeadId,
+                        beneficiaryId: branchId,
                         settlementType:
                             SettlementType.RESTAURANT,
                         status:
@@ -257,7 +257,7 @@ export class PayoutRepository {
     // ==========================================
 
     getRestaurantHistory = async (
-        branchHeadId: string,
+        branchId: string,
         page: number,
         limit: number
     ) => {
@@ -270,7 +270,7 @@ export class PayoutRepository {
 
                 this.prisma.restaurantPayout.findMany({
                     where: {
-                        branchHeadId
+                        branchId
                     },
                     include: {
                         payoutTransaction: true,
@@ -285,7 +285,7 @@ export class PayoutRepository {
 
                 this.prisma.restaurantPayout.count({
                     where: {
-                        branchHeadId
+                        branchId
                     }
                 })
 
@@ -359,7 +359,7 @@ export class PayoutRepository {
     // ==========================================
 
     createRestaurantSettlement = async (
-        branchHeadId: string
+        branchId: string
     ) => {
 
         return await this.prisma.$transaction(
@@ -368,7 +368,7 @@ export class PayoutRepository {
                 const pendingPayouts =
                     await tx.restaurantPayout.findMany({
                         where: {
-                            branchHeadId,
+                            branchId,
                             status:
                                 SettlementStatus.PENDING,
                             settlementId: null
@@ -399,7 +399,7 @@ export class PayoutRepository {
                                 SettlementType.RESTAURANT,
 
                             beneficiaryId:
-                                branchHeadId,
+                                branchId,
 
                             totalAmount,
 

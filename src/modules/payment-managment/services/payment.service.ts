@@ -9,7 +9,7 @@ export class PaymentService {
     this.paymentRepo = new PaymentRepository(prisma);
   }
 
-  async getPaymentByOrderId( orderId: string): Promise<ServiceResponse<any>> {
+  async getPaymentByOrderId(orderId: string): Promise<ServiceResponse<any>> {
     const payment =
       await this.paymentRepo.getPaymentByOrderId(orderId);
 
@@ -35,6 +35,8 @@ export class PaymentService {
 
     const payment =
       await this.paymentRepo.getPaymentById(paymentId);
+
+      
 
     if (!payment) {
       return {
@@ -62,6 +64,9 @@ export class PaymentService {
     return {
       success: true,
       message: "Payment completed successfully",
+      data: {
+        orderId: payment.orderId
+      },
       statusCode: 200,
     };
   }

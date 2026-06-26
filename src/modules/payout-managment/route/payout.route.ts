@@ -40,16 +40,26 @@ export class PayoutRoutes implements IRoutes {
 
         // THis fetxh helkps to findout the branch pending payouts and lastSettledPayout Date.
         this.router.get(
-            "/restaurants/:branchHeadId/pending-summary",
+            "/restaurants/:branchId/pending-summary",
             this.controller.getRestaurantPendingSummary
         );
 
         // GET /api/payouts/restaurants/BH001/history?status=PENDING&page=1&limit=10
         // Payout History's..............
         this.router.get(
-            "/restaurants/:branchHeadId/history",
+            "/restaurants/:branchId/history",
             this.controller.getRestaurantHistory
         );
+
+        // This route will make the create settlement pending entry insdide the settlememt table and also assign the settlement id to the restaurantPayout Table
+        this.router.post(
+            "/settlements/restaurants",
+            this.controller.createRestaurantSettlement
+        );
+
+
+
+
 
 
         //  Delivery Partner Module...............
@@ -63,28 +73,19 @@ export class PayoutRoutes implements IRoutes {
             this.controller.getDeliveryHistory
         );
 
-
-
-
-        // Settlements Routes Builded specially for Admin perspctive
-
-        // This route will make the create settlement pending entry insdide the settlememt table and also assign the settlement id to the restaurantPayout Table
-        this.router.post(
-            "/settlements/restaurants",
-            this.controller.createRestaurantSettlement
-        );
-
         this.router.post(
             "/settlements/delivery-partners",
             this.controller.createDeliveryPartnerSettlement
         );
+
+
+        // Settlements Routes Builded specially for Admin perspctive
 
         // Admin To wahtch All pending Settlements
         this.router.get(
             "/settlements/pending",
             this.controller.getPendingSettlements
         );
-
 
         // Settelment History..
         // GET /api/payouts/settlements/history?page=1&limit=10
