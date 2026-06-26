@@ -1,0 +1,125 @@
+<div
+    id="addAddressModal"
+    class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+    <div class="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-xl">
+
+        <div class="flex justify-between items-center mb-6">
+
+            <h2 class="text-2xl font-semibold">
+                Add Address
+            </h2>
+
+            <button
+                onclick="closeAddAddressModal()">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+        <form id="addAddressForm">
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+                <input
+                    id="newLabel"
+                    placeholder="Home / Office"
+                    class="border rounded-xl px-4 py-3">
+
+                <input
+                    id="newPincode"
+                    placeholder="Pincode"
+                    class="border rounded-xl px-4 py-3">
+
+            </div>
+
+            <div class="mt-4">
+
+                <input
+                    id="newAddressLine1"
+                    placeholder="Address Line 1"
+                    class="w-full border rounded-xl px-4 py-3">
+
+            </div>
+
+            <div class="mt-4">
+
+                <input
+                    id="newAddressLine2"
+                    placeholder="Address Line 2"
+                    class="w-full border rounded-xl px-4 py-3">
+
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mt-4">
+
+                <input
+                    id="newCity"
+                    placeholder="City"
+                    class="border rounded-xl px-4 py-3">
+
+                <input
+                    id="newState"
+                    placeholder="State"
+                    class="border rounded-xl px-4 py-3">
+
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mt-4">
+
+                <input
+                    id="newLatitude"
+                    placeholder="Latitude"
+                    class="border rounded-xl px-4 py-3">
+
+                <input
+                    id="newLongitude"
+                    placeholder="Longitude"
+                    class="border rounded-xl px-4 py-3">
+
+            </div>
+
+            <div class="mt-4">
+
+                <label class="flex items-center gap-2">
+
+                    <input
+                        type="checkbox"
+                        id="newIsDefault">
+
+                    <span>
+                        Set as Default Address
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8">
+
+                <button
+                    type="button"
+                    id="cancelAddAddress"
+                    class="border px-5 py-3 rounded-xl">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="bg-[#ff7a00] text-white px-5 py-3 rounded-xl">
+
+                    Save Address
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

@@ -525,7 +525,7 @@ function renderMenu() {
                 category.id;
 
             section.className =
-                "bg-white rounded-[24px] border border-[#ececec] p-6 lg:p-8 shadow-sm";
+                "bg-white rounded-[24px] border border-[#ececec] p-6 lg:p-8 shadow-sm scroll-mt-24";
 
             section.innerHTML = `
 
@@ -803,7 +803,7 @@ function setupScrollSpy() {
 
     const sections =
         document.querySelectorAll(
-            "[data-category-id]"
+            "#menuContainer [data-category-id]"
         );
 
     const observer =
@@ -877,11 +877,10 @@ function setupScrollSpy() {
                 );
 
             },
-
             {
-                threshold: 0.3
+                rootMargin: "-100px 0px -70% 0px",
+                threshold: 0
             }
-
         );
 
     sections.forEach(
@@ -894,9 +893,7 @@ function setupScrollSpy() {
 
 }
 
-/* =====================================
-ADD BUTTONS
-===================================== */
+// Add buttons
 
 document.addEventListener(
     "click",
