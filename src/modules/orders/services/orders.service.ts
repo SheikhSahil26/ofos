@@ -61,6 +61,32 @@ export class OrderService {
       };
     }
 
+    const activeOrder = await this.prisma.order.findFirst({
+    where: {
+      customerId: userId,
+      status: {
+        notIn: ["DELIVERED", "CANCELLED"], // anything not finished or cancelled counts as active
+      },
+    },
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+    },
+  });
+
+  if (activeOrder) {
+    return {
+      success: false,
+      error: `You already have an active order (#${activeOrder.orderNumber}) in ${activeOrder.status.replace(/_/g, " ")} status. Please wait for it to be delivered before placing a new order.`,
+      statusCode: 409,
+    };
+  }
+
+
+
+
+
     const branchId = cart.restaurantBranchId;
 
     if (!branchId) {

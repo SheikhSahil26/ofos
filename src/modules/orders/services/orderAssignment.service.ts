@@ -121,10 +121,10 @@ export class OrderAssignmentService {
 
 
   const delivery = await tx.delivery.findUnique({
-  where: {
-    orderId: order.id,
-  },
-});
+      where: {
+        orderId: order.id,
+      },
+  });
 
 if (!delivery) {
   throw new Error("Delivery record not found");

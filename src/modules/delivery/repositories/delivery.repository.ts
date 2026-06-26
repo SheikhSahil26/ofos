@@ -7,6 +7,9 @@ import { IDeliveryRepository } from "../interfaces/delivery.interface";
 
 export class DeliveryRepository implements IDeliveryRepository {
   constructor(private readonly prisma: PrismaClient) {}
+  findActivePartners(): Promise<any[]> {
+    throw new Error("Method not implemented.");
+  }
   getAdminUserId(): Promise<string> {
     throw new Error("Method not implemented.");
   }
@@ -83,7 +86,10 @@ async updatePartnerStatus(
   // modules/delivery/repositories/delivery.repository.ts
 
 async clearPartnerLocation(partnerId: string): Promise<void> {
-  await redisClient.del(`delivery_partners:${partnerId}`);
+    await redisClient.zRem(
+        "delivery_partners",
+        partnerId
+    );
 }
 
 async findPartnerProfileByUserId(userId: string): Promise<any> {
@@ -395,6 +401,70 @@ async findPendingOfferForPartner(partnerUserId: string): Promise<any> {
       },
     },
   });
+}
+
+async findActiveOrdersForPartner(partnerId: string): Promise<any[]> {
+  return this.prisma.deliveryAssignment.findMany({
+    where: {
+      partnerId,
+      responseStatus: null, // pending, not yet accepted/rejected
+    },
+    orderBy: { assignedAt: "asc" },
+    include: {
+      delivery: {
+        include: {
+          order: {
+            select: {
+              id: true,
+              orderNumber: true,
+              branch: { select: { branchName: true, latitude: true, longitude: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+async findCurrentOrderForPartner(partnerId: string): Promise<any> {
+  return this.prisma.delivery.findFirst({
+    where: {
+      currentPartnerId: partnerId,
+      status: { in: ["ASSIGNED", "ACCEPTED", "PICKED_UP"] },
+    },
+    include: {
+      order: {
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          customer: { select: { fullName: true } },
+          branch: { select: { branchName: true, latitude: true, longitude: true } },
+        },
+      },
+    },
+  });
+}
+
+
+async findTodayStats(partnerId: string): Promise<{ earnings: number; deliveries: number }> {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const deliveries = await this.prisma.delivery.findMany({
+    where: {
+      currentPartnerId: partnerId,
+      status: "DELIVERED",
+      deliveredAt: { gte: startOfToday },
+    },
+    select: {
+      order: { select: { deliveryFee: true } },
+    },
+  });
+
+  const earnings = deliveries.reduce((sum, d) => sum + Number(d.order.deliveryFee), 0);
+
+  return { earnings, deliveries: deliveries.length };
 }
 
 }
