@@ -248,6 +248,23 @@ export class BranchService {
     };
   }
 
+async getBranchDetailsWithoutOwnership(
+    branchId: string,
+  ): Promise<ServiceResponse<IBranchDetails>> {
+    const branch = await this.branchRepo.getBranchDetails(branchId);
+
+    if (!branch) {
+      throw new AppError("Branch details not found", 404);
+    }
+
+    return {
+      success: true,
+      data: branch,
+      message: "Branch details fetched successfully",
+      statusCode: 200,
+    };
+  }
+
   // Update branch
   async updateBranch(
     branchId: string,

@@ -98,10 +98,10 @@ export class CartService {
          modifiers: CartModifier[] = [],        // new param — defaults to empty
   specialInstruction?: string,   
     ): Promise<ServiceResponse<EnrichedCart>> {
-
+        if(!quantity) quantity=1
         quantity = Number(quantity);
 
-        console.log(menuItemId, quantity) ;
+        console.log("Adding to cart:", menuItemId, quantity);
         console.log(
     "typeof:",
     typeof menuItemId

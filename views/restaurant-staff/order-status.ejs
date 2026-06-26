@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Restaurant Orders</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body class="bg-[#F8F8F8]">
+
+<!-- NAVBAR -->
+<header class="sticky top-0 z-50 bg-gradient-to-r from-[#014D2F] to-[#006B3F] shadow-lg">
+
+    <div class="max-w-7xl mx-auto h-20 px-8 flex items-center justify-between">
+
+        <div class="flex items-center gap-4">
+
+            <h1 class="text-3xl font-bold text-orange-400">
+                Ziggy Partner
+            </h1>
+
+        </div>
+
+        <div class="flex items-center gap-8 text-white">
+
+            <button>
+                Dashboard
+            </button>
+
+            <button>
+                Orders
+            </button>
+
+            <button>
+                Profile
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="max-w-7xl mx-auto px-8 py-8">
+
+
+    <!-- Stats -->
+    <div class="grid grid-cols-4 gap-6 mb-10">
+
+        <div class="bg-white rounded-3xl shadow-sm p-6">
+            <p class="text-gray-500">
+                Today's Orders
+            </p>
+
+            <h2 class="text-4xl font-bold mt-4">
+                42
+            </h2>
+        </div>
+
+
+        <div class="bg-white rounded-3xl shadow-sm p-6">
+            <p class="text-gray-500">
+                Active Orders
+            </p>
+
+            <h2 class="text-4xl font-bold mt-4 text-orange-500">
+                12
+            </h2>
+        </div>
+
+
+        <div class="bg-white rounded-3xl shadow-sm p-6">
+            <p class="text-gray-500">
+                Preparing
+            </p>
+
+            <h2 class="text-4xl font-bold mt-4 text-yellow-500">
+                6
+            </h2>
+        </div>
+
+
+        <div class="bg-white rounded-3xl shadow-sm p-6">
+            <p class="text-gray-500">
+                Ready
+            </p>
+
+            <h2 class="text-4xl font-bold mt-4 text-green-500">
+                4
+            </h2>
+        </div>
+
+    </div>
+
+
+
+    <!-- New Order Notification -->
+    <div
+    class="bg-orange-100 border-l-8 border-orange-500 rounded-2xl p-5 mb-10 flex justify-between items-center">
+
+        <div>
+
+            <h2 class="font-bold text-xl text-orange-700">
+
+                🔔 New Order #1045
+
+            </h2>
+
+            <p class="text-orange-600 mt-2">
+
+                Sahil Sheikh placed an order worth ₹548
+
+            </p>
+
+        </div>
+
+        <button
+        class="bg-orange-500 text-white px-6 py-3 rounded-xl">
+
+            View Order
+
+        </button>
+
+    </div>
+
+
+
+
+    <!-- KANBAN -->
+    <div class="grid grid-cols-4 gap-8">
+
+
+
+        <!-- PLACED -->
+        <div>
+
+            <h2
+            class="font-bold text-xl mb-6">
+
+                Placed
+
+            </h2>
+
+            <% for(let i=0;i<2;i++){ %>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+
+                <div class="flex justify-between">
+
+                    <h3 class="font-bold">
+
+                        #1042
+
+                    </h3>
+
+                    <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-xl">
+
+                        New
+
+                    </span>
+
+                </div>
+
+                <p class="text-gray-500 mt-3">
+
+                    Sahil Sheikh
+
+                </p>
+
+                <div class="mt-4 space-y-2">
+
+                    <p>2 × Pizza</p>
+                    <p>1 × Garlic Bread</p>
+
+                </div>
+
+                <div class="flex justify-between mt-6">
+
+                    <span class="font-bold">
+                        ₹548
+                    </span>
+
+                    <span class="text-gray-500">
+                        2 mins ago
+                    </span>
+
+                </div>
+
+                <button
+                class="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-2xl">
+
+                    Start Preparing
+
+                </button>
+
+            </div>
+
+            <% } %>
+
+        </div>
+
+
+
+
+        <!-- PREPARING -->
+        <div>
+
+            <h2
+            class="font-bold text-xl mb-6">
+
+                Preparing
+
+            </h2>
+
+            <% for(let i=0;i<2;i++){ %>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+
+                <h3 class="font-bold">
+
+                    #1040
+
+                </h3>
+
+                <p class="text-gray-500 mt-3">
+
+                    Rahul Patel
+
+                </p>
+
+                <div class="mt-5">
+
+                    <div class="flex justify-between mb-2">
+
+                        <span>
+                            Progress
+                        </span>
+
+                        <span>
+                            70%
+                        </span>
+
+                    </div>
+
+                    <div
+                    class="h-3 bg-gray-200 rounded-full">
+
+                        <div
+                        class="bg-yellow-500 h-3 rounded-full w-[70%]">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button
+                class="w-full mt-8 bg-green-600 text-white py-3 rounded-2xl">
+
+                    Ready For Pickup
+
+                </button>
+
+            </div>
+
+            <% } %>
+
+        </div>
+
+
+
+
+        <!-- READY -->
+        <div>
+
+            <h2 class="font-bold text-xl mb-6">
+
+                Ready For Pickup
+
+            </h2>
+
+            <% for(let i=0;i<2;i++){ %>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+
+                <h3 class="font-bold">
+
+                    #1037
+
+                </h3>
+
+                <p class="text-gray-500 mt-3">
+
+                    Delivery Partner Assigned
+
+                </p>
+
+                <div class="mt-5">
+
+                    <p>
+
+                        Rahul Kumar
+
+                    </p>
+
+                    <p class="text-gray-500 mt-2">
+
+                        Bike • GJ01AB1234
+
+                    </p>
+
+                </div>
+
+                <button
+                class="w-full mt-8 border border-green-600 text-green-600 py-3 rounded-2xl">
+
+                    Hand Over
+
+                </button>
+
+            </div>
+
+            <% } %>
+
+        </div>
+
+
+
+
+        <!-- PICKED UP -->
+        <div>
+
+            <h2 class="font-bold text-xl mb-6">
+
+                Picked Up
+
+            </h2>
+
+            <% for(let i=0;i<3;i++){ %>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+
+                <h3 class="font-bold">
+
+                    #1035
+
+                </h3>
+
+                <p class="text-gray-500 mt-3">
+
+                    Delivered by Rahul Kumar
+
+                </p>
+
+                <div class="mt-5">
+
+                    <span
+                    class="bg-green-100 text-green-700 px-4 py-2 rounded-xl">
+
+                        Picked Up
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <% } %>
+
+        </div>
+
+
+    </div>
+
+</main>
+
+</body>
+</html>
+
