@@ -17,5 +17,9 @@ export class OrderWebRoutes implements IRoutes{
             const orderId = req.params.orderId as string;
             res.status(200).render("orders/track-order", { orderId });
         });
+
+        this.router.get("/owner/orders", (req: Request, res: Response) => {
+            res.status(200).render("restaurant/orders", { activePage: "orders" });
+        });
     }
 }

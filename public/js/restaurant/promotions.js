@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const promotionsLoading = $("promotionsLoading");
     const promotionsEmpty = $("promotionsEmpty");
-    const promotionsGrid = $("promotionsGrid");
+    const promotionsContainer = $("promotionsContainer");
 
     const modal = $("createPromotionModal");
     const openBtn = $("openCreatePromotionModal");
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function init() {
         try {
             promotionsLoading.style.display = "flex";
-            promotionsGrid.style.display = "none";
+            promotionsContainer.style.display = "none";
             promotionsEmpty.style.display = "none";
 
             // 1. Fetch user's restaurants
@@ -71,10 +71,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (promotions.length === 0) {
                 promotionsEmpty.style.display = "flex";
-                promotionsGrid.style.display = "none";
+                promotionsContainer.style.display = "none";
             } else {
                 promotionsEmpty.style.display = "none";
-                promotionsGrid.style.display = "grid";
+                promotionsContainer.style.display = "flex";
                 renderPromotions(promotions);
             }
         } catch (err) {
@@ -86,54 +86,113 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function renderPromotions(promotions) {
-        promotionsGrid.innerHTML = promotions.map(promo => {
+        const activePromotions = [];
+        const pausedPromotions = [];
+        const expiredPromotions = [];
+
+        const now = new Date();
+
+        promotions.forEach(promo => {
+            const endDate = new Date(promo.endDate);
+            const promoEndDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999);
             
-            let typeColor = "bg-blue-100 text-blue-800";
-            let typeLabel = promo.type;
-            let valLabel = "";
-            if (promo.type === "PERCENTAGE") { valLabel = `${promo.discountValue}% OFF`; typeColor = "bg-purple-100 text-purple-800"; }
-            else if (promo.type === "FIXED") { valLabel = `₹${promo.discountValue} OFF`; typeColor = "bg-green-100 text-green-800"; }
-            else if (promo.type === "FREE_DELIVERY") { valLabel = "Free Delivery"; typeColor = "bg-orange-100 text-orange-800"; }
-            else if (promo.type === "BOGO") { valLabel = "Buy 1 Get 1"; typeColor = "bg-red-100 text-red-800"; }
+            if (promoEndDate < now) {
+                expiredPromotions.push(promo);
+            } else if (promo.isActive) {
+                activePromotions.push(promo);
+            } else {
+                pausedPromotions.push(promo);
+            }
+        });
 
-            const isActive = promo.isActive;
-            const toggleBg = isActive ? "bg-[#014f38]" : "bg-gray-200";
-            const toggleBtn = isActive ? "translate-x-5" : "translate-x-1";
+        const activeContainer = $("activePromotionsContainer");
+        const pausedContainer = $("pausedPromotionsContainer");
+        const expiredContainer = $("expiredPromotionsContainer");
 
-            const startDate = new Date(promo.startDate).toLocaleDateString();
-            const endDate = new Date(promo.endDate).toLocaleDateString();
+        if (activePromotions.length > 0) {
+            activeContainer.style.display = "block";
+            $("activePromotionsGrid").innerHTML = activePromotions.map(p => generatePromotionCard(p, "ACTIVE")).join("");
+        } else {
+            activeContainer.style.display = "none";
+        }
 
-            return `
-                <div class="bg-white rounded-2xl p-6 border ${isActive ? 'border-[#014f38]/30 shadow-md' : 'border-[#ececec] shadow-sm opacity-70'} relative transition-all">
-                    
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${typeColor} mb-2 inline-block">${typeLabel}</span>
-                            <h3 class="text-xl font-bold text-gray-900 line-clamp-1" title="${promo.title}">${promo.title}</h3>
-                            ${promo.code ? `<p class="text-xs font-mono bg-gray-100 px-2 py-1 rounded mt-1 inline-block border border-gray-200">${promo.code}</p>` : ''}
-                        </div>
-                        <button onclick="togglePromotion('${promo.id}', ${!isActive})" class="w-10 h-5 rounded-full ${toggleBg} relative transition-colors duration-300 focus:outline-none">
-                            <span class="w-3 h-3 bg-white rounded-full absolute top-1 left-0 transition-transform duration-300 transform ${toggleBtn}"></span>
-                        </button>
-                    </div>
+        if (pausedPromotions.length > 0) {
+            pausedContainer.style.display = "block";
+            $("pausedPromotionsGrid").innerHTML = pausedPromotions.map(p => generatePromotionCard(p, "PAUSED")).join("");
+        } else {
+            pausedContainer.style.display = "none";
+        }
 
-                    <div class="mb-4">
-                        <p class="text-2xl font-black text-[#014f38]">${valLabel}</p>
-                        ${promo.minimumOrderAmount ? `<p class="text-xs text-gray-500 mt-1">Min. Order: ₹${promo.minimumOrderAmount}</p>` : ''}
-                        ${promo.maximumDiscountAmount ? `<p class="text-xs text-gray-500">Max Discount: ₹${promo.maximumDiscountAmount}</p>` : ''}
-                    </div>
+        if (expiredPromotions.length > 0) {
+            expiredContainer.style.display = "block";
+            $("expiredPromotionsGrid").innerHTML = expiredPromotions.map(p => generatePromotionCard(p, "EXPIRED")).join("");
+        } else {
+            expiredContainer.style.display = "none";
+        }
+    }
 
-                    <div class="border-t border-gray-100 pt-4 flex items-center justify-between text-xs text-gray-500 font-medium">
-                        <div class="flex items-center gap-1">
-                            <i class="fa-regular fa-calendar"></i>
-                            <span>${startDate} - ${endDate}</span>
-                        </div>
-                        <span class="${isActive ? 'text-green-600' : 'text-gray-400'}">${isActive ? 'Active' : 'Paused'}</span>
-                    </div>
+    function generatePromotionCard(promo, category) {
+        let typeColor = "bg-blue-100 text-blue-800";
+        let typeLabel = promo.type;
+        let valLabel = "";
+        if (promo.type === "PERCENTAGE") { valLabel = `${promo.discountValue}% OFF`; typeColor = "bg-purple-100 text-purple-800"; }
+        else if (promo.type === "FIXED") { valLabel = `₹${promo.discountValue} OFF`; typeColor = "bg-green-100 text-green-800"; }
+        else if (promo.type === "FREE_DELIVERY") { valLabel = "Free Delivery"; typeColor = "bg-orange-100 text-orange-800"; }
+        else if (promo.type === "BOGO") { valLabel = "Buy 1 Get 1"; typeColor = "bg-red-100 text-red-800"; }
 
-                </div>
+        const isActive = promo.isActive;
+        const toggleBg = isActive ? "bg-[#014f38]" : "bg-gray-200";
+        const toggleBtn = isActive ? "translate-x-5" : "translate-x-1";
+
+        const startDate = new Date(promo.startDate).toLocaleDateString();
+        const endDate = new Date(promo.endDate).toLocaleDateString();
+
+        let toggleHtml = "";
+        if (category !== "EXPIRED") {
+            toggleHtml = `
+                <button onclick="togglePromotion('${promo.id}', ${!isActive})" class="w-10 h-5 rounded-full ${toggleBg} relative transition-colors duration-300 focus:outline-none">
+                    <span class="w-3 h-3 bg-white rounded-full absolute top-1 left-0 transition-transform duration-300 transform ${toggleBtn}"></span>
+                </button>
             `;
-        }).join("");
+        }
+
+        let badgeHtml = "";
+        if (category === "ACTIVE") {
+            badgeHtml = `<span class="text-green-600 font-bold">Active</span>`;
+        } else if (category === "PAUSED") {
+            badgeHtml = `<span class="text-gray-500 font-bold">Paused</span>`;
+        } else {
+            badgeHtml = `<span class="text-red-500 font-bold">Expired</span>`;
+        }
+
+        return `
+            <div class="bg-white rounded-2xl p-6 border ${category === 'ACTIVE' ? 'border-[#014f38]/30 shadow-md' : 'border-[#ececec] shadow-sm opacity-70'} relative transition-all">
+                
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${typeColor} mb-2 inline-block">${typeLabel}</span>
+                        <h3 class="text-xl font-bold text-gray-900 line-clamp-1" title="${promo.title}">${promo.title}</h3>
+                        ${promo.code ? `<p class="text-xs font-mono bg-gray-100 px-2 py-1 rounded mt-1 inline-block border border-gray-200">${promo.code}</p>` : ''}
+                    </div>
+                    ${toggleHtml}
+                </div>
+
+                <div class="mb-4">
+                    <p class="text-2xl font-black text-[#014f38]">${valLabel}</p>
+                    ${promo.minimumOrderAmount ? `<p class="text-xs text-gray-500 mt-1">Min. Order: ₹${promo.minimumOrderAmount}</p>` : ''}
+                    ${promo.maximumDiscountAmount ? `<p class="text-xs text-gray-500">Max Discount: ₹${promo.maximumDiscountAmount}</p>` : ''}
+                </div>
+
+                <div class="border-t border-gray-100 pt-4 flex items-center justify-between text-xs text-gray-500 font-medium">
+                    <div class="flex items-center gap-1">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>${startDate} - ${endDate}</span>
+                    </div>
+                    ${badgeHtml}
+                </div>
+
+            </div>
+        `;
     }
 
     // ── Toggle Status API ─────────────────────────────────────────────────────
@@ -162,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         $("promoDiscountValue").required = true;
         $("promoMaxDiscount").required = false;
 
-        if (type === "FIXED") {
+        if (type === "FIXED") {                   
             maxDiscountContainer.style.display = "none";
         } else if (type === "PERCENTAGE") {
             $("promoMaxDiscount").required = true;

@@ -4,6 +4,7 @@
 <%- include('../partials/admin/head',{title:"Admin Page"}) %>
 
     <body class="bg-slate-100">
+        <p id="toast"></p>
 
         <div class="flex min-h-screen">
 
@@ -63,21 +64,21 @@
 
                             <div class="bg-white p-5 rounded-xl shadow">
                                 <h3 class="text-gray-500">Active Branches</h3>
-                                <p id="activeRestaurants" class="text-3xl font-bold text-green-600 mt-2">
+                                <p id="activeBranches" class="text-3xl font-bold text-green-600 mt-2">
                                     0
                                 </p>
                             </div>
 
                             <div class="bg-white p-5 rounded-xl shadow">
                                 <h3 class="text-gray-500">Blocked Branches</h3>
-                                <p id="blockedRestaurants" class="text-3xl font-bold text-red-600 mt-2">
+                                <p id="blockedBranches" class="text-3xl font-bold text-red-600 mt-2">
                                     0
                                 </p>
                             </div>
 
                             <div class="bg-white p-5 rounded-xl shadow">
                                 <h3 class="text-gray-500">New This Month</h3>
-                                <p id="newRestaurants" class="text-3xl font-bold text-blue-600 mt-2">
+                                <p id="newBranches" class="text-3xl font-bold text-blue-600 mt-2">
                                     0
                                 </p>
                             </div>
@@ -271,19 +272,24 @@
 
                                     </table>
 
+
+                                    <!-- Pagination -->
+
+                                    <div id="paginationContainer" class="
+        flex
+        justify-start
+        gap-2
+        mt-10
+        mb-6
+        ml-10
+    "></div>
+
                                 </div>
 
                             </div>
 
                         </div>
 
-                        <!-- Pagination -->
-                        <div id="paginationContainer" class="
-        flex
-        justify-end
-        gap-2
-        mt-6
-    "></div>
 
                     </div>
                 </main>
@@ -294,6 +300,7 @@
         <script src="/js/common/api.js"></script>
         <script src="/js/common/auth.js"></script>
         <script src="/js/admin/admin-restaurants.js"></script>
+        <script src="/js/common/toast.js"></script>
 
     </body>
 
