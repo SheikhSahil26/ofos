@@ -106,9 +106,9 @@ export class DeliveryController {
 getEarnings = asyncHandler(
   async (req: Request, res: Response) => {
     // const deliveryUserId = req.user.id;
-     const user  = req.user as Express.payload
-    const { period } = req.query;
-const deliveryUserId = user.userId;
+    const user  = req.user as Express.payload
+    const  period  = req.query.period;
+    const deliveryUserId = user.userId;
     const result = await this.deliveryService.getEarnings({
       deliveryUserId,
       period: period as "today" | "week" | "month" | "all",
@@ -123,8 +123,9 @@ const deliveryUserId = user.userId;
 getPartnerRatings = asyncHandler(
   async (req: Request, res: Response) => {
     // const deliveryUserId = req.user.id;
-      const user  = req.user as Express.payload
-    const { page, limit } = req.query;
+    const user  = req.user as Express.payload
+    const  page  = req.query.page;
+    const limit = req.query.limit
 
     const result = await this.deliveryService.getPartnerRatings({
       deliveryUserId: user.userId,
