@@ -144,13 +144,23 @@ export class RestaurantPromotionRepository {
     });
   }
 
-  // get active promotion
-  async getActivePromotions(
+  // toggle promotion status
+  async togglePromotionStatus(id: string, isActive: boolean) {
+    return await prisma.restaurantPromotion.update({
+      where: { id },
+      data: { isActive },
+      select: {
+        id: true,
+        title: true,
+        isActive: true,
+      },
+    });
+  }
+
+  // get all promotions for a restaurant
+  async getAllPromotions(
     restaurantId:string
 ): Promise<IRestaurantPromotion[]>{
-
-    const today =
-    new Date();
 
     return await prisma
     .restaurantPromotion
@@ -158,13 +168,6 @@ export class RestaurantPromotionRepository {
         where:{
             restaurantId,
             isDeleted:false,
-            isActive:true,
-            startDate:{
-                lte:today
-            },
-            endDate:{
-                gte:today
-            }
         },
         select:{
             id:true,
@@ -175,11 +178,47 @@ export class RestaurantPromotionRepository {
             minimumOrderAmount:true,
             maximumDiscountAmount:true,
             startDate:true,
-            endDate:true
+            endDate:true,
+            isActive:true
         },
         orderBy:{
             startDate:"desc"
         }
     });
 }
+
+  // get active promotions for a restaurant
+  async getActivePromotions(
+    restaurantId: string
+  ): Promise<IRestaurantPromotion[]> {
+    const today = new Date();
+    return await prisma.restaurantPromotion.findMany({
+      where: {
+        restaurantId,
+        isDeleted: false,
+        isActive: true,
+        startDate: {
+          lte: today,
+        },
+        endDate: {
+          gte: today,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        code: true,
+        type: true,
+        discountValue: true,
+        minimumOrderAmount: true,
+        maximumDiscountAmount: true,
+        startDate: true,
+        endDate: true,
+        isActive: true,
+      },
+      orderBy: {
+        startDate: "desc",
+      },
+    });
+  }
 }

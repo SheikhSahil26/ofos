@@ -49,7 +49,7 @@ export class CartController {
     
 
     const data = await this.cartService.addToCart(
-      user.userId,
+      "1eaab1e4-6bd3-458c-a708-65307da24d9e",
       menuItemId,
       Number(quantity),
       modifiers || [],

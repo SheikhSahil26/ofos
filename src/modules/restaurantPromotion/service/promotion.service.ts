@@ -33,6 +33,11 @@ export class RestaurantPromotionService {
     const startDate = new Date(payload.startDate);
 
     const endDate = new Date(payload.endDate);
+    const now = new Date();
+
+    if (endDate < now) {
+      throw new AppError("End date cannot be in the past", 400);
+    }
 
     if (startDate > endDate) {
       throw new AppError("Start date cannot be greater than end date", 400);
@@ -74,6 +79,10 @@ export class RestaurantPromotionService {
 
         if (payload.discountValue > 90) {
           throw new AppError("Percentage discount cannot exceed 90%", 400);
+        }
+
+        if (!payload.maximumDiscountAmount || payload.maximumDiscountAmount <= 0) {
+          throw new AppError("Maximum discount amount is required for percentage promotions", 400);
         }
 
         break;
@@ -138,6 +147,8 @@ export class RestaurantPromotionService {
           startDate,
           endDate,
           discountValue: payload.discountValue ?? 0,
+          minimumOrderAmount: payload.minimumOrderAmount,
+          maximumDiscountAmount: payload.maximumDiscountAmount,
           ...(code && { code }),
         },
       });
@@ -213,6 +224,23 @@ export class RestaurantPromotionService {
     };
   }
 
+  // toggle promotion status
+  async togglePromotionStatus(
+    promotionId: string,
+    userId: string,
+    isActive: boolean
+  ): Promise<ServiceResponse<any>> {
+    await this.validatePromotionOwnership(promotionId, userId);
+    const promotion = await this.promotionRepo.togglePromotionStatus(promotionId, isActive);
+
+    return {
+      success: true,
+      data: promotion,
+      message: `Promotion ${isActive ? 'activated' : 'deactivated'} successfully`,
+      statusCode: 200,
+    };
+  }
+
   async getRestaurantPromotions(
     restaurantId:string
 ): Promise<
@@ -256,7 +284,7 @@ export class RestaurantPromotionService {
 
     const promotions =
     await this.promotionRepo
-    .getActivePromotions(
+    .getAllPromotions(
         restaurantId
     );
 

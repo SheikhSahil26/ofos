@@ -19,6 +19,7 @@ import { AdminRoutes } from "../modules/admin/routes/admin.route.js";
 import { RestaurantRoutes } from "../modules/restaurant/routes/restaurant.route.js";
 import { PayoutRoutes } from "../modules/payout-managment/route/payout.route.js";
 import { PaymentsRoutes } from "../modules/payment-managment/routes/payment.route.js";
+import { RestaurantPromotionRoutes } from "../modules/restaurantPromotion/routes/promotion.routes.js";
 
 
 export function buildApiRouter(): Router {
@@ -41,7 +42,8 @@ export function buildApiRouter(): Router {
         new CouponRoutes(),
         new AdminRoutes(),
         new PayoutRoutes(),
-        new PaymentsRoutes()
+        new PaymentsRoutes(),
+        new RestaurantPromotionRoutes()
     ]
 
     routes.forEach((route) => {

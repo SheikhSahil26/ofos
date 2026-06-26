@@ -51,6 +51,32 @@ export class RestaurantPromotionController {
     });
   });
 
+  togglePromotionStatus = asyncHandler(async (req: Request, res: Response) => {
+    const promotionId = req.params.id as string;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== "boolean") {
+      throw new AppError("isActive boolean is required", 400);
+    }
+
+    const user = req.user as Express.payload | undefined;
+    if (!user || typeof user.userId !== "string") {
+      throw new AppError("Invalid user id", 409);
+    }
+
+    const userId = user.userId;
+
+    const data = await this.promotionService.togglePromotionStatus(
+      promotionId,
+      userId,
+      isActive
+    );
+
+    return res.status(data.statusCode!).json({
+      ...data,
+    });
+  });
+
   getRestaurantPromotions =
 asyncHandler(
     async(

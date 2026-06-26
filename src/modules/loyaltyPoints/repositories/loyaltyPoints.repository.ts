@@ -64,4 +64,161 @@ export class LoyaltyPointsRepository{
             }
         });
     }
+
+    //get earned points
+    async getEarnedPoints(userId: string){
+        const result =
+            await prisma.loyaltyTransaction.aggregate({
+                where: {
+                    account: {
+                        customerId: userId
+                    },
+                    points: {
+                        gt: 0
+                    }
+                },
+                _sum: {
+                    points: true
+                }
+            });
+
+        return result._sum.points || 0;
+    }
+
+    //get redeemed points
+    async getRedeemedPoints(userId: string){
+        const result = await prisma.loyaltyTransaction.aggregate({
+            where: {
+                account: {
+                    customerId: userId
+                },
+                points: {
+                    lt: 0
+                }
+            },
+            _sum: {
+                points: true
+            }
+        });
+
+        return Math.abs(
+            result._sum.points || 0
+        );
+    }
+
+    //get transaction count
+    async getTransactionCount(userId: string) {
+
+        const count = await prisma.loyaltyTransaction.count({
+            where: {
+                account: {
+                    customerId: userId
+                }
+            }
+        });
+
+        return count;
+    }
+
+    //get all transactions with pagination and filter
+    async getTransactions(
+        userId: string,
+        page: number,
+        limit: number,
+        typeFilter?: "earned" | "redeemed",
+        dateFilter?: "day" | "week" | "month",
+    ) {
+
+        const skip =
+        (page - 1) * limit;
+
+        const where: any = {
+            account: {
+                customerId: userId
+            }
+        };
+
+        // Date filter
+        if (dateFilter) {
+
+            const now =
+                new Date();
+
+            let startDate =
+                new Date();
+
+            if (dateFilter === "day") {
+
+                startDate.setHours(
+                    0, 0, 0, 0
+                );
+
+            } else if (
+                dateFilter === "week"
+            ) {
+
+                startDate.setDate(
+                    now.getDate() - 7
+                );
+
+            } else if (
+                dateFilter === "month"
+            ) {
+
+                startDate.setMonth(
+                    now.getMonth() - 1
+                );
+            }
+
+            where.createdAt = {
+                gte: startDate
+            };
+        }
+
+        // Transaction type filter
+        if (typeFilter === "earned") {
+
+            where.points = {
+                gt: 0
+            };
+        }
+
+        if (typeFilter === "redeemed") {
+
+            where.points = {
+                lt: 0
+            };
+        }
+
+        const [
+            transactions,
+            total
+        ] = await Promise.all([
+
+            prisma.loyaltyTransaction.findMany({
+                where,
+                orderBy: {
+                    createdAt: "desc"
+                },
+                skip,
+                take: limit,
+                include: {
+                    account: {
+                        select: {
+                            currentPoints: true,
+                        }
+                    }
+                }
+            }),
+
+            prisma.loyaltyTransaction.count({
+                where
+            })
+        ]);
+
+        return {
+            transactions,
+            total
+        };
+    }
 }

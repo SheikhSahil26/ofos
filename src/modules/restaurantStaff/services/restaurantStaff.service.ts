@@ -26,15 +26,18 @@ export class RestaurantStaffService{
     async getStaffByBranch(branchId: string): Promise<ServiceResponse<IBranchStaff[]>>{
 
         await this.validateBranch(branchId);
+        const branch = await this.staffRepo.getBranchById(branchId);
         
         const staff = await this.staffRepo.getStaffByBranch(branchId);
 
         //map result of repo to interface
         const result: IBranchStaff[] = staff.map(item => ({
             id: item.user.id,
+            staffId: item.id,
             fullName: item.user.fullName,
             email: item.user.email,
             mobile: item.user.mobile,
+            isHead: branch?.headId === item.id
         }));
 
         return {
@@ -108,9 +111,16 @@ export class RestaurantStaffService{
         //add restaurant_staff role and userId to user role table
         await this.authRepo.assignRole(staff.user.id, role);
 
+        //check if branch has head, if not set this new staff as head
+        const branch = await this.staffRepo.getBranchById(branchId);
+        if(branch && !branch.headId){
+            await this.staffRepo.updateBranchHead(branchId, staff.id);
+        }
+
         //mapping staff result to Interface IBranchStaff
         const result : IBranchStaff = {
             id: staff.user.id,
+            staffId: staff.id,
             fullName: staff.user.fullName,
             email: staff.user.email,
             mobile: staff.user.mobile 
@@ -139,9 +149,89 @@ export class RestaurantStaffService{
 
         await this.staffRepo.removeStaff(branchId, userId);
 
+        //if this staff was the branch head, unset the head
+        const branch = await this.staffRepo.getBranchById(branchId);
+        if(branch && branch.headId === isExist.id){
+            await this.staffRepo.updateBranchHead(branchId, null);
+            // Optionally, assign the next available staff as head here, but unsetting is safer
+        }
+
         return {
             success: true,
             message: "Staff removed successfully",
+            statusCode: 200
+        }
+    }
+
+    //check email and assign if exists
+    async checkEmailAndAssign(branchId: string, email: string): Promise<ServiceResponse<{exists: boolean}>>{
+        const role = "RESTAURANT_STAFF";
+
+        await this.validateBranch(branchId);
+
+        const isExist = await this.authRepo.findUserByEmail(email);
+
+        if(isExist){
+            let staffId: string;
+            const assigned = await this.staffRepo.findStaffAssignment(branchId, isExist.id);
+
+            if(assigned){
+                if(!assigned.isDeleted){
+                    throw new AppError("Staff already exist in branch", 409);
+                }
+                const reactivated = await this.staffRepo.reactiveStaff(branchId, isExist.id);
+                staffId = reactivated.id;
+            }
+            else{
+                const newStaff = await this.staffRepo.addStaff(branchId, isExist.id);
+                staffId = newStaff.id;
+            }
+
+            //check if branch has head
+            const branch = await this.staffRepo.getBranchById(branchId);
+            if(branch && !branch.headId){
+                await this.staffRepo.updateBranchHead(branchId, staffId);
+            }
+
+            const hasRole = isExist.userRoles.some(ur => ur.role.role === role);
+            if(!hasRole){
+                await this.authRepo.assignRole(isExist.id, role);
+            }
+
+            return {
+                success: true,
+                data: { exists: true },
+                message: "User already exists. Added to branch staff successfully.",
+                statusCode: 200
+            }
+        }
+
+        return {
+            success: true,
+            data: { exists: false },
+            message: "User does not exist. Please provide full details.",
+            statusCode: 200
+        }
+    }
+
+    //change branch head
+    async changeBranchHead(branchId: string, staffId: string): Promise<ServiceResponse<null>>{
+        await this.validateBranch(branchId);
+
+        // Verify the staffId belongs to this branch and is active
+        const branch = await this.staffRepo.getBranchById(branchId);
+        const staffList = await this.staffRepo.getStaffByBranch(branchId);
+        
+        const staffExists = staffList.some(s => s.id === staffId);
+        if(!staffExists){
+            throw new AppError("Staff member not found in this branch", 404);
+        }
+
+        await this.staffRepo.updateBranchHead(branchId, staffId);
+
+        return {
+            success: true,
+            message: "Branch head updated successfully",
             statusCode: 200
         }
     }

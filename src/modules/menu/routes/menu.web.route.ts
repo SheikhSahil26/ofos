@@ -14,7 +14,7 @@ export class MenuWebRoutes implements IRoutes{
     private initializeRoutes(){
         
         this.router.get("/menu-management", (req: Request, res: Response) => {
-            res.status(200).render("restaurant/menu-management");
+            res.status(200).render("restaurant/menu-management", { activePage: "dashboard"});
         });
     }
 }

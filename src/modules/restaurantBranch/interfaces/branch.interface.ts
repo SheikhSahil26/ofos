@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, DayOfWeek, OrderStatus } from "@prisma/client";
 
 export interface ICreateRestaurantBranch {
   branchName: string;
@@ -14,6 +14,12 @@ export interface ICreateRestaurantBranch {
   longitude?: number;
   deliveryRadiusKm?: number;
   isPrimary?: boolean;
+  operatingHours?: {
+    dayOfWeek: DayOfWeek;
+    openTime?: string | Date;
+    closeTime?: string | Date;
+    isClosed: boolean;
+  }[];
 }
 
 export interface IRestaurantBranchResponse {
@@ -35,7 +41,7 @@ export interface IBranchValidation {
 
 export type VerificationStatus = string;
 
-export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+
 
 export interface IRestaurantBranchList {
 
@@ -117,8 +123,6 @@ export interface IUpdateRestaurantBranch {
     city?: string;
     state?: string;
     pincode?: string;
-    gstin?: string;
-    fssaiLicense?: string;
     latitude?: number;
     longitude?: number;
     deliveryRadiusKm?: number;
@@ -181,24 +185,43 @@ export interface IBranchOrder {
     id:string;
     orderNumber:string;
     status:OrderStatus;
+    paymentStatus:string;
+    subtotal:Prisma.Decimal;
+    taxAmount:Prisma.Decimal;
+    deliveryFee:Prisma.Decimal;
+    discountAmount:Prisma.Decimal;
     totalAmount:Prisma.Decimal;
     placedAt:Date;
     customer:{
         id:string;
         fullName:string;
+        mobile:string;
     };
-}
-
-export interface IBranchOrder {
-    id:string;
-    orderNumber:string;
-    status:OrderStatus;
-    totalAmount:Prisma.Decimal;
-    placedAt:Date;
-    customer:{
-        id:string;
-        fullName:string;
+    address: {
+        addressLine1: string | null;
+        addressLine2: string | null;
+        city: string | null;
+        state: string | null;
+        pincode: string | null;
     };
+    orderItems: {
+        id: string;
+        menuItemName: string;
+        price: Prisma.Decimal;
+        quantity: number;
+        specialInstruction: string | null;
+        modifiers: {
+            modifierName: string;
+            extraPrice: Prisma.Decimal;
+        }[];
+    }[];
+    payments: {
+        paymentMethod: string;
+    }[];
+    coupon?: {
+        code: string;
+        type: string;
+    } | null;
 }
 
 export interface IBranchOrdersResponse {
@@ -209,5 +232,4 @@ export interface IBranchOrdersResponse {
         limit:number;
         totalPages:number;
     };
-
 }

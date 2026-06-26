@@ -1,5 +1,5 @@
 import { OrderStatus, Prisma, VerificationStatus } from "@prisma/client";
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { RestaurantService } from "../../restaurant/services/restaurant.service";
 import {
@@ -123,7 +123,7 @@ export class BranchService {
     }
 
     //Create branch
-    const branch = await this.branchRepo.createBranch({
+    const createData: Prisma.RestaurantBranchCreateInput = {
       restaurant: {
         connect: {
           id: restaurantId,
@@ -142,7 +142,20 @@ export class BranchService {
       longitude: payload.longitude ?? null,
       deliveryRadiusKm: payload.deliveryRadiusKm ?? null,
       isPrimary: payload.isPrimary ?? false,
-    });
+    };
+
+    if (payload.operatingHours && payload.operatingHours.length > 0) {
+      createData.operatingHours = {
+        create: payload.operatingHours.map(hour => ({
+          dayOfWeek: hour.dayOfWeek,
+          openTime: hour.openTime ? new Date(hour.openTime) : null,
+          closeTime: hour.closeTime ? new Date(hour.closeTime) : null,
+          isClosed: hour.isClosed
+        }))
+      };
+    }
+
+    const branch = await this.branchRepo.createBranch(createData);
 
     return {
       success: true,
@@ -287,25 +300,7 @@ async getBranchDetailsWithoutOwnership(
       }
     }
 
-    if (payload.gstin && payload.gstin !== branch.gstin) {
-      const existingGST = await this.branchRepo.validateGSTINExists(
-        payload.gstin,
-      );
 
-      if (existingGST) {
-        throw new AppError("GSTIN already exists", 400);
-      }
-    }
-
-    if (payload.fssaiLicense && payload.fssaiLicense !== branch.fssaiLicense) {
-      const existingFSSAI = await this.branchRepo.validateFSSAIExists(
-        payload.fssaiLicense,
-      );
-
-      if (existingFSSAI) {
-        throw new AppError("FSSAI License already exists", 400);
-      }
-    }
 
     if (branch.isPrimary && payload.isPrimary === false) {
       throw new AppError(
@@ -314,9 +309,7 @@ async getBranchDetailsWithoutOwnership(
       );
     }
 
-    const requiresReverification =
-      (payload.gstin && payload.gstin !== branch.gstin) ||
-      (payload.fssaiLicense && payload.fssaiLicense !== branch.fssaiLicense);
+
 
     const updateData: Prisma.RestaurantBranchUpdateInput = {} as any;
 
@@ -333,9 +326,7 @@ async getBranchDetailsWithoutOwnership(
     if (payload.state !== undefined) updateData.state = payload.state ?? null;
     if (payload.pincode !== undefined)
       updateData.pincode = payload.pincode ?? null;
-    if (payload.gstin !== undefined) updateData.gstin = payload.gstin ?? null;
-    if (payload.fssaiLicense !== undefined)
-      updateData.fssaiLicense = payload.fssaiLicense ?? null;
+
     if (payload.latitude !== undefined) updateData.latitude = payload.latitude;
     if (payload.longitude !== undefined)
       updateData.longitude = payload.longitude;
@@ -344,9 +335,7 @@ async getBranchDetailsWithoutOwnership(
     if (payload.isPrimary !== undefined)
       updateData.isPrimary = payload.isPrimary;
 
-    if (requiresReverification) {
-      updateData.verificationStatus = VerificationStatus.PENDING;
-    }
+
 
     if (payload.isPrimary === true) {
       const primaryBranch = await this.branchRepo.getPrimaryBranch(
@@ -517,6 +506,38 @@ async getBranchDetailsWithoutOwnership(
         },
       },
       message: "Branch orders fetched successfully",
+      statusCode: 200,
+    };
+  }
+  async getBranchDashboardData(
+    branchId: string,
+    userId: string,
+  ): Promise<ServiceResponse<any>> {
+    // Validate branch ownership
+    await this.validateBranchOwnership(branchId, userId);
+
+    const branch = await this.branchRepo.getBranchDetails(branchId);
+    
+    if (!branch) {
+        throw new AppError("Branch not found", 404);
+    }
+
+    const ordersData = await this.branchRepo.getBranchOrders(branchId, 0, 10);
+    const ordersTotal = await this.branchRepo.countBranchOrders(branchId);
+
+    const MenuServiceModule = (await import("../../menu/services/menu.service")).MenuService;
+    const menuService = new MenuServiceModule();
+    const menu = await menuService.getFullMenu(branchId);
+
+    return {
+      success: true,
+      data: {
+        branch,
+        orders: ordersData,
+        ordersTotal,
+        menu: menu.data,
+      },
+      message: "Branch dashboard data fetched successfully",
       statusCode: 200,
     };
   }
