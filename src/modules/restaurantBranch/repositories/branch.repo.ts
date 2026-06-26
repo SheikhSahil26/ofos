@@ -526,5 +526,23 @@ export class BranchRepository {
             }
         });
     }
+
+    //helper for reviews
+    async getOwnerIdByBranchId (branchId: string): Promise<string | null> {
+        const branch = await prisma.restaurantBranch.findUnique({
+            where: {
+            id: branchId,
+            },
+            select: {
+            restaurant: {
+                select: {
+                ownerId: true,
+                },
+            },
+            },
+        });
+
+        return branch?.restaurant.ownerId ?? null;
+    };
 }
 

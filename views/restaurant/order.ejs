@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Order Details</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/common/toast.css">
+</head>
+
+<body class="bg-[#f5f7f6]">
+
+<p id="toast"></p>
+
+<div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <%- include("../partials/restaurant-sidebar") %>
+
+    <main class="flex-1 p-8">
+
+        <!-- Header -->
+
+        <div class="flex justify-between items-center mb-8">
+
+            <div>
+
+                <button
+                    onclick="history.back()"
+                    class="text-[#014f38] hover:text-[#ff7a00] transition mb-3">
+
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                    Back
+
+                </button>
+
+                <h1 class="text-3xl font-bold text-[#014f38]">
+                    Order Details
+                </h1>
+
+                <p class="order-date text-gray-500 mt-1"></p>
+
+            </div>
+
+            <span
+                class="order-status px-4 py-2 rounded-full text-sm font-semibold">
+            </span>
+
+        </div>
+
+
+        <!-- Customer + Delivery -->
+
+        <div class="grid lg:grid-cols-2 gap-6 mb-8">
+
+            <!-- Customer -->
+
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+
+                <h2 class="text-xl font-bold text-[#014f38] mb-6">
+                    Customer Details
+                </h2>
+
+                <div class="flex items-center gap-4">
+
+                    <div
+                        class="customer-avatar w-16 h-16 rounded-full bg-[#014f38] text-white flex items-center justify-center text-2xl font-bold">
+                    </div>
+
+                    <div>
+
+                        <h3
+                            class="customer-name font-semibold text-lg">
+                        </h3>
+
+                        <p
+                            class="customer-mobile text-gray-500">
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-6">
+
+                    <h4 class="font-semibold mb-2">
+                        Delivery Address
+                    </h4>
+
+                    <p
+                        class="customer-address text-gray-600 leading-7">
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Delivery -->
+
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+
+                <h2 class="text-xl font-bold text-[#014f38] mb-6">
+                    Delivery Details
+                </h2>
+
+                <div class="space-y-3">
+
+                    <div class="flex justify-between">
+
+                        <span class="text-gray-500">
+                            Partner
+                        </span>
+
+                        <span
+                            class="partner-name font-medium">
+                        </span>
+
+                    </div>
+
+                    <div class="flex justify-between">
+
+                        <span class="text-gray-500">
+                            Accepted
+                        </span>
+
+                        <span class="accepted-time"></span>
+
+                    </div>
+
+                    <div class="flex justify-between">
+
+                        <span class="text-gray-500">
+                            Picked Up
+                        </span>
+
+                        <span class="pickedup-time"></span>
+
+                    </div>
+
+                    <div class="flex justify-between">
+
+                        <span class="text-gray-500">
+                            Delivered
+                        </span>
+
+                        <span class="delivered-time"></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Ordered Items -->
+
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+
+            <div class="flex justify-between items-center mb-6">
+
+                <h2 class="text-xl font-bold text-[#014f38]">
+                    Ordered Items
+                </h2>
+
+                <span
+                    class="order-number text-gray-500">
+                </span>
+
+            </div>
+
+            <div
+                id="orderItemsContainer"
+                class="space-y-4">
+            </div>
+
+        </div>
+
+
+        <!-- Bill Summary + Review -->
+
+        <div class="grid lg:grid-cols-2 gap-6 mt-8">
+
+            <!-- Bill Summary -->
+
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+
+                <h2 class="text-xl font-bold text-[#014f38] mb-6">
+                    Bill Summary
+                </h2>
+
+                <div class="space-y-4">
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Subtotal</span>
+                        <span class="subtotal font-medium"></span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Tax</span>
+                        <span class="tax-amount font-medium"></span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Delivery Fee</span>
+                        <span class="delivery-fee font-medium"></span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Discount</span>
+                        <span class="discount text-red-500 font-medium"></span>
+                    </div>
+
+                    <hr>
+
+                    <div class="flex justify-between text-lg font-bold">
+
+                        <span>Total</span>
+
+                        <span
+                            class="total text-[#014f38]">
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Customer Review -->
+
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+
+                <div class="flex justify-between items-center">
+
+                    <h2 class="text-xl font-bold text-[#014f38]">
+                        Customer Review
+                    </h2>
+
+                    <div
+                        class="overall-rating bg-[#014f38] text-white px-4 py-2 rounded-full text-sm font-semibold">
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="reviewSection"
+                    class="mt-6">
+
+                    <div class="space-y-4">
+
+                        <div class="flex justify-between">
+
+                            <span>Food</span>
+
+                            <span class="food-rating text-[#ff7a00]"></span>
+
+                        </div>
+
+                        <div class="flex justify-between">
+
+                            <span>Delivery</span>
+
+                            <span class="delivery-rating text-[#ff7a00]"></span>
+
+                        </div>
+
+                        <div class="flex justify-between">
+
+                            <span>Packaging</span>
+
+                            <span class="packaging-rating text-[#ff7a00]"></span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mt-6">
+
+                        <h3 class="font-semibold mb-2">
+                            Review
+                        </h3>
+
+                        <p
+                            class="review-text text-gray-600 leading-7">
+                        </p>
+
+                    </div>
+
+
+                    <div class="review-images mt-6">
+
+                        <h3 class="font-semibold mb-3">
+                            Photos
+                        </h3>
+
+                        <div
+                            id="reviewImagesContainer"
+                            class="grid grid-cols-3 gap-3">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- No Review -->
+
+                <div
+                    id="noReview"
+                    class="hidden text-center py-12">
+
+                    <i
+                        class="fa-regular fa-star text-5xl text-gray-300 mb-4">
+                    </i>
+
+                    <p class="text-gray-500">
+
+                        Customer hasn't submitted a review yet.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Review Image Template -->
+
+        <template id="reviewImageTemplate">
+
+            <img
+                class="review-image rounded-xl object-cover w-full h-28 border"
+                src=""
+                alt="Review Image">
+
+        </template>
+
+    </main>
+
+</div>
+
+
+<!-- Order Item Template -->
+
+<template id="orderItemTemplate">
+
+    <div class="border rounded-xl p-5">
+
+        <div class="flex justify-between">
+
+            <div>
+
+                <h3
+                    class="item-name font-semibold text-lg">
+                </h3>
+
+                <p
+                    class="item-price text-[#ff7a00] font-semibold mt-1">
+                </p>
+
+            </div>
+
+            <div
+                class="item-quantity font-semibold text-[#014f38]">
+            </div>
+
+        </div>
+
+        <div
+            class="special-instruction mt-4 hidden">
+
+            <h4 class="font-medium mb-1">
+                Special Instruction
+            </h4>
+
+            <p
+                class="instruction-text text-gray-600">
+            </p>
+
+        </div>
+
+        <div
+            class="modifier-section mt-4 hidden">
+
+            <h4 class="font-medium mb-2">
+                Modifiers
+            </h4>
+
+            <div
+                class="modifier-container flex flex-wrap gap-2">
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+<script src="/js/common/auth.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/common/api.js"></script>
+<script src="/js/restaurant/order.js"></script>
+</body>
+
+</html>

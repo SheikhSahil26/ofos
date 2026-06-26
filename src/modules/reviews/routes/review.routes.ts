@@ -15,7 +15,7 @@ export class ReviewRoutes implements IRoutes{
 
     private initializeRoutes() : void{
         this.router.post("/",isAuthenticated, this.controller.createReview);
-
+        this.router.get("/", isAuthenticated, this.controller.getReviews); //get all the reviews of a branch
         
     }
 }

@@ -77,46 +77,19 @@ export class ReviewService{
         };
     }
 
-    //get all reviews of a branch
-    async getBranchReviews(
-        branchId: string,
+    // Get reviews of all branches or a specific branch
+    async getReviews(
         ownerId: string,
         page: number,
         limit: number
-    ): Promise<ServiceResponse<any>> {
-
-        const branch =
-            await this.branchRepository.validateBranchById(branchId);
-
-        if (!branch) {
-            throw new AppError("Branch not found", 404);
-        }
-
-        // Adjust this check according to your Branch model
-        if (branch.restaurantId !== ownerId) {
-            throw new AppError(
-                "You are not authorized to view these reviews",
-                403
-            );
-        }
+    ) {
 
         const { reviews, total } =
-            await this.reviewRepository.getBranchReviews(
-                branchId,
+            await this.reviewRepository.getReviews(
+                ownerId,
                 page,
                 limit
             );
-
-        // const formattedReviews = reviews.map((review) => ({
-        //     ...review,
-        //     overallRating: Number(
-        //         (
-        //             ((review.foodRating ?? 0) +
-        //                 (review.deliveryRating ?? 0) +
-        //                 (review.packagingRating ?? 0)) / 3
-        //         ).toFixed(1)
-        //     ),
-        // }));
 
         return {
             success: true,

@@ -15,6 +15,7 @@ export class OrdersRoutes implements IRoutes {
 
   private initializeRoutes(): void {
   
+    this.router.get("/details/:orderId",isAuthenticated,this.controller.getOrderDetails); //get full orders details
     this.router.post("/place-order",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.createOrder);
     this.router.get("/list-orders", this.controller.listOrders); // lists all orders of authenticated user
     this.router.get("/get-order/:id", isAuthenticated, this.controller.getOrder); // fetch a specific order by ID
@@ -23,5 +24,6 @@ export class OrdersRoutes implements IRoutes {
     this.router.patch("/change-status/:orderId",isAuthenticated,authorizeRoles("STAFF"), this.controller.updateOrderStatusByStaff); // fetch a specific order by ID
     this.router.get("/ready-for-pickup",isAuthenticated,authorizeRoles("STAFF"), this.controller.getOrdersReadyForPickup); // for restaurant staff to view orders ready for pickup
     this.router.get("/delivery-status/:orderId",isAuthenticated,authorizeRoles("DELIVERY_PARTNER"), this.controller.updateOrderStatusByDeliveryPartner); // for delivery staff to view their pickup history
+
   }
 }
