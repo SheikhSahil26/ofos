@@ -18,16 +18,20 @@ export const isAuthenticated = (
         return next(err);
       }
 
-      // console.log("Here use.............")
+      // console.log("Here use.............",user)
+
+      
       
 
       if (!user) {
         return res.status(401).json({
           status: "Error",
           statusCode:401,
-          message: "Unauthorized User"
+          message: "new kdfk User"
         });
       }
+
+      console.log("Authenticated user:", user);
 
       req.user = user;
       console.log("req.user", user);
