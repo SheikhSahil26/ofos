@@ -519,12 +519,6 @@ model DeliveryPartner {
   @@map("delivery_partners")
 }
 
-enum DeliveryPartnerVerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 /// Main delivery record for an order (never delete)
 model Delivery {
   id               String               @id @default(uuid())
@@ -627,28 +621,6 @@ model Refund {
   @@index([orderId])
   @@index([status])
   @@map("refunds")
-}
-
-enum RefundReason {
-  MISSING_ITEM
-  WRONG_ITEM
-  FOOD_QUALITY
-  DAMAGED_FOOD
-  ORDER_NOT_DELIVERED
-  DUPLICATE_PAYMENT
-  OTHER
-}
-
-enum RefundType {
-  FULL
-  PARTIAL
-}
-
-enum RefundStatus {
-  REQUESTED
-  APPROVED
-  REJECTED
-  PROCESSED
 }
 
 /// Customer review after order delivery (one review per order)
@@ -856,6 +828,34 @@ model admin_audit_logs {
   @@index([admin_id])
   @@index([entity_id])
   @@index([entity_type])
+}
+
+enum DeliveryPartnerVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RefundReason {
+  MISSING_ITEM
+  WRONG_ITEM
+  FOOD_QUALITY
+  DAMAGED_FOOD
+  ORDER_NOT_DELIVERED
+  DUPLICATE_PAYMENT
+  OTHER
+}
+
+enum RefundType {
+  FULL
+  PARTIAL
+}
+
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  PROCESSED
 }
 
 enum PaymentTransactionStatus {
