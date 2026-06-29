@@ -778,13 +778,13 @@ async updateOrderStatusByDeliveryPartner(
     //    verify no other partner has already claimed it
     const isClaimingOrder = order.status === "READY_FOR_PICKUP";
 
-    if (isClaimingOrder && delivery.currentPartnerId !== null) {
-      return {
-        success: false,
-        error: "This order has already been claimed by another delivery partner",
-        statusCode: 409,
-      };
-    }
+    // if (isClaimingOrder && delivery.currentPartnerId !== null) {
+    //   return {
+    //     success: false,
+    //     error: "This order has already been claimed by another delivery partner",
+    //     statusCode: 409,
+    //   };
+    // }
 
     // 5. If already claimed, verify THIS partner owns it
     if (!isClaimingOrder && delivery.currentPartnerId !== partnerRecord.id) {

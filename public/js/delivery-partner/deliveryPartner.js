@@ -237,6 +237,12 @@ function setupAvailabilityToggle() {
       const response = await apiRequest("/api/delivery/toggle-availability", "PATCH");
       const result = await response.json();
 
+     if(result.error){
+        toggle.checked = !toggle.checked;
+        showToast(result.error, "error");
+        return;
+     }
+
       if (result.data.currentStatus === "ACTIVE") {
         isPartnerOnline = true;
         toggle.checked = true;
@@ -257,7 +263,7 @@ function setupAvailabilityToggle() {
 
     } catch (err) {
       toggle.checked = !toggle.checked;
-      showToast("Failed to update availability", "error");
+      showToast("failed to update availability", "error");
     }
   });
 }
@@ -315,6 +321,8 @@ async function loadCurrentOrder() {
     const response = await apiRequest("/api/delivery/current-order");
     const result = await response.json();
 
+    console.log("Current order:", result);
+
     if (result.success) {
       currentOrder = result.data;
       renderCurrentOrder();
@@ -323,85 +331,135 @@ async function loadCurrentOrder() {
     console.error(err);
   }
 }
-
 function renderCurrentOrder() {
-  const detailsEl = document.getElementById("current-order-details");
-  const pickedUpBtn = document.getElementById("picked-up-btn");
-  const outForDeliveryBtn = document.getElementById("out-for-delivery-btn");
-  const deliveredBtn = document.getElementById("delivered-btn");
 
-  if (!currentOrder) {
-    detailsEl.innerHTML = `<p class="text-gray-400 text-sm">No active order — waiting for new offers</p>`;
-    pickedUpBtn.style.display = "none";
-    outForDeliveryBtn.style.display = "none";
-    deliveredBtn.style.display = "none";
-    return;
-  }
+    const details =
+        document.getElementById("current-order-details");
 
-  detailsEl.innerHTML = `
-    <div>
-      <p class="text-gray-500">Order ID</p>
-      <h3 class="font-bold text-xl">#${currentOrder.orderNumber}</h3>
-    </div>
-    <div>
-      <p class="text-gray-500">Restaurant</p>
-      <h3 class="font-bold">${currentOrder.restaurantName}</h3>
-    </div>
-    <div>
-      <p class="text-gray-500">Customer</p>
-      <h3 class="font-bold">${currentOrder.customerName}</h3>
-    </div>
-    <div>
-      <p class="text-gray-500">Distance</p>
-      <h3 class="font-bold">${currentOrder.distanceKm != null ? currentOrder.distanceKm + " km" : "—"}</h3>
-    </div>
-  `;
+    const pickedBtn =
+        document.getElementById("picked-up-btn");
 
-  pickedUpBtn.style.display = "none";
-  outForDeliveryBtn.style.display = "none";
-  deliveredBtn.style.display = "none";
+    const deliveryBtn =
+        document.getElementById("out-for-delivery-btn");
 
-  if (currentOrder.orderStatus === "READY_FOR_PICKUP") {
-    pickedUpBtn.style.display = "";
-  } else if (currentOrder.orderStatus === "PICKED_UP") {
-    outForDeliveryBtn.style.display = "";
-  } else if (currentOrder.orderStatus === "OUT_FOR_DELIVERY") {
-    deliveredBtn.style.display = "";
-  }
-}
+    const deliveredBtn =
+        document.getElementById("delivered-btn");
 
-async function advanceCurrentOrderStatus() {
-  if (!currentOrder) return;
+    if (!currentOrder) {
 
-  try {
-    const response = await apiRequest(`/api/orders/delivery-status/${currentOrder.id}`, "PATCH");
-    const result = await response.json();
+        details.innerHTML = `
+            <p class="text-gray-400 text-sm">
+                No active order
+            </p>
+        `;
 
-    if (result.success) {
-      showToast(`Status updated to ${result.data.newStatus.replace(/_/g, " ")}`, "success");
+        pickedBtn.style.display = "none";
+        deliveryBtn.style.display = "none";
+        deliveredBtn.style.display = "none";
 
-      if (result.data.newStatus === "DELIVERED") {
-        currentOrder = null;
-        renderCurrentOrder();
-        loadStats();
-        loadRecentDeliveries();
-        // partner is now free — resume polling for the next offer
-        pollForOffer();
-      } else {
-        loadCurrentOrder();
-      }
-    } else {
-      showToast(result.error || "Failed to update status", "error");
+        return;
     }
-  } catch (err) {
-    console.error(err);
-    showToast("Something went wrong", "error");
-  }
+
+    details.innerHTML = `
+
+        <div>
+
+            <p class="text-gray-500">
+                Order ID
+            </p>
+
+            <h3 class="font-bold text-xl">
+                #${currentOrder.orderNumber}
+            </h3>
+
+        </div>
+
+        <div>
+
+            <p class="text-gray-500">
+                Restaurant
+            </p>
+
+            <h3 class="font-bold">
+                ${currentOrder.restaurantName}
+            </h3>
+
+        </div>
+
+        <div>
+
+            <p class="text-gray-500">
+                Customer
+            </p>
+
+            <h3 class="font-bold">
+                ${currentOrder.customerName}
+            </h3>
+
+        </div>
+
+        <div>
+
+            <p class="text-gray-500">
+                Current Status
+            </p>
+
+            <h3 class="font-bold text-orange-500">
+                ${currentOrder.orderStatus.replaceAll("_"," ")}
+            </h3>
+
+        </div>
+
+    `;
+
+    pickedBtn.style.display = "none";
+    deliveryBtn.style.display = "none";
+    deliveredBtn.style.display = "none";
+
+    switch(currentOrder.orderStatus){
+
+        case "READY_FOR_PICKUP":
+
+            pickedBtn.style.display="block";
+            break;
+
+        case "PICKED_UP":
+
+            deliveryBtn.style.display="block";
+            break;
+
+        case "OUT_FOR_DELIVERY":
+
+            deliveredBtn.style.display="block";
+            break;
+
+    }
+
 }
 
-document.getElementById("picked-up-btn")?.addEventListener("click", advanceCurrentOrderStatus);
-document.getElementById("out-for-delivery-btn")?.addEventListener("click", advanceCurrentOrderStatus);
-document.getElementById("delivered-btn")?.addEventListener("click", advanceCurrentOrderStatus);
+document
+.getElementById("picked-up-btn")
+.addEventListener("click",()=>{
+
+    updateDeliveryStatus();
+
+});
+
+document
+.getElementById("out-for-delivery-btn")
+.addEventListener("click",()=>{
+
+    updateDeliveryStatus();
+
+});
+
+document
+.getElementById("delivered-btn")
+.addEventListener("click",()=>{
+
+    updateDeliveryStatus();
+
+});
 
 // ──────────────────────────────────────────────
 // RECENT DELIVERIES
@@ -430,4 +488,84 @@ async function loadRecentDeliveries() {
   } catch (err) {
     console.error("Failed to load recent deliveries:", err);
   }
+}
+
+async function updateDeliveryStatus(){
+
+    if(!currentOrder)
+        return;
+
+    try{
+
+        const pickedBtn =
+            document.getElementById("picked-up-btn");
+
+        const deliveryBtn =
+            document.getElementById("out-for-delivery-btn");
+
+        const deliveredBtn =
+            document.getElementById("delivered-btn");
+
+        pickedBtn.disabled=true;
+        deliveryBtn.disabled=true;
+        deliveredBtn.disabled=true;
+
+        const response =
+            await apiRequest(
+                `/api/orders/delivery-status/${currentOrder.id}`,
+                "PATCH"
+            );
+
+        const result =
+            await response.json();
+
+        if(!result.success){
+
+            showToast(
+                result.error,
+                "error"
+            );
+
+            return;
+        }
+
+        showToast(
+            result.message,
+            "success"
+        );
+
+        currentOrder.orderStatus =
+            result.data.newStatus;
+
+        renderCurrentOrder();
+
+        if(result.data.newStatus==="DELIVERED"){
+
+            currentOrder=null;
+
+            renderCurrentOrder();
+
+            loadStats();
+
+            loadRecentDeliveries();
+
+            pollForOffer();
+
+            return;
+        }
+
+        await loadCurrentOrder();
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        showToast(
+            "Failed to update order",
+            "error"
+        );
+
+    }
+
 }

@@ -163,28 +163,40 @@ respondToOffer = asyncHandler(async (req: Request, res: Response) => {
 });
 
 getActiveOrders = asyncHandler(async (req: Request, res: Response) => {
-  const result = await this.deliveryService.getActiveOrders(req.user.id);
+   const user  = req.user as Express.payload
+    console.log("User from request: in pending offer", user);
+  const result = await this.deliveryService.getActiveOrders(user.userId);
   return res.status(result.statusCode).json(result);
 });
 
 getCurrentOrder = asyncHandler(async (req: Request, res: Response) => {
-  const result = await this.deliveryService.getCurrentOrder(req.user.id);
+  const user  = req.user as Express.payload
+  console.log("User from request: in current order", user); 
+
+
+
+  const result = await this.deliveryService.getCurrentOrder(user.userId);
   return res.status(result.statusCode).json(result);
 });
 
 getTodayStats = asyncHandler(async (req: Request, res: Response) => {
-  const result = await this.deliveryService.getTodayStats(req.user.id);
+  const user  = req.user as Express.payload
+  console.log("User from request: in current order", user); 
+  const result = await this.deliveryService.getTodayStats(user.userId);
   return res.status(result.statusCode).json(result);
 });
 
 getRecentDeliveries = asyncHandler(async (req: Request, res: Response) => {
-  const result = await this.deliveryService.getRecentDeliveries(req.user.id);
+   const user  = req.user as Express.payload
+    console.log("User from request: in pending offer", user);
+  const result = await this.deliveryService.getRecentDeliveries(user.userId);
   return res.status(result.statusCode).json(result);
 });
 
 acceptActiveOrder = asyncHandler(async (req: Request, res: Response) => {
-  const { assignmentId } = req.params;
-  const result = await this.deliveryService.acceptActiveOrder(req.user.id, assignmentId);
+  const  assignmentId  = req.params.assignmentId as string;
+  const user = req.user as Express.payload;
+  const result = await this.deliveryService.acceptActiveOrder(user.userId, assignmentId);
   return res.status(result.statusCode).json(result);
 });
 
