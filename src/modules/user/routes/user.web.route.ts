@@ -3,7 +3,7 @@ import { Request, Response, Router } from "express";
 import { UserController } from "../controllers/user.controller";
 
 export class UserWebRoutes implements IRoutes{
-    path= "/"
+    path= "/customer"
     router= Router();
     controller = new UserController();
 
@@ -35,6 +35,10 @@ export class UserWebRoutes implements IRoutes{
 
         this.router.get("/orders", (req: Request, res: Response) => {
             res.status(200).render("customer/orders", {activePage: "orders"});
+        });
+
+        this.router.get("/reviews", (req: Request, res: Response) => {
+            res.status(200).render("customer/reviews", {activePage: "reviews"});
         });
     }
 }

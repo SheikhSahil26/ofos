@@ -45,6 +45,7 @@ export class OrdersControllers {
       listOrders = asyncHandler(
         async(req: Request, res: Response) => {
            const user = req.user as Express.payload // dummy
+           console.log("list-orders", user);
 
           const result : any = await this.ordersService.listOrders("1eaab1e4-6bd3-458c-a708-65307da24d9e");
 

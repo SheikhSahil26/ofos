@@ -567,7 +567,7 @@ export class RestaurantRepository {
 
         branchId,
 
-        deliveryPartnerId,
+        deliveryPartnerId, 
 
         foodRating: data.foodRating,
 

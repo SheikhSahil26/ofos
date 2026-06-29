@@ -5,7 +5,7 @@ import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";
 import { OrdersRepository } from "../repositories/orders.repository";
 import { DELIVERY_TRANSITIONS, STAFF_TRANSITIONS } from "../types/order.types";
-import { OrderItemInput } from "../types/order.types";
+import { OrderItemInput } from "../interfaces/orders.interface";
 import { PayoutService } from "../../payout-managment/services/payout.service";
 import { prisma } from "../../../config/prisma";
 import { DeliveryService } from "../../delivery/services/delivery.service";
