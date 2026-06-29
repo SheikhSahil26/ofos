@@ -77,6 +77,12 @@ this.router.patch(
   this.controller.respondToOffer
 );
     
+// routes
+this.router.get("/orders/active", isAuthenticated, authorizeRoles("DELIVERY_PARTNER"), this.controller.getActiveOrders);
+this.router.get("/current-order", isAuthenticated, authorizeRoles("DELIVERY_PARTNER"), this.controller.getCurrentOrder);
+this.router.get("/stats/today", isAuthenticated, authorizeRoles("DELIVERY_PARTNER"), this.controller.getTodayStats);
+this.router.get("/deliveries/recent", isAuthenticated, authorizeRoles("DELIVERY_PARTNER"), this.controller.getRecentDeliveries);
+this.router.patch("/orders/:assignmentId/accept", isAuthenticated, authorizeRoles("DELIVERY_PARTNER"), this.controller.acceptActiveOrder);
     
   }
 }

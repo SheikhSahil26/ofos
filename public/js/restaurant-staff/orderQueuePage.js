@@ -41,6 +41,8 @@ async function fetchBranchOrders() {
     const response = await apiRequest("/api/orders/branch-orders-active", "GET");
     const result = await response.json();
 
+    console.log("Fetched branch orders:", result);
+
     if (!result.success) {
       showToast(result.error || "Failed to load orders", "error");
       return;
@@ -52,8 +54,11 @@ async function fetchBranchOrders() {
     console.error("Failed to fetch branch orders:", err);
   }
 }
+let allOrders = []; // store latest fetched orders for modal lookup
 
 function renderBoard(orders) {
+  allOrders = orders; // keep reference for modal click handler
+
   const columns = { new: [], confirmed: [], preparing: [], ready: [] };
 
   orders.forEach((order) => {
@@ -72,12 +77,96 @@ function renderBoard(orders) {
   document.getElementById("count-ready").textContent = columns.ready.length;
 
   attachButtonListeners();
+  attachCardClickListeners(); // ← new
 }
+
+
+function attachCardClickListeners() {
+  document.querySelectorAll(".order-card").forEach((card) => {
+    card.addEventListener("click", (e) => {
+      // Don't open modal if the click was on the action button inside the card
+      if (e.target.closest(".status-action-btn")) return;
+
+      const orderId = card.dataset.orderId;
+      const order = allOrders.find((o) => o.id === orderId);
+      if (order) showOrderDetailModal(order);
+    });
+  });
+}
+
+function showOrderDetailModal(order) {
+  const modal = document.getElementById("order-detail-modal");
+
+  const itemsHtml = order.orderItems.map((item) => `
+    <div class="flex justify-between text-slate-200 text-sm py-2 border-b border-white/5 last:border-0">
+      <div>
+        <span class="text-orange-400 font-bold mr-2">${item.quantity}x</span>${item.menuItemName}
+        ${item.specialInstruction ? `<div class="text-slate-500 text-xs mt-1 ml-6">${item.specialInstruction}</div>` : ""}
+        ${item.modifiers && item.modifiers.length > 0
+          ? `<div class="text-slate-500 text-xs mt-1 ml-6">+ ${item.modifiers.map((m) => m.modifierName).join(", ")}</div>`
+          : ""}
+      </div>
+    </div>
+  `).join("");
+
+  const statusLabel = order.status.replace(/_/g, " ");
+  const timeAgo = formatTimeAgo(order.placedAt);
+
+  modal.innerHTML = `
+    <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" id="modal-backdrop">
+      <div class="bg-[#16241C] rounded-2xl p-6 max-w-md w-full border border-white/10 max-h-[85vh] overflow-y-auto">
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h2 class="text-white font-bold text-lg">#${order.orderNumber}</h2>
+            <p class="text-slate-500 text-xs mt-1">${timeAgo}</p>
+          </div>
+          <button id="close-modal-btn" class="text-slate-400 hover:text-white text-xl leading-none">✕</button>
+        </div>
+
+        <div class="bg-white/5 rounded-xl p-3 mb-4">
+          <span class="text-slate-300 text-xs font-semibold uppercase tracking-wide">${statusLabel}</span>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-slate-500 text-xs font-semibold uppercase tracking-wide mb-2">Customer</p>
+          <p class="text-white text-sm font-medium">${order.customer.fullName}</p>
+          <p class="text-slate-400 text-sm">${order.customer.mobile}</p>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-slate-500 text-xs font-semibold uppercase tracking-wide mb-2">Order Items</p>
+          ${itemsHtml}
+        </div>
+
+        <div class="flex justify-between items-center pt-3 border-t border-white/10">
+          <span class="text-slate-400 text-sm">Total Amount</span>
+          <span class="text-white font-bold text-lg">₹${order.totalAmount}</span>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  document.getElementById("close-modal-btn").onclick = closeOrderDetailModal;
+
+  // Close on clicking outside the card
+  document.getElementById("modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "modal-backdrop") closeOrderDetailModal();
+  });
+}
+
+function closeOrderDetailModal() {
+  document.getElementById("order-detail-modal").innerHTML = "";
+}
+
+
+
+
 
 function emptyState() {
   return `<div class="text-slate-600 text-xs text-center py-6">No orders here</div>`;
 }
-
 function buildCard(order, isNew = false, isReady = false) {
   const itemsHtml = order.orderItems.map((item) => `
     <div class="flex justify-between text-slate-300 text-[12.5px] py-0.5">
@@ -109,7 +198,9 @@ function buildCard(order, isNew = false, isReady = false) {
   }
 
   return `
-    <div class="bg-[#1E2D24] rounded-[14px] p-3.5 mb-3 border ${isNew ? "border-orange-500 shadow-[0_0_0_1px_rgba(249,115,22,0.3)]" : "border-white/5"}">
+    <div
+      class="order-card bg-[#1E2D24] rounded-[14px] p-3.5 mb-3 border ${isNew ? "border-orange-500 shadow-[0_0_0_1px_rgba(249,115,22,0.3)]" : "border-white/5"} cursor-pointer hover:border-white/20 transition-colors"
+      data-order-id="${order.id}">
       <div class="flex justify-between items-start mb-2">
         <div>
           <div class="text-white font-bold text-sm">#${order.orderNumber}</div>

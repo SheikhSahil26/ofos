@@ -1,29 +1,44 @@
-
 // /public/js/orders/deliveryPartner.js
-
-// js/delivery/partnerOffersPage.js
 
 let offerPollTimer = null;
 let currentOffer = null;
+let activeOrders = [];
+let currentOrder = null;
+
+// ──────────────────────────────────────────────
+// OFFER POLLING (your existing logic, fixed interval)
+// ──────────────────────────────────────────────
+let isPartnerOnline = false; // tracks current availability state
 
 document.addEventListener("DOMContentLoaded", () => {
-  pollForOffer();
-  offerPollTimer = setInterval(pollForOffer, 300000);
+  // Don't start polling immediately — wait until we know the partner's actual status
+  // loadPartnerProfile() already sets the toggle checked state; we read it after that
 });
 
+function startOfferPolling() {
+  if (offerPollTimer) return; // already running, don't start a second interval
+  pollForOffer(); // check immediately on going online
+  offerPollTimer = setInterval(pollForOffer, 5000);
+}
+
+function stopOfferPolling() {
+  if (!offerPollTimer) return;
+  clearInterval(offerPollTimer);
+  offerPollTimer = null;
+}
+
 async function pollForOffer() {
-  // Don't poll if a modal is already showing an offer
+  if (!isPartnerOnline) return; // safety guard — never fetch offers while offline
   if (currentOffer) return;
 
   try {
     const response = await apiRequest("/api/delivery/pending-offer", "GET");
     const result = await response.json();
 
-    console.log("Polling for offers:", result);
+    console.log("Offer poll result:", result);
 
     if (result.success && result.data) {
       currentOffer = result.data;
-      console.log("New offer received:", currentOffer);
       showOfferModal(currentOffer);
     }
   } catch (err) {
@@ -63,7 +78,7 @@ async function respondToOffer(response) {
     if (result.success) {
       showToast(response === "ACCEPTED" ? "Offer accepted!" : "Offer rejected", "success");
       if (response === "ACCEPTED") {
-        window.location.href = `/delivery/active-order/${currentOffer.orderNumber}`;
+        loadDashboard(); // refresh current order + active orders immediately
       }
     } else {
       showToast(result.error || "Failed to respond", "error");
@@ -76,820 +91,435 @@ async function respondToOffer(response) {
   }
 }
 
-
-
-let activeOrders = [];
-
-let currentOrder = null;
-
-let acceptingOrders = false;
-
-
-
-
+// ──────────────────────────────────────────────
+// PROFILE GATING (unchanged)
+// ──────────────────────────────────────────────
 async function loadPartnerProfile() {
+  try {
+    const response = await apiRequest("/api/delivery/profile");
+    const result = await response.json();
 
-    try {
-
-        const response =
-            await apiRequest(
-                "/api/delivery/profile"
-            );
-
-        const result =
-            await response.json();
-
-        if (!result.success) {
-
-            renderVerificationPending();
-
-            return false;
-        }
-
-        const partner =
-            result.data;
-
-        console.log(
-            "Partner Profile",
-            partner
-        );
-
-        if (
-            partner.status ===
-            "PENDING_VERIFICATION"
-        ) {
-
-            renderVerificationPending();
-
-            return false;
-        }
-
-        if (
-            partner.status ===
-            "SUSPENDED"
-        ) {
-
-            renderSuspendedAccount();
-
-            return false;
-        }
-
-        const toggle =
-            document.querySelector(
-                'input[type="checkbox"]'
-            );
-
-        if (toggle) {
-
-            toggle.checked =
-                partner.status === "ACTIVE";
-        }
-
-        return true;
-
-    }
-    catch (error) {
-
-        console.error(error);
-
-        renderVerificationPending();
-
-        return false;
-
+    if (!result.success) {
+      renderVerificationPending();
+      return false;
     }
 
+    const partner = result.data;
+
+    if (partner.status === "PENDING_VERIFICATION") {
+      renderVerificationPending();
+      return false;
+    }
+
+    if (partner.status === "SUSPENDED") {
+      renderSuspendedAccount();
+      return false;
+    }
+
+    const toggle = document.querySelector('input[type="checkbox"]');
+    if (toggle) {
+      toggle.checked = partner.status === "ACTIVE";
+      updateAvailabilityLabel(partner.status === "ACTIVE");
+    }
+
+      isPartnerOnline = partner.status === "ACTIVE";
+    if (isPartnerOnline) {
+      startOfferPolling();
+    }
+
+    return true;
+
+  } catch (error) {
+    console.error(error);
+    renderVerificationPending();
+    return false;
+  }
 }
 
-//if profile is not verified 
 function renderVerificationPending() {
-
-    document.body.innerHTML = `
-
-    <div
-    class="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
-
-        <div
-        class="bg-white rounded-3xl shadow-lg p-12 max-w-lg text-center">
-
-            <div
-            class="w-24 h-24 rounded-full
-            bg-orange-100
-            flex items-center justify-center
-            mx-auto">
-
-                <span class="text-5xl">
-                    ⏳
-                </span>
-
-            </div>
-
-            <h1
-            class="text-3xl font-bold mt-8">
-
-                Verification Pending
-
-            </h1>
-
-            <p
-            class="text-gray-500 mt-4">
-
-                Your delivery partner profile
-                is currently under review.
-
-                Once approved by the admin,
-                you will be able to accept
-                delivery requests.
-
-            </p>
-
-            <button
-            onclick="window.location.href='/delivery/profile'"
-            class="
-            mt-8
-            bg-orange-500
-            hover:bg-orange-600
-            text-white
-            px-8 py-4
-            rounded-2xl">
-
-                View Profile
-
-            </button>
-
+  document.body.innerHTML = `
+    <div class="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
+      <div class="bg-white rounded-3xl shadow-lg p-12 max-w-lg text-center">
+        <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center mx-auto">
+          <span class="text-5xl">⏳</span>
         </div>
-
+        <h1 class="text-3xl font-bold mt-8">Verification Pending</h1>
+        <p class="text-gray-500 mt-4">
+          Your delivery partner profile is currently under review.
+          Once approved by the admin, you will be able to accept delivery requests.
+        </p>
+        <button onclick="window.location.href='/delivery/profile'"
+        class="mt-8 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-2xl">
+          View Profile
+        </button>
+      </div>
     </div>
-
-    `;
+  `;
 }
 
-//if profile is suspended
 function renderSuspendedAccount() {
-
-    document.body.innerHTML = `
-
-    <div
-    class="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
-
-        <div
-        class="bg-white rounded-3xl shadow-lg p-12 max-w-lg text-center">
-
-            <div
-            class="w-24 h-24 rounded-full
-            bg-red-100
-            flex items-center justify-center
-            mx-auto">
-
-                <span class="text-5xl">
-                    ⚠️
-                </span>
-
-            </div>
-
-            <h1
-            class="text-3xl font-bold mt-8">
-
-                Account Suspended
-
-            </h1>
-
-            <p
-            class="text-gray-500 mt-4">
-
-                Your delivery partner account
-                has been suspended.
-
-                Please contact support
-                for further assistance.
-
-            </p>
-
-            <button
-            class="
-            mt-8
-            bg-orange-500
-            text-white
-            px-8 py-4
-            rounded-2xl">
-
-                Contact Support
-
-            </button>
-
+  document.body.innerHTML = `
+    <div class="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
+      <div class="bg-white rounded-3xl shadow-lg p-12 max-w-lg text-center">
+        <div class="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+          <span class="text-5xl">⚠️</span>
         </div>
-
+        <h1 class="text-3xl font-bold mt-8">Account Suspended</h1>
+        <p class="text-gray-500 mt-4">
+          Your delivery partner account has been suspended. Please contact support for further assistance.
+        </p>
+        <button class="mt-8 bg-orange-500 text-white px-8 py-4 rounded-2xl">Contact Support</button>
+      </div>
     </div>
-
-    `;
+  `;
 }
 
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  const canAccess = await loadPartnerProfile();
+  if (!canAccess) return;
 
+  loadDashboard();
+  setupAvailabilityToggle();
+});
 
-
-/* ================================
-INIT
-================================ */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
-
-        const canAccess =
-            await loadPartnerProfile();
-
-        if (!canAccess) {
-            return;
-        }
-
-        loadDashboard();
-
-        setupAvailabilityToggle();
-
-        // initializeSocket();
-
-    }
-);
-
-
-/* ================================
-LOAD DASHBOARD
-================================ */
-
+// ──────────────────────────────────────────────
+// LOAD DASHBOARD — now also loads stats + recent deliveries
+// ──────────────────────────────────────────────
 async function loadDashboard() {
-
-    try {
-
-        await Promise.all([
-            loadActiveOrders(),
-            loadCurrentOrder()
-        ]);
-
-    }
-    catch (err) {
-
-        console.error(err);
-
-        showToast(
-            "Failed to load dashboard",
-            "error"
-        );
-
-    }
-
+  try {
+    await Promise.all([
+      loadActiveOrders(),
+      loadCurrentOrder(),
+      loadStats(),
+      loadRecentDeliveries(),
+    ]);
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to load dashboard", "error");
+  }
 }
 
+// ──────────────────────────────────────────────
+// STATS — fills the 3 top cards (not the toggle)
+// ──────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const response = await apiRequest("/api/delivery/stats/today");
+    const result = await response.json();
 
-/* ================================
-AVAILABILITY
-================================ */
+    if (!result.success) return;
+
+    document.getElementById("stat-earnings").textContent = `₹${result.data.earnings}`;
+    document.getElementById("stat-deliveries").textContent = result.data.deliveriesToday;
+    document.getElementById("stat-rating").textContent = result.data.rating ?? "New";
+
+  } catch (err) {
+    console.error("Failed to load stats:", err);
+  }
+}
+
+// ──────────────────────────────────────────────
+// AVAILABILITY — same toggle element, unchanged markup
+// ──────────────────────────────────────────────
+function updateAvailabilityLabel(isActive) {
+  const label = document.getElementById("availability-label");
+  if (!label) return;
+  label.textContent = isActive ? "Online" : "Offline";
+  label.className = isActive ? "text-xl font-bold mt-3 text-green-600" : "text-xl font-bold mt-3 text-gray-400";
+}
 
 function setupAvailabilityToggle() {
+  const toggle = document.querySelector('input[type="checkbox"]');
+  if (!toggle) return;
 
-    const toggle =
-        document.querySelector(
-            'input[type="checkbox"]'
-        );
+  toggle.addEventListener("change", async () => {
+    try {
+      const response = await apiRequest("/api/delivery/toggle-availability", "PATCH");
+      const result = await response.json();
 
-    if (!toggle)
-        return;
+      if (result.data.currentStatus === "ACTIVE") {
 
-    toggle.addEventListener(
-        "change",
-        async () => {
+    isPartnerOnline = true;
 
-            try {
+    toggle.checked = true;
 
-                const response =
-                    await apiRequest(
-                        "/api/delivery/toggle-availability",
-                        "PATCH"
+    updateAvailabilityLabel(true);
 
-                    );
+    startLocationTracking();
 
-                const result =
-                    await response.json();
+    startOfferPolling();
 
-                console.log("availability", result);
-
-                if (
-                    result.data.currentStatus ===
-                    "ACTIVE"
-                ) {
-
-                    showToast(
-                        toggle.checked
-                            ? "You are online"
-                            : "You are offline",
-                        "success"
-                    );
-
-                    startLocationTracking();
-
-                }
-                else {
-
-                    showToast(
-                        toggle.checked
-                            ? "You are online"
-                            : "You are offline",
-                        "success"
-                    );
-
-                    stopLocationTracking();
-
-                }
-
-            }
-            catch (err) {
-
-                toggle.checked =
-                    !toggle.checked;
-
-                showToast(
-                    "Failed to update availability",
-                    "error"
-                );
-
-            }
-
-        }
-    );
+    showToast("You are online", "success");
 
 }
+else {
+
+    isPartnerOnline = false;
+
+    toggle.checked = false;
+
+    updateAvailabilityLabel(false);
+
+    stopLocationTracking();
+
+    stopOfferPolling();
+
+    currentOffer = null;
+
+    document.getElementById("offer-modal").innerHTML = "";
+
+    showToast("You are offline", "success");
+
+}
+
+    } catch (err) {
+      toggle.checked = !toggle.checked;
+      showToast("Failed to update availability", "error");
+    }
+  });
+}
+
+// ──────────────────────────────────────────────
+// LOCATION TRACKING (unchanged)
+// ──────────────────────────────────────────────
 let locationInterval = null;
 
 async function getCurrentLocation() {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            if (!navigator.geolocation) {
-
-                reject(
-                    new Error(
-                        "Geolocation not supported"
-                    )
-                );
-
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-
-                (position) => {
-
-                    resolve({
-                        latitude:
-                            position.coords.latitude,
-
-                        longitude:
-                            position.coords.longitude
-                    });
-
-                },
-
-                (error) => {
-
-                    reject(error);
-
-                },
-
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-
-            );
-
-        }
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation not supported"));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+      (error) => reject(error),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  });
 }
 
 async function sendLocation() {
-
-    try {
-
-        console.log(
-            "Sending location..."
-        );
-
-        const currentLocation =
-            await getCurrentLocation();
-
-        console.log(
-            "Current Location:",
-            currentLocation
-        );
-
-        const response =
-            await apiRequest(
-                "/api/delivery/update-partner-location",
-                "PATCH",
-                {
-                    latitude:
-                        currentLocation.latitude,
-
-                    longitude:
-                        currentLocation.longitude
-                }
-            );
-
-        if (!response) {
-
-            console.error(
-                "apiRequest returned null"
-            );
-
-            return;
-        }
-
-        const result =
-            await response.json();
-
-        console.log(
-            "Location Updated:",
-            result
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "Location Tracking Error:",
-            error
-        );
-
-    }
+  try {
+    const currentLocation = await getCurrentLocation();
+    const response = await apiRequest("/api/delivery/update-partner-location", "PATCH", {
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude,
+    });
+    if (!response) return;
+    await response.json();
+  } catch (error) {
+    console.error("Location Tracking Error:", error);
+  }
 }
 
 function startLocationTracking() {
-
-    console.log(
-        "Starting location tracking..."
-    );
-
-    if (locationInterval) {
-
-        console.log(
-            "Tracking already running"
-        );
-
-        return;
-    }
-
-    // First call immediately
-    sendLocation();
-
-    // Then poll every 5 sec
-    locationInterval =
-        setInterval(
-            () => {
-
-                console.log(
-                    "Polling..."
-                );
-
-                sendLocation();
-
-            },
-            5000
-        );
-
-    console.log(
-        "Interval Started:",
-        locationInterval
-    );
+  if (locationInterval) return;
+  sendLocation();
+  locationInterval = setInterval(sendLocation, 5000);
 }
 
 function stopLocationTracking() {
-
-    console.log(
-        "Stopping location tracking..."
-    );
-
-    if (!locationInterval)
-        return;
-
-    clearInterval(
-        locationInterval
-    );
-
-    locationInterval = null;
-
-    console.log(
-        "Tracking stopped"
-    );
+  if (!locationInterval) return;
+  clearInterval(locationInterval);
+  locationInterval = null;
 }
 
-
-/* ================================
-ACTIVE ORDERS
-================================ */
-
+// ──────────────────────────────────────────────
+// ACTIVE ORDERS
+// ──────────────────────────────────────────────
 async function loadActiveOrders() {
+  try {
+    const response = await apiRequest("/api/delivery/orders/active");
+    const result = await response.json();
 
-    try {
+    if (!result.success) return;
 
-        const response =
-            await apiRequest(
-                "/api/delivery-partner/orders/active"
-            );
+    activeOrders = result.data;
+    renderActiveOrders();
 
-        const result =
-            await response.json();
-
-        if (!result.success)
-            return;
-
-        activeOrders =
-            result.data;
-
-        renderActiveOrders();
-
-    }
-    catch (err) {
-
-        console.error(err);
-
-    }
-
+  } catch (err) {
+    console.error(err);
+  }
 }
-
 
 function renderActiveOrders() {
+  const container = document.getElementById("active-orders-container");
+  if (!container) return;
 
-    const container =
-        document.querySelector(
-            ".space-y-6"
-        );
+  if (activeOrders.length === 0) {
+    container.innerHTML = `
+      <div class="bg-white rounded-3xl p-8 shadow-sm text-center text-gray-400">
+        No pending offers right now
+      </div>`;
+    return;
+  }
 
-    if (!container)
-        return;
-
-    container.innerHTML = "";
-
-    activeOrders.forEach(
-        order => {
-
-            container.innerHTML += `
-
-            <div
-            class="bg-white rounded-3xl p-8 shadow-sm">
-
-                <div class="flex justify-between">
-
-                    <div>
-
-                        <h3 class="text-2xl font-bold">
-                            #${order.orderNumber}
-                        </h3>
-
-                        <p class="text-gray-500 mt-3">
-                            ${order.restaurantName}
-                        </p>
-
-                        <p class="text-gray-500">
-                            ${order.distanceKm} km Away
-                        </p>
-
-                    </div>
-
-                    <span
-                    class="bg-orange-100 text-orange-600 px-5 py-3 rounded-2xl">
-
-                        Waiting
-
-                    </span>
-
-                </div>
-
-                <div class="flex gap-4 mt-8">
-
-                    <button
-                    class="
-                    view-route-btn
-                    bg-[#014D2F]
-                    text-white
-                    px-6 py-3 rounded-2xl"
-                    data-order-id="${order.id}">
-
-                        View Route
-
-                    </button>
-
-                    <button
-                    class="
-                    accept-order-btn
-                    bg-orange-500
-                    text-white
-                    px-6 py-3 rounded-2xl"
-                    data-order-id="${order.id}">
-
-                        Accept
-
-                    </button>
-
-                </div>
-
-            </div>
-
-            `;
-
-        }
-    );
-
+  container.innerHTML = activeOrders.map((order) => `
+    <div class="bg-white rounded-3xl p-8 shadow-sm">
+      <div class="flex justify-between">
+        <div>
+          <h3 class="text-2xl font-bold">#${order.orderNumber}</h3>
+          <p class="text-gray-500 mt-3">${order.restaurantName}</p>
+          <p class="text-gray-500">${order.distanceKm != null ? order.distanceKm + " km Away" : "Distance unavailable"}</p>
+        </div>
+        <span class="bg-orange-100 text-orange-600 px-5 py-3 rounded-2xl">Waiting</span>
+      </div>
+      <div class="flex gap-4 mt-8">
+        <button class="view-route-btn bg-[#014D2F] text-white px-6 py-3 rounded-2xl" data-order-id="${order.orderId}">
+          View Route
+        </button>
+        <button class="accept-order-btn bg-orange-500 text-white px-6 py-3 rounded-2xl" data-assignment-id="${order.id}">
+          Accept
+        </button>
+      </div>
+    </div>
+  `).join("");
 }
 
+document.addEventListener("click", async (e) => {
+  const button = e.target.closest(".accept-order-btn");
+  if (!button) return;
 
-/* ================================
-ACCEPT ORDER
-================================ */
+  try {
+    const response = await apiRequest(
+      `/api/delivery/orders/${button.dataset.assignmentId}/accept`,
+      "PATCH"
+    );
+    const result = await response.json();
 
-document.addEventListener(
-    "click",
-    async e => {
-
-        const button =
-            e.target.closest(
-                ".accept-order-btn"
-            );
-
-        if (!button)
-            return;
-
-        try {
-
-            const response =
-                await apiRequest(
-                    `/api/delivery-partner/orders/${button.dataset.orderId}/accept`,
-                    "PATCH"
-                );
-
-            const result =
-                await response.json();
-
-            if (
-                result.success
-            ) {
-
-                showToast(
-                    "Order accepted",
-                    "success"
-                );
-
-                loadDashboard();
-
-            }
-
-        }
-        catch (err) {
-
-            showToast(
-                "Unable to accept order",
-                "error"
-            );
-
-        }
-
+    if (result.success) {
+      showToast("Order accepted", "success");
+      loadDashboard();
+    } else {
+      showToast(result.error || "Unable to accept order", "error");
     }
-);
+  } catch (err) {
+    showToast("Unable to accept order", "error");
+  }
+});
 
-
-/* ================================
-CURRENT ORDER
-================================ */
-
+// ──────────────────────────────────────────────
+// CURRENT ORDER
+// ──────────────────────────────────────────────
 async function loadCurrentOrder() {
+  try {
+    const response = await apiRequest("/api/delivery/current-order");
+    const result = await response.json();
 
-    try {
-
-        const response =
-            await apiRequest(
-                "/api/delivery-partner/current-order"
-            );
-
-        const result =
-            await response.json();
-
-        if (
-            result.success
-        ) {
-
-            currentOrder =
-                result.data;
-
-        }
-
+    if (result.success) {
+      currentOrder = result.data;
+      renderCurrentOrder();
     }
-    catch (err) {
-
-        console.error(err);
-
-    }
-
+  } catch (err) {
+    console.error(err);
+  }
 }
 
+function renderCurrentOrder() {
+  const detailsEl = document.getElementById("current-order-details");
+  const pickedUpBtn = document.getElementById("picked-up-btn");
+  const outForDeliveryBtn = document.getElementById("out-for-delivery-btn");
+  const deliveredBtn = document.getElementById("delivered-btn");
 
-/* ================================
-PICKED UP
-================================ */
+  if (!currentOrder) {
+    detailsEl.innerHTML = `<p class="text-gray-400 text-sm">No active order</p>`;
+    pickedUpBtn.style.display = "none";
+    outForDeliveryBtn.style.display = "none";
+    deliveredBtn.style.display = "none";
+    return;
+  }
 
-document
-    .getElementById(
-        "picked-up-btn"
-    )
-    ?.addEventListener(
-        "click",
-        async () => {
+  detailsEl.innerHTML = `
+    <div>
+      <p class="text-gray-500">Order ID</p>
+      <h3 class="font-bold text-xl">#${currentOrder.orderNumber}</h3>
+    </div>
+    <div>
+      <p class="text-gray-500">Restaurant</p>
+      <h3 class="font-bold">${currentOrder.restaurantName}</h3>
+    </div>
+    <div>
+      <p class="text-gray-500">Customer</p>
+      <h3 class="font-bold">${currentOrder.customerName}</h3>
+    </div>
+    <div>
+      <p class="text-gray-500">Distance</p>
+      <h3 class="font-bold">${currentOrder.distanceKm != null ? currentOrder.distanceKm + " km" : "—"}</h3>
+    </div>
+  `;
 
-            if (!currentOrder)
-                return;
+  pickedUpBtn.style.display = "none";
+  outForDeliveryBtn.style.display = "none";
+  deliveredBtn.style.display = "none";
 
-            const response =
-                await apiRequest(
-                    `/api/orders/${currentOrder.id}/picked-up`,
-                    "PATCH"
-                );
+  if (currentOrder.orderStatus === "READY_FOR_PICKUP") {
+    pickedUpBtn.style.display = "";
+  } else if (currentOrder.orderStatus === "PICKED_UP") {
+    outForDeliveryBtn.style.display = "";
+  } else if (currentOrder.orderStatus === "OUT_FOR_DELIVERY") {
+    deliveredBtn.style.display = "";
+  }
+}
 
-            const result =
-                await response.json();
+async function advanceCurrentOrderStatus() {
+  if (!currentOrder) return;
 
-            if (
-                result.success
-            ) {
+  try {
+    const response = await apiRequest(`/api/orders/${currentOrder.id}/delivery-status`, "PATCH");
+    const result = await response.json();
 
-                showToast(
-                    "Picked up",
-                    "success"
-                );
+    if (result.success) {
+      showToast(`Status updated to ${result.data.newStatus.replace(/_/g, " ")}`, "success");
 
-            }
+      if (result.data.newStatus === "DELIVERED") {
+        currentOrder = null;
+        renderCurrentOrder();
+        loadStats();
+        loadRecentDeliveries();
+      } else {
+        loadCurrentOrder();
+      }
+    } else {
+      showToast(result.error || "Failed to update status", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Something went wrong", "error");
+  }
+}
 
-        }
-    );
+document.getElementById("picked-up-btn")?.addEventListener("click", advanceCurrentOrderStatus);
+document.getElementById("out-for-delivery-btn")?.addEventListener("click", advanceCurrentOrderStatus);
+document.getElementById("delivered-btn")?.addEventListener("click", advanceCurrentOrderStatus);
 
+// ──────────────────────────────────────────────
+// RECENT DELIVERIES
+// ──────────────────────────────────────────────
+async function loadRecentDeliveries() {
+  try {
+    const response = await apiRequest("/api/delivery/deliveries/recent");
+    const result = await response.json();
 
-/* ================================
-DELIVERED
-================================ */
+    const tbody = document.getElementById("recent-deliveries-body");
 
-document
-    .getElementById(
-        "delivered-btn"
-    )
-    ?.addEventListener(
-        "click",
-        async () => {
+    if (!result.success || result.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">No deliveries yet</td></tr>`;
+      return;
+    }
 
-            if (!currentOrder)
-                return;
+    tbody.innerHTML = result.data.map((d) => `
+      <tr class="border-t">
+        <td class="px-8 py-5">#${d.orderNumber}</td>
+        <td>${d.restaurantName}</td>
+        <td class="text-green-600 font-bold">₹${d.earnings}</td>
+        <td><span class="bg-green-100 text-green-700 px-4 py-2 rounded-xl">Delivered</span></td>
+      </tr>
+    `).join("");
 
-            const response =
-                await apiRequest(
-                    `/api/orders/${currentOrder.id}/delivered`,
-                    "PATCH"
-                );
-
-            const result =
-                await response.json();
-
-            if (
-                result.success
-            ) {
-
-                showToast(
-                    "Delivered successfully",
-                    "success"
-                );
-
-                loadDashboard();
-
-            }
-
-        }
-    );
-
-
-/* ================================
-REAL TIME SOCKET PLACEHOLDER
-================================ */
-
-// socket.on(
-//     "newDeliveryRequest",
-//     order => {
-//
-//         showToast(
-//             "New Order Received",
-//             "success"
-//         );
-//
-//         activeOrders.unshift(
-//             order
-//         );
-//
-//         renderActiveOrders();
-//
-//     }
-// );
-
+  } catch (err) {
+    console.error("Failed to load recent deliveries:", err);
+  }
+}

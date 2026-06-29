@@ -40,8 +40,17 @@ export class DeliveryService{
    latitude: number,
    longitude: number
   ): Promise<ServiceResponse<any>> {
+
+    const partner = await this.deliveryRepo.findPartnerByUserId(partnerId);
+    if (!partner) {
+      return {
+        success: false,
+        error: "Delivery partner profile not found",
+        statusCode: 404,
+      };
+    }
         
-    const updateLocation = await this.deliveryRepo.updatePartnerLocation(partnerId, latitude, longitude);
+    const updateLocation = await this.deliveryRepo.updatePartnerLocation(partner.id, latitude, longitude);
 
     return {   
         success: true,
@@ -84,7 +93,7 @@ async assignNearestPartner(orderId: string): Promise<ServiceResponse<any>> {
     return { success: false, error: "Branch coordinates not configured", statusCode: 400 };
   }
 
-  const nearbyResults = await this.redis.sendCommand([
+  const nearbyResults = await redisClient.sendCommand([
     "GEORADIUS",
     "delivery_partners",
     branchLng.toString(),
@@ -94,7 +103,7 @@ async assignNearestPartner(orderId: string): Promise<ServiceResponse<any>> {
     "WITHDIST",
     "ASC",
     "COUNT", "20",
-  ]);
+  ])as unknown as [string, string][];
 
   if (!nearbyResults || nearbyResults.length === 0) {
     return { success: false, error: "No delivery partners found nearby", statusCode: 503 };
@@ -230,7 +239,9 @@ async toggleAvailability(
   // 5. If going INACTIVE — clear their location from Redis
   //    No point keeping stale location for an offline partner
 if (newStatus === "INACTIVE") {
-  await this.deliveryRepo.clearPartnerLocation(partner.userId);
+  console.log("clearing partner location from redis!!!!")
+  console.log("partner id is", partner.id)
+  await this.deliveryRepo.clearPartnerLocation(partner.id);
 }
   return {
     success: true,
@@ -640,6 +651,132 @@ async getPendingOffer(partnerUserId: string): Promise<ServiceResponse<any>> {
   };
 }
 
+async getActiveOrders(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const assignments = await this.deliveryRepo.findActiveOrdersForPartner(partner.id);
+
+  // Calculate distance from partner's last known location to each branch
+  const raw = await redisClient.get(`location:${partner.id}`);
+  const partnerLoc = raw ? JSON.parse(raw) : null;
+
+  const orders = assignments.map((a) => {
+    const branch = a.delivery.order.branch;
+    let distanceKm: number | null = null;
+
+    if (partnerLoc && branch.latitude && branch.longitude) {
+      distanceKm = this.haversine(
+        partnerLoc.lat, partnerLoc.lng,
+        Number(branch.latitude), Number(branch.longitude)
+      );
+    }
+
+    return {
+      id: a.id, // assignmentId — needed for accept action
+      orderId: a.delivery.order.id,
+      orderNumber: a.delivery.order.orderNumber,
+      restaurantName: branch.branchName,
+      distanceKm: distanceKm ? parseFloat(distanceKm.toFixed(1)) : null,
+    };
+  });
+
+  return { success: true, message: "Active orders fetched", data: orders, statusCode: 200 };
+}
+
+async getCurrentOrder(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const delivery = await this.deliveryRepo.findCurrentOrderForPartner(partner.id);
+
+  if (!delivery) {
+    return { success: true, message: "No current order", data: null, statusCode: 200 };
+  }
+
+  const raw = await redisClient.get(`location:${partner.id}`);
+  const partnerLoc = raw ? JSON.parse(raw) : null;
+  let distanceKm: number | null = null;
+
+  if (partnerLoc && delivery.order.branch.latitude) {
+    distanceKm = this.haversine(
+      partnerLoc.lat, partnerLoc.lng,
+      Number(delivery.order.branch.latitude), Number(delivery.order.branch.longitude)
+    );
+  }
+
+  return {
+    success: true,
+    message: "Current order fetched",
+    data: {
+      id: delivery.order.id,
+      orderNumber: delivery.order.orderNumber,
+      orderStatus: delivery.order.status,
+      restaurantName: delivery.order.branch.branchName,
+      customerName: delivery.order.customer.fullName,
+      distanceKm: distanceKm ? parseFloat(distanceKm.toFixed(1)) : null,
+    },
+    statusCode: 200,
+  };
+}
+
+async getTodayStats(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const stats = await this.deliveryRepo.findTodayStats(partner.id);
+  const ratingStats = await this.deliveryRepo.findPartnerRatingStats(partner.id);
+
+  return {
+    success: true,
+    message: "Stats fetched",
+    data: {
+      earnings: stats.earnings,
+      deliveriesToday: stats.deliveries,
+      rating: ratingStats.totalReviews > 0 ? ratingStats.averageRating : null,
+    },
+    statusCode: 200,
+  };
+}
+
+async getRecentDeliveries(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const deliveries = await this.deliveryRepo.findCompletedDeliveries(partner.id, thirtyDaysAgo);
+
+  const formatted = deliveries.slice(0, 5).map((d) => ({
+    orderNumber: d.order.orderNumber,
+    restaurantName: d.order.branch.branchName,
+    earnings: Number(d.order.deliveryFee),
+  }));
+
+  return { success: true, message: "Recent deliveries fetched", data: formatted, statusCode: 200 };
+}
+
+// Accept an offer from the Active Orders list — reuses your existing respondToOffer logic
+async acceptActiveOrder(partnerUserId: string, assignmentId: string): Promise<ServiceResponse<any>> {
+  return this.respondToOffer(partnerUserId, assignmentId, "ACCEPTED");
+}
+
+private haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 
 

@@ -78,10 +78,10 @@ export class OrderAssignmentService {
   
     const activePartners = await this.deliveryRepo.findActivePartnersByIds(candidateIds);
     const activePartnerIds = new Set(
-  activePartners.map((p) => p.userId)
+  activePartners.map((p) => p.id)
 );
 
-    console.log(`Active delivery partners for order ${orderId}:`, activePartners.map(p => p.userId));
+    console.log(`Active delivery partners for order ${orderId}:`, activePartners.map(p => p.id));
   
     let chosen: { partnerId: string; distanceKm: number } | null = null;
   
@@ -110,27 +110,30 @@ export class OrderAssignmentService {
     }
     
     console.log(`Chosen partner for order ${orderId}:`, chosen);
-    const chosenPartner = activePartners.find((p) => p.userId === chosen!.partnerId)!;
+    const chosenPartner = activePartners.find((p) => p.id === chosen!.partnerId)!;
     
     
 
-    console.log(`Chosen partner ${chosenPartner.userId} for order ${orderId}, distance: ${chosen.distanceKm.toFixed(2)} km`);
+    console.log(`Chosen partner ${chosenPartner.id} for order ${orderId}, distance: ${chosen.distanceKm.toFixed(2)} km`);
 
     // ── Create OFFER only — do not touch delivery.currentPartnerId yet ──
     await prisma.$transaction(async (tx) => {
 
 
-       const delivery = await tx.delivery.create({
-    data: {
+  const delivery = await tx.delivery.findUnique({
+      where: {
         orderId: order.id,
-        status: "ASSIGNED",
-        currentPartnerId: chosenPartner.userId,    }
-}); 
+      },
+  });
+
+if (!delivery) {
+  throw new Error("Delivery record not found");
+}
   
       await tx.deliveryAssignment.create({
         data: {
           deliveryId: delivery.id,
-          partnerId: chosenPartner.userId,
+          partnerId: chosenPartner.id,
           assignedAt: new Date(),
           // responseStatus and respondedAt stay null = "pending offer"
         },

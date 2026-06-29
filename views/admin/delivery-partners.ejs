@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Delivery Partner Management"}) %>
+
+    <body class="bg-slate-100">
+
+        <p id="toast"></p>
+
+        <div class="flex min-h-screen">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- MAIN -->
+
+                <main class="flex-1 p-8">
+
+                    <div class="p-8">
+
+                        <!-- Header -->
+
+                        <div class="flex justify-between items-center mb-8">
+
+                            <div>
+
+                                <h1 class="text-4xl font-bold">
+                                    Delivery Partner Management
+                                </h1>
+
+                                <p class="text-gray-500 mt-1">
+                                    Manage all delivery partners on Ziggy
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <!-- STATS -->
+
+                        <div class="grid lg:grid-cols-5 gap-6 mb-8">
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">
+                                    Total Partners
+                                </h3>
+
+                                <p id="totalPartners" class="text-3xl font-bold mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">
+                                    Active
+                                </h3>
+
+                                <p id="activePartners" class="text-3xl font-bold text-green-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">
+                                    On Delivery
+                                </h3>
+
+                                <p id="onDeliveryPartners" class="text-3xl font-bold text-blue-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">
+                                    Inactive
+                                </h3>
+
+                                <p id="inactivePartners" class="text-3xl font-bold text-orange-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow">
+                                <h3 class="text-gray-500">
+                                    Suspended
+                                </h3>
+
+                                <p id="suspendedPartners" class="text-3xl font-bold text-red-600 mt-2">
+                                    0
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <!-- SEARCH -->
+
+                        <div class="bg-white rounded-2xl p-5 shadow-sm mb-6">
+
+                            <div class="flex flex-wrap items-center gap-4">
+
+                                <div class="flex-1 min-w-[300px]">
+
+                                    <input type="text" id="searchInput"
+                                        placeholder="Search Name, Email, Mobile, Vehicle..." class="
+                                w-full
+                                border
+                                rounded-xl
+                                px-4
+                                py-3
+                                outline-none
+                                focus:ring-2
+                                focus:ring-orange-400
+                            ">
+                                </div>
+
+                                <select id="statusFilter" class="
+                            border
+                            rounded-xl
+                            px-4
+                            py-3
+                            bg-white
+                        ">
+
+                                    <option value="">
+                                        All Status
+                                    </option>
+
+                                    <option value="ACTIVE">
+                                        Active
+                                    </option>
+
+                                    <option value="ON_DELIVERY">
+                                        On Delivery
+                                    </option>
+
+                                    <option value="INACTIVE">
+                                        Inactive
+                                    </option>
+
+                                    <option value="SUSPENDED">
+                                        Suspended
+                                    </option>
+
+                                </select>
+
+                                <select id="vehicleFilter" class="
+                            border
+                            rounded-xl
+                            px-4
+                            py-3
+                            bg-white
+                        ">
+
+                                    <option value="">
+                                        All Vehicles
+                                    </option>
+
+                                    <option value="BIKE">
+                                        Bike
+                                    </option>
+
+                                    <option value="SCOOTER">
+                                        Scooter
+                                    </option>
+
+                                    <option value="BICYCLE">
+                                        Bicycle
+                                    </option>
+
+                                </select>
+
+                                <button onclick="loadPartners(1)" class="
+                            bg-orange-500
+                            text-white
+                            px-6
+                            py-3
+                            rounded-xl
+                        ">
+                                    Search
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- TABLE -->
+
+                        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+
+                            <div class="overflow-x-auto">
+
+                                <div class="max-h-[650px] overflow-y-auto">
+
+                                    <table class="w-full min-w-[1200px]">
+
+                                        <thead class="
+                                    bg-slate-100
+                                    sticky
+                                    top-0
+                                    z-10
+                                ">
+
+                                            <tr>
+
+                                                <th class="p-4 text-left">
+                                                    Partner
+                                                </th>
+
+                                                <th class="p-4 text-left">
+                                                    Mobile
+                                                </th>
+
+                                                <th class="p-4 text-left">
+                                                    Vehicle
+                                                </th>
+
+                                                <th class="p-4 text-left">
+                                                    Vehicle Number
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Deliveries
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Earnings
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Rating
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Status
+                                                </th>
+
+                                                <th class="p-4 text-center">
+                                                    Actions
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody id="partnerTableBody">
+
+                                        </tbody>
+
+                                    </table>
+
+                                    <div id="paginationContainer" class="
+                                flex
+                                justify-start
+                                gap-2
+                                mt-10
+                                mb-6
+                                ml-10
+                            ">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+        </div>
+
+        <script src="/js/admin/admin-sidebar.js"></script>
+        <script src="/js/common/api.js"></script>
+        <script src="/js/common/auth.js"></script>
+        <script src="/js/common/toast.js"></script>
+        <script src="/js/admin/admin-delivery-partners.js"></script>
+
+    </body>
+
+</html>
