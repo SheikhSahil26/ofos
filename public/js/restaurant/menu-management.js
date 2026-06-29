@@ -915,18 +915,26 @@ async function createMenuItem() {
             'input[name="foodType"]:checked'
         ).value
     );
+
+    const tagIdsTemp = [];
+
+    // selectedTags.forEach(
+    //     tagId => formData.append(
+    //         "tagIds",
+    //         tagId
+    //     )
+    // );
+
     selectedTags.forEach(
-        tagId => formData.append(
-            "tagIds",
+        tagId => tagIdsTemp.push(
+            
             tagId
         )
     );
 
-    clone.querySelector(".delete-item-btn")
-    .addEventListener(
-        "click",
-        () => openDeleteMenuItemModal(item.id)
-    );
+    formData.append("tagIds", tagIdsTemp);
+
+    console.log(formData);
 
     const imageFile =
         document.getElementById(
@@ -1277,3 +1285,43 @@ document
         "click",
         closeDeleteMenuItemModal
     );
+
+let confirmAction = null;
+
+function openConfirmModal(title, message, callback) {
+
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmMessage").textContent = message;
+
+    confirmAction = callback;
+
+    document.getElementById("confirmModal")
+        .classList.remove("hidden");
+
+    document.getElementById("confirmModal")
+        .classList.add("flex");
+}
+
+function closeConfirmModal() {
+
+    document.getElementById("confirmModal")
+        .classList.add("hidden");
+
+    document.getElementById("confirmModal")
+        .classList.remove("flex");
+
+    confirmAction = null;
+}
+
+document.getElementById("cancelConfirmBtn")
+    .addEventListener("click", closeConfirmModal);
+
+document.getElementById("confirmActionBtn")
+    .addEventListener("click", async () => {
+
+        if (confirmAction) {
+            await confirmAction();
+        }
+
+        closeConfirmModal();
+    });

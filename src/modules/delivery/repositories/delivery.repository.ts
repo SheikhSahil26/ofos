@@ -38,7 +38,7 @@ export class DeliveryRepository implements IDeliveryRepository {
 
   async createNotification(data: any): Promise<any> { }
 
-
+  
 
   async updatePartnerLocation(
     partnerId: string,

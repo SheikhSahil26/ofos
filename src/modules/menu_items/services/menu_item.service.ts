@@ -1,5 +1,5 @@
 import { MenuItem } from "@prisma/client";
-import { ServiceResponse } from "../../../common/types/service-response.type";
+import { ServiceResponse } from "../../../common/types/service-response.types";
 import { AppError } from "../../../utils/appError";
 import { DietaryTagRepository } from "../../dietaryTags/repositories/dietaryTag.repository";
 import { MenuRepository } from "../../menu/repositories/menu.repository";
@@ -35,11 +35,19 @@ export class MenuItemService{
 
         // Validate dietary tags if provided
         if (data.tagIds?.length) {
-            const tags = await this.dietaryTagRepository.getDietaryTagsByIds(data.tagIds);
 
-            if (tags.length !== data.tagIds.length) {
+            const tagIds = data.tagIds
+    ? Array.isArray(data.tagIds)
+        ? data.tagIds
+        : [data.tagIds]
+    : [];
+            const tags = await this.dietaryTagRepository.getDietaryTagsByIds(tagIds);
+
+            if (tags.length !== tagIds.length) {
                 throw new AppError("One or more dietary tags are invalid", 400);
             }
+
+            data.tagIds = tagIds
         }
 
         console.log(data.name);
@@ -52,6 +60,7 @@ export class MenuItemService{
             
 
         if (!existingItem) {
+
             
             
             const menuItem = await this.menuItemRepository.createMenuItem(data);
