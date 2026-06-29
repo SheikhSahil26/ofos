@@ -1133,7 +1133,7 @@ document
         () => {
 
             window.location.href =
-                "/home";
+                "/customer/home";
 
         }
     );

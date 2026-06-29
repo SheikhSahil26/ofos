@@ -29,6 +29,10 @@ export class AdminWebRoutes implements IRoutes {
             res.status(200).render("admin/restaurants");
         });
 
+        this.router.get("/coupon", (req: Request, res: Response) => {
+            res.status(200).render("admin/coupon");
+        })
+
 
         this.router.get("/restaurant-approvals", (req: Request, res: Response) => {
             res.status(200).render("admin/restaurant-approvals");

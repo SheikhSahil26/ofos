@@ -22,7 +22,6 @@ model User {
   createdAt                DateTime             @default(now()) @map("created_at")
   updatedAt                DateTime             @updatedAt @map("updated_at")
   admin_audit_logs         admin_audit_logs[]
-  admin_audit_logs         admin_audit_logs[]
   couponUsages             CouponUsage[]
   deliveryPartner          DeliveryPartner?
   loyaltyAccount           LoyaltyAccount?
@@ -437,7 +436,6 @@ model Order {
   refunds             Refund[]
   review              Review?
   supportTickets      SupportTicket[]
-  refunds             Refund[]
 
   @@index([customerId])
   @@index([branchId])
@@ -513,19 +511,12 @@ model DeliveryPartner {
   assignments            DeliveryAssignment[]
   deliveryPartnerPayouts DeliveryPartnerPayout[]
   user                   User                              @relation(fields: [userId], references: [id])
-  user                   User                              @relation(fields: [userId], references: [id])
   reviews                Review[]
 
   @@index([userId])
   @@index([vehicleNumber])
   @@index([status])
   @@map("delivery_partners")
-}
-
-enum DeliveryPartnerVerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
 }
 
 /// Main delivery record for an order (never delete)
@@ -576,7 +567,6 @@ model Payment {
   paymentTransactions  PaymentTransaction[]
   order                Order                    @relation(fields: [orderId], references: [id])
   refunds              Refund[]
-  paymentTransactions  PaymentTransaction[]
 
   @@index([orderId])
   @@index([paymentMethod])
@@ -629,31 +619,8 @@ model Refund {
   @@index([paymentId])
   @@index([userId])
   @@index([orderId])
-  @@index([orderId])
   @@index([status])
   @@map("refunds")
-}
-
-enum RefundReason {
-  MISSING_ITEM
-  WRONG_ITEM
-  FOOD_QUALITY
-  DAMAGED_FOOD
-  ORDER_NOT_DELIVERED
-  DUPLICATE_PAYMENT
-  OTHER
-}
-
-enum RefundType {
-  FULL
-  PARTIAL
-}
-
-enum RefundStatus {
-  REQUESTED
-  APPROVED
-  REJECTED
-  PROCESSED
 }
 
 /// Customer review after order delivery (one review per order)

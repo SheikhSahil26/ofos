@@ -1,5 +1,5 @@
 // services/order.service.ts
-import { PrismaClient, PaymentMethodType } from "@prisma/client";
+import { PrismaClient, PaymentMethodType, Order } from "@prisma/client";
 import { ServiceResponse } from "../../../common/types/service-response.types";
 import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";

@@ -123,7 +123,7 @@ export class CouponController{
         }
 
         const response = await this.couponService.getCouponUsageStats(id);
-
+        
         res.status(response.statusCode || 200).json(response);
     });
 

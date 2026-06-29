@@ -31,7 +31,7 @@
 }
 
 .toggle-switch input:checked + .slider {
-    background: #014f38;
+    background: #ff7a00;
 }
 
 .toggle-switch input:checked + .slider::before {

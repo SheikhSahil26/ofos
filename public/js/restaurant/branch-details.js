@@ -31,6 +31,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Expose to modal logic
     window.currentBranchId = branchId;
 
+    //manage menu button 
+    document.getElementById("manageMenuBtn").addEventListener("click", () => {
+        window.location.href = `/restaurants/menu/menu-management/${branchId}`;
+    });
+
     // ── Fetch branch details ──────────────────────────────────────────────────
     async function loadBranchData() {
         try {

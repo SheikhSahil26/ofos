@@ -4,6 +4,7 @@ import { asyncHandler } from "../../../middlewares/asyncHandler";
 import { AddressService } from "../../address/services/address.service";
 import { CartService } from "../../cart/services/cart.services";
 import { prisma } from "../../../config/prisma";
+import { AppError } from "../../../utils/appError";
 
 export class OrdersControllers {
   private ordersService = new OrderService(
@@ -44,6 +45,7 @@ export class OrdersControllers {
       listOrders = asyncHandler(
         async(req: Request, res: Response) => {
            const user = req.user as Express.payload // dummy
+           console.log("list-orders", user);
 
           const result : any = await this.ordersService.listOrders("1eaab1e4-6bd3-458c-a708-65307da24d9e");
 
@@ -119,5 +121,21 @@ updateOrderStatusByDeliveryPartner = asyncHandler(
   }
 );
   
+  getOrderDetails = asyncHandler(async (req: Request, res: Response) => {
+    console.log("here")
+    const orderId = req.params.orderId;
+    const user = req.user as Express.payload;
+
+    if (typeof orderId !== "string") {
+        throw new AppError("Order ID is required", 400);
+    }
+
+    const response = await this.ordersService.getOrderDetails(
+        orderId,
+        user.userId
+    );
+
+    res.status(response.statusCode || 200).json(response);
+  });
  
 }

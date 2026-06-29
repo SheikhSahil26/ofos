@@ -194,4 +194,73 @@ export class OrdersRepository {
             }
         })
     }
+
+    //get order details in detail
+    async getOrderDetailsById(orderId: string) {
+        return prisma.order.findUnique({
+            where: {
+                id: orderId,
+            },
+            include: {
+                customer: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        mobile: true,
+                        profilePhoto: true,
+                    },
+                },
+                branch: {
+                    select: {
+                        id: true,
+                        branchName: true,
+                    },
+                },
+                address: {
+                    select: {
+                        addressLine1: true,
+                        addressLine2: true,
+                        city: true,
+                        state: true,
+                        pincode: true,
+                    },
+                },
+               orderItems: {
+                    select: {
+                        id: true,
+                        menuItemName: true,
+                        quantity: true,
+                        price: true,
+                        specialInstruction: true,
+                        modifiers: {
+                            select: {
+                                modifierName: true,
+                                extraPrice: true,
+                            },
+                        },
+                    },
+                },
+                delivery: {
+                    include: {
+                        currentPartner: {
+                            include: {
+                                user: {
+                                    select: {
+                                        fullName: true,
+                                        mobile: true,
+                                        profilePhoto: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                review: {
+                    include: {
+                        images: true,
+                    },
+                },
+            },
+        });
+    }
 }
