@@ -1090,6 +1090,8 @@ function openModifierModal(
 
             const result = await response.json();
 
+            showToast("Item added to cart successfully", "success");
+
             console.log("Item added to cart:", result);
 
             // Optionally, you can show a success message or update the cart UI here
@@ -1097,7 +1099,7 @@ function openModifierModal(
 
         } catch (error) {
             console.error(error);
-            alert("Failed to add item to cart. Please try again.");
+            showToast("Failed to add item to cart. Please try again.", "error");
         }
 
     }

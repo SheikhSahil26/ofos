@@ -8,6 +8,7 @@ import { DELIVERY_TRANSITIONS, STAFF_TRANSITIONS } from "../types/order.types";
 import { OrderItemInput } from "../interfaces/orders.interface";
 import { DeliveryService } from "../../delivery/services/delivery.service";
 import { OrderAssignmentService } from "./orderAssignment.service";
+import redisClient from "../../../config/redis";
 // import { CreateOrderInput, OrderItemInput } from "../types/order.types";
 
 export class OrderService {
@@ -735,6 +736,10 @@ async updateOrderStatusByDeliveryPartner(
 ): Promise<ServiceResponse<any>> {
   try {
 
+    console.log("updateOrderStatusByDeliveryPartner called with orderId:", orderId, "deliveryUserId:", deliveryUserId);
+
+    
+
     // 1. Get delivery partner profile
     const partnerRecord = await this.prisma.deliveryPartner.findFirst({
       where: { userId: deliveryUserId, isDeleted: false },
@@ -948,6 +953,96 @@ console.log("Fetching branch orders for staff user:", staffUserIdDummy);
     success: true,
     message: "Branch orders fetched successfully",
     data: { orders, branchId: staffRecord.branchId },
+    statusCode: 200,
+  };
+}
+
+// services/orders.service.ts
+
+async getOrderTrackingDetails(orderId: string, userId: string): Promise<ServiceResponse<any>> {
+
+  const order = await this.orderRepo.getTrackingDetails(orderId);
+
+  if (!order) {
+    return {
+      success: false,
+      error: "Order not found",
+      statusCode: 404,
+    };
+  }
+
+  if (order.customerId !== userId) {
+    return {
+      success: false,
+      error: "Unauthorized access to this order",
+      statusCode: 403,
+    };
+  }
+
+  const statusHistory = await this.orderRepo.getStatusHistory(orderId);
+
+  // ── Partner live location from Redis ──
+  const partnerLocation = await redisClient.geoPos(
+  "delivery_partners",
+  order.delivery?.currentPartnerId || ""
+);
+
+console.log(partnerLocation);
+  let rating: number | null = null;
+ 
+
+  if (order.delivery?.currentPartnerId) {
+  const position = await redisClient.geoPos(
+  "delivery_partners",
+   order.delivery.currentPartnerId
+) ; 
+
+    // if (position) {
+    //   const loc = JSON.parse(position);
+    //   partnerLocation = { lat: loc.lat, lng: loc.lng };
+    // }
+
+   
+  }
+
+  const etaMinutes =
+    order.status === "OUT_FOR_DELIVERY" ? 18 :
+    order.status === "PICKED_UP" ? 25 :
+    order.status === "DELIVERED" || order.status === "CANCELLED" ? null : 35;
+
+  return {
+    success: true,
+    message: "Tracking details fetched successfully",
+    data: {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      etaMinutes,
+      statusHistory,
+      branchLocation: order.branch?.latitude
+        ? { lat: Number(order.branch.latitude), lng: Number(order.branch.longitude) }
+        : null,
+      partnerLocation,
+      deliveryPartner: order.delivery?.currentPartner
+        ? {
+            partnerId: order.delivery.currentPartner.id,
+            fullName: order.delivery.currentPartner.user.fullName,
+            mobile: order.delivery.currentPartner.user.mobile,
+            profilePhoto: order.delivery.currentPartner.user.profilePhoto,
+            vehicleType: order.delivery.currentPartner.vehicleType,
+            rating,
+          }
+        : null,
+      address: order.address
+        ? {
+            addressLine1: order.address.addressLine1,
+            addressLine2: order.address.addressLine2,
+            city: order.address.city,
+            state: order.address.state,
+            pincode: order.address.pincode,
+          }
+        : null,
+    },
     statusCode: 200,
   };
 }

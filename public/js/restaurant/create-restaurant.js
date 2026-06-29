@@ -211,12 +211,14 @@ restaurantForm?.addEventListener("submit", async (event) => {
       formData.append("coverImage", coverFile);
     }
 
-    const response = await fetch("/api/restaurants", {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    });
-
+    // const response = await apiRequest("/api/restaurants", {
+    //   method: "POST",
+    //   credentials: "include",
+    //   body: formData,
+    // });
+    const response = await apiRequest("/api/restaurants",
+     "POST",formData
+    );
     const result = await response.json();
 
     if (!response.ok) {

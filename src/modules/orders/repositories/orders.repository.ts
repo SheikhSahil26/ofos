@@ -194,4 +194,58 @@ export class OrdersRepository {
             }
         })
     }
+
+    async getTrackingDetails(orderId: string) {
+        return prisma.order.findUnique({
+            where: { id: orderId },
+            select: {
+                id: true,
+                orderNumber: true,
+                status: true,
+                customerId: true,
+                placedAt: true,
+                deliveredAt: true,
+                branch: {
+                    select: {
+                        branchName: true,
+                        latitude: true,
+                        longitude: true,
+                    },
+                },
+                address: {
+                    select: {
+                        addressLine1: true,
+                        addressLine2: true,
+                        city: true,
+                        state: true,
+                        pincode: true,
+                        latitude: true,
+                        longitude: true,
+                    },
+                },
+                delivery: {
+                    select: {
+                        id: true,
+                        status: true,
+                        currentPartnerId: true,
+                        currentPartner: {
+                            select: {
+                                id: true,
+                                userId: true,
+                                vehicleType: true,
+                                vehicleNumber: true,
+                                user: {
+                                    select: {
+                                        fullName: true,
+                                        mobile: true,
+                                        profilePhoto: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
 }

@@ -16,7 +16,7 @@ export class RestaurantRoutes implements IRoutes {
   private initializeRoutes(): void {
     this.router.get("/", this.controller.getRestaurants);
     this.router.post(
-      "/",
+      "/",isAuthenticated,
       upload.fields([
         { name: "logo", maxCount: 1 },
         { name: "coverImage", maxCount: 1 },

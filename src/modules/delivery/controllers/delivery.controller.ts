@@ -143,6 +143,7 @@ getPartnerRatings = asyncHandler(
 
 getPendingOffer = asyncHandler(async (req: Request, res: Response) => {
     const user  = req.user as Express.payload
+    console.log("User from request: in pending offer", user);
   const result = await this.deliveryService.getPendingOffer(user.userId);
   return res.status(result.statusCode).json(result);
 });

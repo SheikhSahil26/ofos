@@ -118,6 +118,17 @@ updateOrderStatusByDeliveryPartner = asyncHandler(
     return res.status(result.statusCode).json(result);
   }
 );
+
+// controllers/orders.controller.ts
+
+getOrderTrackingDetails = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user as Express.payload; // replace with req.user.id
+  const userId = user.userId;
+  const  orderId = req.params.orderId as string;
+
+  const result = await this.ordersService.getOrderTrackingDetails(orderId, userId);
+  return res.status(result.statusCode).json(result);
+});
   
  
 }

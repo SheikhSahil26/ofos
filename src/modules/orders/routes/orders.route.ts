@@ -23,11 +23,19 @@ export class OrdersRoutes implements IRoutes {
     //will add role middleware later
     this.router.patch("/change-status/:orderId",isAuthenticated, this.controller.updateOrderStatusByStaff); // fetch a specific order by ID
     this.router.get("/ready-for-pickup",isAuthenticated,authorizeRoles("RESTAURANT_STAFF"), this.controller.getOrdersReadyForPickup); // for restaurant staff to view orders ready for pickup
-    this.router.get("/delivery-status/:orderId",isAuthenticated,authorizeRoles("DELIVERY_PARTNER"), this.controller.updateOrderStatusByDeliveryPartner); // for delivery staff to view their pickup history
+    this.router.patch("/delivery-status/:orderId",isAuthenticated,authorizeRoles("DELIVERY_PARTNER"), this.controller.updateOrderStatusByDeliveryPartner); // for delivery staff to view their pickup history
     this.router.get(
   "/branch-orders-active",
   isAuthenticated,
   this.controller.getBranchOrdersForStaff
+);
+
+// routes — add this new route, leave your existing status-history route untouched
+this.router.get(
+  "/tracking-details/:orderId",
+  isAuthenticated,
+  authorizeRoles("CUSTOMER"),
+  this.controller.getOrderTrackingDetails
 );
 
     // this.router.get("/get-tracking-details/:orderId",isAuthenticated

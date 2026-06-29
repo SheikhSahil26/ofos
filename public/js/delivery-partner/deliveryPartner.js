@@ -2,22 +2,15 @@
 
 let offerPollTimer = null;
 let currentOffer = null;
-let activeOrders = [];
 let currentOrder = null;
+let isPartnerOnline = false;
 
 // ──────────────────────────────────────────────
-// OFFER POLLING (your existing logic, fixed interval)
+// OFFER POLLING — the ONLY acceptance mechanism
 // ──────────────────────────────────────────────
-let isPartnerOnline = false; // tracks current availability state
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Don't start polling immediately — wait until we know the partner's actual status
-  // loadPartnerProfile() already sets the toggle checked state; we read it after that
-});
-
 function startOfferPolling() {
-  if (offerPollTimer) return; // already running, don't start a second interval
-  pollForOffer(); // check immediately on going online
+  if (offerPollTimer) return;
+  pollForOffer();
   offerPollTimer = setInterval(pollForOffer, 5000);
 }
 
@@ -28,14 +21,13 @@ function stopOfferPolling() {
 }
 
 async function pollForOffer() {
-  if (!isPartnerOnline) return; // safety guard — never fetch offers while offline
+  if (!isPartnerOnline) return;
   if (currentOffer) return;
+  if (currentOrder) return; // NEW — don't offer new orders while one is already in progress
 
   try {
     const response = await apiRequest("/api/delivery/pending-offer", "GET");
     const result = await response.json();
-
-    console.log("Offer poll result:", result);
 
     if (result.success && result.data) {
       currentOffer = result.data;
@@ -77,8 +69,12 @@ async function respondToOffer(response) {
 
     if (result.success) {
       showToast(response === "ACCEPTED" ? "Offer accepted!" : "Offer rejected", "success");
+
       if (response === "ACCEPTED") {
-        loadDashboard(); // refresh current order + active orders immediately
+        // Only refresh what's relevant — current order + stats
+        // (no more loadActiveOrders — that mechanism is retired)
+        await loadCurrentOrder();
+        loadStats();
       }
     } else {
       showToast(result.error || "Failed to respond", "error");
@@ -122,8 +118,10 @@ async function loadPartnerProfile() {
       updateAvailabilityLabel(partner.status === "ACTIVE");
     }
 
-      isPartnerOnline = partner.status === "ACTIVE";
+    isPartnerOnline = partner.status === "ACTIVE";
+
     if (isPartnerOnline) {
+      startLocationTracking();
       startOfferPolling();
     }
 
@@ -186,12 +184,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ──────────────────────────────────────────────
-// LOAD DASHBOARD — now also loads stats + recent deliveries
+// LOAD DASHBOARD — active orders removed, current order is the live source of truth
 // ──────────────────────────────────────────────
 async function loadDashboard() {
   try {
     await Promise.all([
-      loadActiveOrders(),
       loadCurrentOrder(),
       loadStats(),
       loadRecentDeliveries(),
@@ -203,7 +200,7 @@ async function loadDashboard() {
 }
 
 // ──────────────────────────────────────────────
-// STATS — fills the 3 top cards (not the toggle)
+// STATS
 // ──────────────────────────────────────────────
 async function loadStats() {
   try {
@@ -222,7 +219,7 @@ async function loadStats() {
 }
 
 // ──────────────────────────────────────────────
-// AVAILABILITY — same toggle element, unchanged markup
+// AVAILABILITY — same toggle, unchanged markup
 // ──────────────────────────────────────────────
 function updateAvailabilityLabel(isActive) {
   const label = document.getElementById("availability-label");
@@ -241,39 +238,22 @@ function setupAvailabilityToggle() {
       const result = await response.json();
 
       if (result.data.currentStatus === "ACTIVE") {
-
-    isPartnerOnline = true;
-
-    toggle.checked = true;
-
-    updateAvailabilityLabel(true);
-
-    startLocationTracking();
-
-    startOfferPolling();
-
-    showToast("You are online", "success");
-
-}
-else {
-
-    isPartnerOnline = false;
-
-    toggle.checked = false;
-
-    updateAvailabilityLabel(false);
-
-    stopLocationTracking();
-
-    stopOfferPolling();
-
-    currentOffer = null;
-
-    document.getElementById("offer-modal").innerHTML = "";
-
-    showToast("You are offline", "success");
-
-}
+        isPartnerOnline = true;
+        toggle.checked = true;
+        updateAvailabilityLabel(true);
+        startLocationTracking();
+        startOfferPolling();
+        showToast("You are online", "success");
+      } else {
+        isPartnerOnline = false;
+        toggle.checked = false;
+        updateAvailabilityLabel(false);
+        stopLocationTracking();
+        stopOfferPolling();
+        currentOffer = null;
+        document.getElementById("offer-modal").innerHTML = "";
+        showToast("You are offline", "success");
+      }
 
     } catch (err) {
       toggle.checked = !toggle.checked;
@@ -328,81 +308,7 @@ function stopLocationTracking() {
 }
 
 // ──────────────────────────────────────────────
-// ACTIVE ORDERS
-// ──────────────────────────────────────────────
-async function loadActiveOrders() {
-  try {
-    const response = await apiRequest("/api/delivery/orders/active");
-    const result = await response.json();
-
-    if (!result.success) return;
-
-    activeOrders = result.data;
-    renderActiveOrders();
-
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function renderActiveOrders() {
-  const container = document.getElementById("active-orders-container");
-  if (!container) return;
-
-  if (activeOrders.length === 0) {
-    container.innerHTML = `
-      <div class="bg-white rounded-3xl p-8 shadow-sm text-center text-gray-400">
-        No pending offers right now
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = activeOrders.map((order) => `
-    <div class="bg-white rounded-3xl p-8 shadow-sm">
-      <div class="flex justify-between">
-        <div>
-          <h3 class="text-2xl font-bold">#${order.orderNumber}</h3>
-          <p class="text-gray-500 mt-3">${order.restaurantName}</p>
-          <p class="text-gray-500">${order.distanceKm != null ? order.distanceKm + " km Away" : "Distance unavailable"}</p>
-        </div>
-        <span class="bg-orange-100 text-orange-600 px-5 py-3 rounded-2xl">Waiting</span>
-      </div>
-      <div class="flex gap-4 mt-8">
-        <button class="view-route-btn bg-[#014D2F] text-white px-6 py-3 rounded-2xl" data-order-id="${order.orderId}">
-          View Route
-        </button>
-        <button class="accept-order-btn bg-orange-500 text-white px-6 py-3 rounded-2xl" data-assignment-id="${order.id}">
-          Accept
-        </button>
-      </div>
-    </div>
-  `).join("");
-}
-
-document.addEventListener("click", async (e) => {
-  const button = e.target.closest(".accept-order-btn");
-  if (!button) return;
-
-  try {
-    const response = await apiRequest(
-      `/api/delivery/orders/${button.dataset.assignmentId}/accept`,
-      "PATCH"
-    );
-    const result = await response.json();
-
-    if (result.success) {
-      showToast("Order accepted", "success");
-      loadDashboard();
-    } else {
-      showToast(result.error || "Unable to accept order", "error");
-    }
-  } catch (err) {
-    showToast("Unable to accept order", "error");
-  }
-});
-
-// ──────────────────────────────────────────────
-// CURRENT ORDER
+// CURRENT ORDER — the single source of truth for "what am I doing right now"
 // ──────────────────────────────────────────────
 async function loadCurrentOrder() {
   try {
@@ -425,7 +331,7 @@ function renderCurrentOrder() {
   const deliveredBtn = document.getElementById("delivered-btn");
 
   if (!currentOrder) {
-    detailsEl.innerHTML = `<p class="text-gray-400 text-sm">No active order</p>`;
+    detailsEl.innerHTML = `<p class="text-gray-400 text-sm">No active order — waiting for new offers</p>`;
     pickedUpBtn.style.display = "none";
     outForDeliveryBtn.style.display = "none";
     deliveredBtn.style.display = "none";
@@ -468,7 +374,7 @@ async function advanceCurrentOrderStatus() {
   if (!currentOrder) return;
 
   try {
-    const response = await apiRequest(`/api/orders/${currentOrder.id}/delivery-status`, "PATCH");
+    const response = await apiRequest(`/api/orders/delivery-status/${currentOrder.id}`, "PATCH");
     const result = await response.json();
 
     if (result.success) {
@@ -479,6 +385,8 @@ async function advanceCurrentOrderStatus() {
         renderCurrentOrder();
         loadStats();
         loadRecentDeliveries();
+        // partner is now free — resume polling for the next offer
+        pollForOffer();
       } else {
         loadCurrentOrder();
       }

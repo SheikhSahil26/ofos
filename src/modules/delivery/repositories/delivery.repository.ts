@@ -52,6 +52,13 @@ export class DeliveryRepository implements IDeliveryRepository {
         latitude,
         member: partnerId
     });
+
+    // Also store as JSON so tracking API can read individual partner lat/lng
+    await redisClient.set(
+      `location:${partnerId}`,
+      JSON.stringify({ lat: latitude, lng: longitude }),
+      { EX: 300 } // expire after 5 min if partner stops sending updates
+    );
   } 
 
   async findPartnerByUserId(userId: string): Promise<any> {
@@ -378,7 +385,7 @@ async findPendingOfferForPartner(partnerUserId: string): Promise<any> {
   return this.prisma.deliveryAssignment.findFirst({
     where: {
       responseStatus: null,
-      partner: { userId: partnerUserId },
+      partnerId: partnerUserId,
     },
     orderBy: { assignedAt: "desc" },
     include: {

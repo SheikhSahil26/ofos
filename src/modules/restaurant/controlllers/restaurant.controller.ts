@@ -99,6 +99,8 @@ getNearbyRestaurants = asyncHandler(async(
   ) => {
 
     const user = req.user as Express.payload | undefined;
+
+    console.log("User from request:", user);
     if(!user || typeof user.userId !== "string"){
         throw new AppError("Invalid user id", 409);
     }
