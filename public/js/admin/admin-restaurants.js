@@ -426,7 +426,7 @@ async function deleteRestaurant(id) {
 
     try {
 
-        await fetch(
+        await apiRequest(
             `/api/restaurants/${id}`,
             {
                 method: "DELETE"

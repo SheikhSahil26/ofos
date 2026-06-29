@@ -43,5 +43,17 @@ export class RestaurantWebRoutes implements IRoutes {
         });
 
         this.router.get("/branches/:branchId", this.branchWebController.renderBranchDetails);
+
+        this.router.get("/menu/menu-management/:branchId", (req: Request, res: Response) => {
+            res.status(200).render("restaurant/menu-management", { activePage: "branches", branchId: req.params.branchId});
+        });
+
+        this.router.get("/reviews", (req: Request, res: Response) => {
+            res.status(200).render("restaurant/reviews", {activePage: "reviews"});
+        })
+
+        this.router.get("/orders/:orderId", (req: Request, res: Response) => {
+            res.status(200).render("restaurant/order", {orderId: req.params.orderId, activePage: "reviews"})
+        })
     }
 }

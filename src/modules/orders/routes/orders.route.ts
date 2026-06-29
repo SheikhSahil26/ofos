@@ -15,6 +15,7 @@ export class OrdersRoutes implements IRoutes {
 
   private initializeRoutes(): void {
   
+    this.router.get("/details/:orderId",isAuthenticated,this.controller.getOrderDetails); //get full orders details
     this.router.post("/place-order",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.createOrder);
     this.router.get("/list-orders",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.listOrders); // lists all orders of authenticated user
     this.router.get("/get-order/:id",isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.getOrder); // fetch a specific order by ID

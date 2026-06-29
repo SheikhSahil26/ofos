@@ -1,4 +1,4 @@
-import { VerificationStatus } from "@prisma/client";
+import { DeliveryPartnerVerificationStatus, SettlementStatus, VerificationStatus } from "@prisma/client";
 import { prisma } from "../../../config/prisma";
 import { isBranchOpenNow } from "../../restaurantBranch/utils/branch-open-status.util";
 
@@ -792,4 +792,500 @@ export class AdminRepository {
 
         return true;
     }
+
+
+
+    async getPendingPartners(
+        page: number,
+        limit: number,
+        search?: string
+    ) {
+
+        const skip =
+            (page - 1) * limit;
+
+        const where: any = {
+            status: "PENDING_VERIFICATION"
+        };
+
+        if (search) {
+
+            where.OR = [
+
+                {
+                    user: {
+                        fullName: {
+                            contains: search,
+                            mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    user: {
+                        email: {
+                            contains: search,
+                            mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    user: {
+                        mobile: {
+                            contains: search
+                        }
+                    }
+                },
+
+                {
+                    vehicleNumber: {
+                        contains: search,
+                        mode: "insensitive"
+                    }
+                }
+
+            ];
+        }
+
+        const partners =
+            await prisma.deliveryPartner.findMany({
+
+                where,
+
+                skip,
+
+                take: limit,
+
+                orderBy: {
+                    createdAt: "desc"
+                },
+
+                include: {
+                    user: true
+                }
+            });
+
+        const total =
+            await prisma.deliveryPartner.count({
+                where
+            });
+
+        return {
+            partners,
+            total
+        };
+    }
+
+    async getStats() {
+
+        const pending =
+            await prisma.deliveryPartner.count({
+                where: {
+                    status: "PENDING_VERIFICATION"
+                }
+            });
+
+        const active =
+            await prisma.deliveryPartner.count({
+                where: {
+                    status: "ACTIVE"
+                }
+            });
+
+        const suspended =
+            await prisma.deliveryPartner.count({
+                where: {
+                    status: "SUSPENDED"
+                }
+            });
+
+        return {
+            pending,
+            active,
+            suspended
+        };
+    }
+
+    async approvePartner(
+        partnerId: string
+    ) {
+
+        return await prisma.deliveryPartner.update({
+
+            where: {
+                userId: partnerId
+            },
+
+            data: {
+                status: "INACTIVE"
+            }
+
+        });
+    }
+
+    async rejectPartner(
+        partnerId: string
+    ) {
+
+        return await prisma.deliveryPartner.update({
+
+            where: {
+                userId: partnerId
+
+            },
+
+            data: {
+                status: "SUSPENDED"
+            }
+
+        });
+    }
+
+
+    async getDeliveryPartners(
+        page: number,
+        limit: number,
+        search?: string,
+        status?: string,
+        vehicleType?: string
+    ) {
+
+        const skip =
+            (page - 1) * limit;
+
+        const where: any = {
+
+            isDeleted: false
+
+        };
+
+        if (search) {
+
+            where.OR = [
+
+                {
+                    user: {
+                        fullName: {
+                            contains: search,
+                            // mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    user: {
+                        email: {
+                            contains: search,
+                            // mode: "insensitive"
+                        }
+                    }
+                },
+
+                {
+                    vehicleNumber: {
+                        contains: search,
+                        // mode: "insensitive"
+                    }
+                }
+
+            ];
+        }
+
+        if (status) {
+            where.status = status;
+        }
+
+        if (vehicleType) {
+            where.vehicleType = vehicleType;
+        }
+
+        const [partners, total] =
+            await Promise.all([
+
+                prisma.deliveryPartner.findMany({
+
+                    where,
+
+                    skip,
+
+                    take: limit,
+
+                    include: {
+
+                        user: true,
+
+                        deliveries: true,
+
+                        reviews: true,
+
+                        assignments: true,
+
+                        deliveryPartnerPayouts: true
+
+                    }
+
+                }),
+
+                prisma.deliveryPartner.count({
+                    where
+                })
+
+            ]);
+
+        return {
+            partners,
+            total
+        };
+    }
+
+
+    async getDeliveryPartnerStats() {
+
+        const [
+
+            totalPartners,
+            activePartners,
+            inactivePartners,
+            suspendedPartners,
+            onDeliveryPartners
+
+        ] = await Promise.all([
+
+            prisma.deliveryPartner.count(),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "ACTIVE"
+                }
+            }),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "INACTIVE"
+                }
+            }),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "SUSPENDED"
+                }
+            }),
+
+            prisma.deliveryPartner.count({
+                where: {
+                    status: "ON_DELIVERY"
+                }
+            })
+
+        ]);
+
+        return {
+
+            totalPartners,
+
+            activePartners,
+
+            inactivePartners,
+
+            suspendedPartners,
+
+            onDeliveryPartners
+
+        };
+    }
+
+    getRestaurantPendingPayouts = async (
+        page: number,
+        limit: number,
+        search?: string
+    ) => {
+
+        const skip = (page - 1) * limit;
+
+        const where = {
+
+            verificationStatus: VerificationStatus.APPROVED,
+
+            ...(search && {
+                restaurant: {
+                    name: {
+                        contains: search
+                    }
+                }
+            })
+
+        };
+
+        const [branches, total] = await Promise.all([
+
+            prisma.restaurantBranch.findMany({
+
+                where,
+
+                include: {
+
+                    restaurant: true,
+
+                    head: {
+                        include: {
+                            user: true
+                        }
+                    },
+
+                    restaurantPayouts: {
+                        where: {
+                            status: SettlementStatus.PENDING
+                        }
+                    }
+
+                },
+
+                skip,
+                take: limit
+
+            }),
+
+            prisma.restaurantBranch.count({
+                where
+            })
+
+        ]);
+
+        return {
+
+            restaurants: branches.map(branch => ({
+
+                branchId: branch.id,
+
+                branchName: branch.branchName,
+
+                restaurantName: branch.restaurant.name,
+
+                ownerName: branch.head?.user.fullName ?? null,
+
+                pendingAmount:
+                    branch.restaurantPayouts.reduce(
+                        (sum, payout) =>
+                            sum + Number(payout.amount),
+                        0
+                    ),
+
+                pendingOrders:
+                    branch.restaurantPayouts.length
+
+            })),
+
+            pagination: {
+
+                total,
+
+                page,
+
+                limit,
+
+                totalPages:
+                    Math.ceil(total / limit)
+
+            }
+
+        };
+
+    };
+
+
+
+    getDeliveryPartnerPendingPayouts = async (
+        page: number,
+        limit: number,
+        search?: string
+    ) => {
+        const skip = (page - 1) * limit;
+
+        const where = {
+            verificationStatus: DeliveryPartnerVerificationStatus.APPROVED,
+            isDeleted: false,
+
+            ...(search && {
+                user: {
+                    fullName: {
+                        contains: search,
+                    },
+                },
+            }),
+        };
+
+        const [partners, total] = await Promise.all([
+            prisma.deliveryPartner.findMany({
+                where,
+                include: {
+                    user: {
+                        select: {
+                            fullName: true,
+                            mobile: true,
+                        },
+                    },
+
+                    deliveryPartnerPayouts: {
+                        orderBy: {
+                            createdAt: "desc",
+                        },
+                    },
+                },
+                skip,
+                take: limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+            }),
+
+            prisma.deliveryPartner.count({
+                where,
+            }),
+        ]);
+
+        return {
+            deliveryPartners: partners.map((partner) => {
+                const pendingPayouts = partner.deliveryPartnerPayouts.filter(
+                    payout => payout.status === SettlementStatus.PENDING
+                );
+
+                const lastSettlement = partner.deliveryPartnerPayouts
+                    .filter(
+                        payout =>
+                            payout.status === SettlementStatus.SUCCESS &&
+                            payout.transferredAt
+                    )
+                    .sort(
+                        (a, b) =>
+                            b.transferredAt!.getTime() -
+                            a.transferredAt!.getTime()
+                    )[0];
+
+                return {
+                    deliveryPartnerId: partner.id,
+                    deliveryPartnerName: partner.user.fullName,
+                    mobile: partner.user.mobile,
+                    vehicleNumber: partner.vehicleNumber,
+
+                    pendingOrders: pendingPayouts.length,
+
+                    pendingAmount: pendingPayouts.reduce(
+                        (sum, payout) => sum + Number(payout.amount),
+                        0
+                    ),
+
+                    lastSettlement:
+                        lastSettlement?.transferredAt ?? null,
+                };
+            }),
+
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+    };
 }

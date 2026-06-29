@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Reviews
+    </title>
+
+    <%- include("../partials/head") %>
+
+</head>
+
+<body class="bg-gray-50">
+    <p id="toast"></p>
+
+<div class="flex min-h-screen bg-[#f5f7f6]">
+
+    <!-- Sidebar -->
+    <%- include("../partials/customer-sidebar") %>
+
+    <main class="flex-1 p-8">
+
+        <!-- Header -->
+
+        <div class="flex justify-between items-center mb-8">
+
+            <div>
+
+                <h1 class="text-3xl font-bold text-[#014f38]">
+
+                    Reviews
+
+                </h1>
+
+                <p class="text-gray-500 mt-1">
+
+                    Monitor reviews across all restaurant branches
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Filters -->
+
+        <!-- <div
+            class="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-100">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
+                <select
+                    id="branchFilter"
+                    class="border rounded-xl px-4 py-3">
+
+                    <option value="">
+
+                        All Branches
+
+                    </option>
+
+                </select>
+
+                <select
+                    id="ratingFilter"
+                    class="border rounded-xl px-4 py-3">
+
+                    <option value="">
+
+                        All Ratings
+
+                    </option>
+
+                    <option value="5">
+
+                        ⭐⭐⭐⭐⭐
+
+                    </option>
+
+                    <option value="4">
+
+                        ⭐⭐⭐⭐☆
+
+                    </option>
+
+                    <option value="3">
+
+                        ⭐⭐⭐☆☆
+
+                    </option>
+
+                    <option value="2">
+
+                        ⭐⭐☆☆☆
+
+                    </option>
+
+                    <option value="1">
+
+                        ⭐☆☆☆☆
+
+                    </option>
+
+                </select>
+
+                <select
+                    id="sortFilter"
+                    class="border rounded-xl px-4 py-3">
+
+                    <option value="latest">
+
+                        Latest
+
+                    </option>
+
+                    <option value="oldest">
+
+                        Oldest
+
+                    </option>
+
+                    <option value="highest">
+
+                        Highest Rating
+
+                    </option>
+
+                    <option value="lowest">
+
+                        Lowest Rating
+
+                    </option>
+
+                </select>
+
+                <input
+                    id="searchReview"
+                    type="text"
+                    placeholder="Search customer..."
+                    class="border rounded-xl px-4 py-3">
+
+            </div>
+
+        </div> -->
+
+
+        <!-- searh bar -->
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-6">
+
+            <div class="relative">
+
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+                <input
+                    id="searchReview"
+                    type="text"
+                    placeholder="Search order or review..."
+                    class="w-full border rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#014f38]">
+
+            </div>
+
+        </div>
+
+
+        <!-- Review Container -->
+
+        <div
+            id="reviewContainer"
+            class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- //review card template -->
+<template id="reviewTemplate">
+
+    <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-5">
+
+        <!-- Header -->
+        <div class="flex justify-between items-start">
+
+            <div class="flex items-center gap-4">
+
+                <!-- Avatar -->
+                <div class="w-12 h-12 rounded-full bg-[#014f38] text-white flex items-center justify-center font-semibold text-lg review-avatar">
+                    R
+                </div>
+
+                <div>
+
+                    <h3 class="review-customer text-lg font-semibold text-gray-800">
+                        Rahul Sharma
+                    </h3>
+
+                    <div class="flex items-center gap-2 mt-1">
+
+                        <span class="review-branch text-sm text-gray-500">
+                            Satellite Branch
+                        </span>
+
+                        <span class="text-gray-300">•</span>
+
+                        <span class="review-date text-sm text-gray-500">
+                            25 Jun 2026
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Rating -->
+            <span class="review-rating bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-semibold">
+
+                <i class="fa-solid fa-star mr-1"></i>
+
+                4.8
+
+            </span>
+
+        </div>
+
+
+        <!-- Order -->
+
+        <div class="mt-5">
+
+            <span class="review-order inline-flex items-center gap-2 bg-gray-100 text-gray-600 text-xs px-3 py-2 rounded-lg">
+
+                <i class="fa-solid fa-receipt"></i>
+
+                Order #ORD-10024
+
+            </span>
+
+        </div>
+
+
+        <!-- Review -->
+
+        <div class="mt-5">
+
+            <p class="review-comment text-gray-700 leading-7">
+
+                The pizza was absolutely delicious. The crust was perfectly baked and delivery was faster than expected.
+
+            </p>
+
+        </div>
+
+
+        <!-- Customer Images -->
+
+        <div class="review-images hidden mt-5 flex gap-3 overflow-x-auto">
+
+            <!-- Images will be appended here -->
+
+        </div>
+
+
+
+        <!-- Footer -->
+
+        <div class="flex justify-end gap-3 mt-6">
+
+    
+
+            <button
+                class="view-order-btn bg-[#014f38] hover:bg-[#013b2a] text-white px-5 py-2 rounded-xl">
+
+                <i class="fa-solid fa-receipt mr-2"></i>
+
+                View Order
+
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+<script src="/js/common/auth.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/common/api.js"></script>
+<script src="/js/restaurant/reviews.js"></script>

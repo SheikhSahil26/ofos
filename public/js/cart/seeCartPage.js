@@ -63,7 +63,7 @@ function renderEmptyCart() {
   container.innerHTML = `
     <div class="bg-white rounded-3xl p-12 shadow-sm text-center">
       <p class="text-gray-500 text-lg">Your cart is empty</p>
-      <a href="/menu" class="text-orange-500 font-semibold mt-4 inline-block">Browse Menu</a>
+      <a href="/customer/home" class="text-orange-500 font-semibold mt-4 inline-block">Browse Menu</a>
     </div>
   `;
   renderSummary(0);
@@ -226,5 +226,5 @@ async function removeItem(menuItemId) {
 // Checkout button
 // ──────────────────────────────────────────────
 document.getElementById("checkout-btn")?.addEventListener("click", () => {
-  window.location.href = "/checkout";
+  window.location.href = "/customer/checkout";
 });

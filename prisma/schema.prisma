@@ -37,7 +37,6 @@ model User {
   supportTicketsAsCustomer SupportTicket[]      @relation("TicketCustomer")
   addresses                UserAddress[]
   userRoles                UserRole[]
-  adminAuditLogs           AdminAuditLog[]
 
   @@map("users")
 }
@@ -154,6 +153,7 @@ model RestaurantBranch {
   orders             Order[]
   head               RestaurantStaff?   @relation("BranchHead", fields: [headId], references: [id])
   restaurant         Restaurant         @relation(fields: [restaurantId], references: [id])
+  restaurantPayouts  RestaurantPayout[]
   staff              RestaurantStaff[]  @relation("BranchStaffMembers")
   reviews            Review[]
 
@@ -183,18 +183,17 @@ model OperatingHour {
 /// Maps users (staff) to the branches they work at.
 /// Also referenced by RestaurantBranch.head_id to designate the branch head.
 model RestaurantStaff {
-  id                String             @id @default(uuid())
-  userId            String             @map("user_id")
-  branchId          String             @map("branch_id")
-  isActive          Boolean            @default(true) @map("is_active")
-  isDeleted         Boolean            @default(false) @map("is_deleted")
-  deletedAt         DateTime?          @map("deleted_at")
-  createdAt         DateTime           @default(now()) @map("created_at")
-  updatedAt         DateTime           @updatedAt @map("updated_at")
-  headOfBranches    RestaurantBranch[] @relation("BranchHead")
-  restaurantPayouts RestaurantPayout[]
-  branch            RestaurantBranch   @relation("BranchStaffMembers", fields: [branchId], references: [id])
-  user              User               @relation(fields: [userId], references: [id])
+  id             String             @id @default(uuid())
+  userId         String             @map("user_id")
+  branchId       String             @map("branch_id")
+  isActive       Boolean            @default(true) @map("is_active")
+  isDeleted      Boolean            @default(false) @map("is_deleted")
+  deletedAt      DateTime?          @map("deleted_at")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+  headOfBranches RestaurantBranch[] @relation("BranchHead")
+  branch         RestaurantBranch   @relation("BranchStaffMembers", fields: [branchId], references: [id])
+  user           User               @relation(fields: [userId], references: [id])
 
   @@unique([userId, branchId])
   @@index([userId])
@@ -433,9 +432,9 @@ model Order {
   customer            User                 @relation(fields: [customerId], references: [id])
   payments            Payment[]
   payoutTransaction   PayoutTransaction?
+  refunds             Refund[]
   review              Review?
   supportTickets      SupportTicket[]
-  refunds             Refund[]
 
   @@index([customerId])
   @@index([branchId])
@@ -502,11 +501,11 @@ model DeliveryPartner {
   vehicleNumber          String                            @unique @map("vehicle_number") @db.VarChar(30)
   governmentId           String                            @map("government_id") @db.VarChar(100)
   status                 DeliveryPartnerStatus             @default(PENDING_VERIFICATION)
-  verificationStatus     DeliveryPartnerVerificationStatus @default(PENDING) @map("verification_status")
   isDeleted              Boolean                           @default(false) @map("is_deleted")
   deletedAt              DateTime?                         @map("deleted_at")
   createdAt              DateTime                          @default(now()) @map("created_at")
   updatedAt              DateTime                          @updatedAt @map("updated_at")
+  verificationStatus     DeliveryPartnerVerificationStatus @default(PENDING) @map("verification_status")
   deliveries             Delivery[]                        @relation("CurrentPartner")
   assignments            DeliveryAssignment[]
   deliveryPartnerPayouts DeliveryPartnerPayout[]
@@ -517,12 +516,6 @@ model DeliveryPartner {
   @@index([vehicleNumber])
   @@index([status])
   @@map("delivery_partners")
-}
-
-enum DeliveryPartnerVerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
 }
 
 /// Main delivery record for an order (never delete)
@@ -570,9 +563,9 @@ model Payment {
   paidAt               DateTime?                @map("paid_at")
   createdAt            DateTime                 @default(now()) @map("created_at")
   updatedAt            DateTime                 @updatedAt @map("updated_at")
+  paymentTransactions  PaymentTransaction[]
   order                Order                    @relation(fields: [orderId], references: [id])
   refunds              Refund[]
-  paymentTransactions  PaymentTransaction[]
 
   @@index([orderId])
   @@index([paymentMethod])
@@ -600,67 +593,33 @@ model SavedPaymentMethod {
 }
 
 model Refund {
-  id String @id @default(uuid())
-
-  orderId   String? @map("order_id")
-  paymentId String  @map("payment_id")
-  userId    String  @map("user_id")
-
-  amount Decimal @db.Decimal(10, 2)
-
-  refundType RefundType @map("refund_type")
-
-  reason      RefundReason
-  description String?      @db.Text
-
-  status RefundStatus @default(REQUESTED)
-
-  gatewayRefundId String? @map("gateway_refund_id") @db.VarChar(255)
-
-  approvedAmount Decimal? @db.Decimal(10, 2)
-
-  reviewedBy String? @map("reviewed_by")
-  remarks    String? @db.Text
-
-  requestedAt DateTime? @map("requested_at")
-  reviewedAt  DateTime? @map("reviewed_at")
-  processedAt DateTime? @map("processed_at")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  payment Payment @relation(fields: [paymentId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
-
-  order Order? @relation(fields: [orderId], references: [id])
+  id              String       @id @default(uuid())
+  paymentId       String       @map("payment_id")
+  userId          String       @map("user_id")
+  amount          Decimal      @db.Decimal(10, 2)
+  reason          RefundReason
+  refundType      RefundType   @map("refund_type")
+  status          RefundStatus @default(REQUESTED)
+  gatewayRefundId String?      @map("gateway_refund_id") @db.VarChar(255)
+  requestedAt     DateTime?    @map("requested_at")
+  processedAt     DateTime?    @map("processed_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  approvedAmount  Decimal?     @db.Decimal(10, 2)
+  description     String?      @db.Text
+  orderId         String?      @map("order_id")
+  remarks         String?      @db.Text
+  reviewedAt      DateTime?    @map("reviewed_at")
+  reviewedBy      String?      @map("reviewed_by")
+  order           Order?       @relation(fields: [orderId], references: [id])
+  payment         Payment      @relation(fields: [paymentId], references: [id])
+  user            User         @relation(fields: [userId], references: [id])
 
   @@index([paymentId])
   @@index([userId])
   @@index([orderId])
   @@index([status])
   @@map("refunds")
-}
-
-enum RefundReason {
-  MISSING_ITEM
-  WRONG_ITEM
-  FOOD_QUALITY
-  DAMAGED_FOOD
-  ORDER_NOT_DELIVERED
-  DUPLICATE_PAYMENT
-  OTHER
-}
-
-enum RefundType {
-  FULL
-  PARTIAL
-}
-
-enum RefundStatus {
-  REQUESTED
-  APPROVED
-  REJECTED
-  PROCESSED
 }
 
 /// Customer review after order delivery (one review per order)
@@ -694,34 +653,20 @@ model Review {
 
 /// Payment transaction history and audit trail (never delete) : logs of user to ziggy
 model PaymentTransaction {
-  id String @id @default(uuid())
-
-  paymentId String @map("payment_id")
-
-  transactionId String @unique @map("transaction_id") @db.VarChar(255)
-
-  amount Decimal @db.Decimal(10, 2)
-
-  status PaymentTransactionStatus
-
-  responseMessage String? @map("response_message") @db.Text
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  payment Payment @relation(fields: [paymentId], references: [id])
+  id              String                   @id @default(uuid())
+  paymentId       String                   @map("payment_id")
+  transactionId   String                   @unique @map("transaction_id") @db.VarChar(255)
+  amount          Decimal                  @db.Decimal(10, 2)
+  status          PaymentTransactionStatus
+  responseMessage String?                  @map("response_message") @db.Text
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  payment         Payment                  @relation(fields: [paymentId], references: [id])
 
   @@index([paymentId])
   @@index([transactionId])
   @@index([status])
   @@index([createdAt])
   @@map("payment_transactions")
-}
-
-enum PaymentTransactionStatus {
-  PENDING
-  SUCCESS
-  FAILED
-  REFUNDED
 }
 
 /// Images attached to a review (hard delete allowed)
@@ -812,17 +757,17 @@ model PayoutTransaction {
 model RestaurantPayout {
   id                  String            @id @default(uuid())
   payoutTransactionId String            @map("payout_transaction_id")
-  branchHeadId        String            @map("branch_head_id")
   amount              Decimal           @db.Decimal(10, 2)
   status              SettlementStatus  @default(PENDING)
   settlementId        String?           @map("settlement_id")
   transferredAt       DateTime?         @map("transferred_at")
   createdAt           DateTime          @default(now()) @map("created_at")
-  branchHead          RestaurantStaff   @relation(fields: [branchHeadId], references: [id])
+  branchId            String?           @map("branch_id")
+  branch              RestaurantBranch? @relation(fields: [branchId], references: [id])
   payoutTransaction   PayoutTransaction @relation(fields: [payoutTransactionId], references: [id])
   settlement          Settlement?       @relation(fields: [settlementId], references: [id])
 
-  @@index([branchHeadId])
+  @@index([branchId])
   @@index([status])
   @@index([settlementId])
   @@index([payoutTransactionId], map: "restaurant_payouts_payout_transaction_id_fkey")
@@ -866,32 +811,57 @@ model Settlement {
   @@map("settlements")
 }
 
-model AdminAuditLog {
-  id String @id @default(uuid())
+model admin_audit_logs {
+  id          String   @id
+  admin_id    String
+  action      String   @db.VarChar(100)
+  entity_type String   @db.VarChar(100)
+  entity_id   String
+  old_value   Json?
+  new_value   Json?
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  users       User     @relation(fields: [admin_id], references: [id])
 
-  adminId String @map("admin_id")
-
-  action String @db.VarChar(100)
-
-  entityType String @map("entity_type") @db.VarChar(100)
-
-  entityId String @map("entity_id")
-
-  oldValue Json? @map("old_value")
-
-  newValue Json? @map("new_value")
-
-  description String? @db.Text
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  admin User @relation(fields: [adminId], references: [id])
-
-  @@index([adminId])
-  @@index([entityType])
-  @@index([entityId])
   @@index([action])
-  @@map("admin_audit_logs")
+  @@index([admin_id])
+  @@index([entity_id])
+  @@index([entity_type])
+}
+
+enum DeliveryPartnerVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RefundReason {
+  MISSING_ITEM
+  WRONG_ITEM
+  FOOD_QUALITY
+  DAMAGED_FOOD
+  ORDER_NOT_DELIVERED
+  DUPLICATE_PAYMENT
+  OTHER
+}
+
+enum RefundType {
+  FULL
+  PARTIAL
+}
+
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  PROCESSED
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
 }
 
 enum PayoutStatus {
@@ -1023,14 +993,5 @@ enum NotificationType {
 enum NotificationDeliveryStatus {
   PENDING
   SENT
-  FAILED
-}
-
-enum refunds_status {
-  REQUESTED
-  APPROVED
-  REJECTED
-  PROCESSING
-  COMPLETED
   FAILED
 }

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/admin/head',{title:"Delivery Partner Approvals"}) %>
+
+    <body class="bg-slate-100">
+        <p id="toast"></p>
+
+        <div class="flex min-h-screen">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- MAIN -->
+
+                <main class="flex-1 p-8">
+
+                    <div class="p-8">
+
+                        <!-- PAGE HEADER -->
+
+                        <div class="flex justify-between items-center mb-8">
+
+                            <div>
+
+                                <h1 class="text-4xl font-bold">
+                                    Delivery Partner Approvals
+                                </h1>
+
+                                <p class="text-gray-500 mt-2">
+                                    Review and approve new delivery partner applications
+                                </p>
+
+                            </div>
+
+                            <div id="pendingRequestCount" class="
+                            bg-orange-100
+                            text-orange-600
+                            px-4
+                            py-2
+                            rounded-xl
+                            font-semibold">
+
+                                0 Pending Requests
+
+                            </div>
+
+                        </div>
+
+                        <!-- SUMMARY CARDS -->
+
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Pending Approvals
+                                </p>
+
+                                <h2 id="totalPendingApprovals" class="
+                                text-3xl
+                                font-bold
+                                mt-2
+                                text-orange-500">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Approved Today
+                                </p>
+
+                                <h2 id="approvedToday" class="
+                                text-3xl
+                                font-bold
+                                mt-2
+                                text-green-600">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+                                <p class="text-gray-500">
+                                    Rejected Today
+                                </p>
+
+                                <h2 id="rejectedToday" class="
+                                text-3xl
+                                font-bold
+                                mt-2
+                                text-red-500">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+                        <!-- FILTERS -->
+
+                        <div class="bg-white rounded-3xl p-6 shadow-sm mb-8">
+
+                            <div class="grid lg:grid-cols-4 gap-4">
+
+                                <input id="searchInput" type="text" placeholder="Search delivery partner..." class="
+                                border
+                                rounded-xl
+                                px-4
+                                py-3">
+
+                                <select id="vehicleFilter" class="
+                                border
+                                rounded-xl
+                                px-4
+                                py-3">
+
+                                    <option value="">
+                                        All Vehicles
+                                    </option>
+
+                                    <option value="BIKE">
+                                        Bike
+                                    </option>
+
+                                    <option value="SCOOTER">
+                                        Scooter
+                                    </option>
+
+                                    <option value="BICYCLE">
+                                        Bicycle
+                                    </option>
+
+                                </select>
+
+                                <select id="sortFilter" class="
+                                border
+                                rounded-xl
+                                px-4
+                                py-3">
+
+                                    <option value="DESC">
+                                        Newest First
+                                    </option>
+
+                                    <option value="ASC">
+                                        Oldest First
+                                    </option>
+
+                                </select>
+
+                                <button id="searchBtn" class="
+                                bg-[#014f38]
+                                text-white
+                                rounded-xl">
+
+                                    Search
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- APPROVAL TABLE -->
+
+                        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+
+                            <table class="w-full">
+
+                                <thead class="bg-slate-50">
+
+                                    <tr>
+
+                                        <th class="text-left p-5">
+                                            Partner Name
+                                        </th>
+
+                                        <th class="text-left">
+                                            Mobile
+                                        </th>
+
+                                        <th class="text-left">
+                                            Vehicle
+                                        </th>
+
+                                        <th class="text-left">
+                                            Vehicle Number
+                                        </th>
+
+                                        <th class="text-left">
+                                            License
+                                        </th>
+
+                                        <th class="text-left">
+                                            Submitted
+                                        </th>
+
+                                        <th class="text-center">
+                                            Actions
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="approvalTableBody">
+
+                                </tbody>
+
+                            </table>
+
+                            <!-- PAGINATION -->
+
+                            <div id="paginationContainer" class="
+                            flex
+                            justify-start
+                            gap-2
+                            mt-10
+                            mb-6
+                            ml-10">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+        </div>
+
+        <script src="/js/admin/admin-sidebar.js"></script>
+        <script src="/js/admin/admin-delivery-partner-approval.js"></script>
+        <script src="/js/common/toast.js"></script>
+        <script src="/js/common/api.js"></script>
+        <script src="/js/common/auth.js"></script>
+
+    </body>
+
+</html>
