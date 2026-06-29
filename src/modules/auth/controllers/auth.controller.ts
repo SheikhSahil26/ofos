@@ -158,7 +158,7 @@ export class AuthController {
 
   getDashboard = (req: Request, res: Response) => {
     const role: string = String(req.params.role);
-    res.render(`auth/${role.toLowerCase()}/dashboard`, { role: role });
+    res.render(`${role.toLowerCase()}/dashboard`, { role: role, activePage: "dashboard" });
   }
 
 
