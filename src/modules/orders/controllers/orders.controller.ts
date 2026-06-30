@@ -117,7 +117,7 @@ updateOrderStatusByDeliveryPartner = asyncHandler(
     const user = req.user as Express.payload // dummy
 
     const result = await this.ordersService.getBranchOrdersForStaff(user.userId);
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
 
@@ -129,7 +129,7 @@ getOrderTrackingDetails = asyncHandler(async (req: Request, res: Response) => {
   const  orderId = req.params.orderId as string;
 
   const result = await this.ordersService.getOrderTrackingDetails(orderId, userId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
   
   getOrderDetails = asyncHandler(async (req: Request, res: Response) => {

@@ -1,10 +1,11 @@
 import { prisma } from "../../../config/prisma";
 import { CartRepository } from "../repositories/cart.repository";
 import { ServiceResponse } from "../../../common/types/service-response.types";
-import { Cart, CartItem, CartModifier } from "../interfaces/cart.interface";
+// import { Cart, CartItem, CartModifier } from "../interfaces/cart.interface";
 import { CheckoutDetails, CouponSummary, EnrichedCart, EnrichedCartItem } from "../types/cart.types";
 import { AddressService } from "../../address/services/address.service";
 import { CouponService } from "../../coupons/services/coupon.service";
+import { CartModifier } from "../interfaces/cart.interface";
 
 
 export class CartService {
@@ -165,7 +166,7 @@ export class CartService {
                 success: true,
                 message:
                     "Item added to cart successfully",
-                data: newCart,
+                data: newCart as any,
                 statusCode: 201,
             };
         }
@@ -205,7 +206,7 @@ export class CartService {
     return {
       success: true,
       message: "Cart replaced and item added successfully",
-      data: await this.enrichCart(newCart),
+      data: await this.enrichCart(newCart) as any,
       statusCode: 200,
     };
   }

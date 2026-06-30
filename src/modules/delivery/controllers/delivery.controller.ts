@@ -51,7 +51,7 @@ export class DeliveryController {
 
     console.log(result)
 
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
   // modules/delivery/controllers/delivery.controller.ts
@@ -64,7 +64,7 @@ export class DeliveryController {
       deliveryUserId: user.userId,
     });
 
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
 
@@ -77,7 +77,7 @@ export class DeliveryController {
       user.userId
     );
 
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
 
@@ -97,7 +97,7 @@ export class DeliveryController {
       governmentId,
     });
 
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
 
@@ -114,7 +114,7 @@ getEarnings = asyncHandler(
       period: period as "today" | "week" | "month" | "all",
     });
 
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
 
@@ -133,7 +133,7 @@ getPartnerRatings = asyncHandler(
       limit: limit ? parseInt(limit as string) : 10,
     });
 
-    return res.status(result.statusCode).json(result);
+    return res.status(result.statusCode || 200).json(result);
   }
 );
 
@@ -145,7 +145,7 @@ getPendingOffer = asyncHandler(async (req: Request, res: Response) => {
     const user  = req.user as Express.payload
     console.log("User from request: in pending offer", user);
   const result = await this.deliveryService.getPendingOffer(user.userId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 respondToOffer = asyncHandler(async (req: Request, res: Response) => {
@@ -159,14 +159,14 @@ respondToOffer = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const result = await this.deliveryService.respondToOffer(partnerUserId, assignmentId, response);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 getActiveOrders = asyncHandler(async (req: Request, res: Response) => {
    const user  = req.user as Express.payload
     console.log("User from request: in pending offer", user);
   const result = await this.deliveryService.getActiveOrders(user.userId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 getCurrentOrder = asyncHandler(async (req: Request, res: Response) => {
@@ -176,28 +176,28 @@ getCurrentOrder = asyncHandler(async (req: Request, res: Response) => {
 
 
   const result = await this.deliveryService.getCurrentOrder(user.userId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 getTodayStats = asyncHandler(async (req: Request, res: Response) => {
   const user  = req.user as Express.payload
   console.log("User from request: in current order", user); 
   const result = await this.deliveryService.getTodayStats(user.userId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 getRecentDeliveries = asyncHandler(async (req: Request, res: Response) => {
    const user  = req.user as Express.payload
     console.log("User from request: in pending offer", user);
   const result = await this.deliveryService.getRecentDeliveries(user.userId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 acceptActiveOrder = asyncHandler(async (req: Request, res: Response) => {
   const  assignmentId  = req.params.assignmentId as string;
   const user = req.user as Express.payload;
   const result = await this.deliveryService.acceptActiveOrder(user.userId, assignmentId);
-  return res.status(result.statusCode).json(result);
+  return res.status(result.statusCode || 200).json(result);
 });
 
 }

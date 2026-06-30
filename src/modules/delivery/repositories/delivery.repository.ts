@@ -119,6 +119,42 @@ async findPartnerProfileByUserId(userId: string): Promise<any> {
     },
   });
 }
+
+async createDeliveryPartner(
+    data: {
+        userId: string;
+        vehicleType: VehicleType;
+        vehicleNumber: string;
+        governmentId: string;
+    }
+) {
+
+    return await this.prisma.deliveryPartner.create({
+
+        data: {
+
+            userId:
+                data.userId,
+
+            vehicleType:
+                data.vehicleType,
+
+            vehicleNumber:
+                data.vehicleNumber,
+
+            governmentId:
+                data.governmentId,
+
+            status:
+                DeliveryPartnerStatus
+                .PENDING_VERIFICATION
+
+        }
+
+    });
+
+}
+
   
   async updatePartnerProfile(
     partnerId: string,

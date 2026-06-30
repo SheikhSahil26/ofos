@@ -5,18 +5,22 @@ import { CartService } from "../../cart/services/cart.services";
 import { AddressService } from "../../address/services/address.service";
 import { OrdersRepository } from "../repositories/orders.repository";
 import { DELIVERY_TRANSITIONS, STAFF_TRANSITIONS } from "../types/order.types";
-import { OrderItemInput } from "../interfaces/orders.interface";
+import { OrderItemInput } from "../interfaces/order.interface";
 import { PayoutService } from "../../payout-managment/services/payout.service";
 import { prisma } from "../../../config/prisma";
 import { DeliveryService } from "../../delivery/services/delivery.service";
 import { OrderAssignmentService } from "./orderAssignment.service";
 import redisClient from "../../../config/redis";
+import { AppError } from "../../../utils/appError";
+import { BranchRepository } from "../../restaurantBranch/repositories/branch.repo";
 // import { CreateOrderInput, OrderItemInput } from "../types/order.types";
 
 export class OrderService {
   private orderRepo = new OrdersRepository();
   // Assuming you have a DeliveryService class
   private orderAssignmentService = new OrderAssignmentService();
+
+  private branchRepo = new BranchRepository()
   
   constructor(
     private readonly prisma: PrismaClient,
@@ -1057,5 +1061,49 @@ console.log(partnerLocation);
     statusCode: 200,
   };
 }
+
+
+
+async getOrderDetails(
+    orderId: string,
+    ownerId: string
+  ): Promise<ServiceResponse<Order>> {
+
+    const order =
+      await this.orderRepo.getOrderDetailsById(orderId);
+
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+
+    // Verify that the logged-in restaurant owner owns this branch
+    const branchOwner =
+      await this.branchRepo.getOwnerIdByBranchId(
+        order.branchId
+      );
+
+    if (!branchOwner) {
+      throw new AppError("Branch not found", 404);
+    }
+
+
+    console.log(branchOwner);
+    console.log(ownerId)
+    if (branchOwner !== ownerId) {
+      throw new AppError(
+        "You are not authorized to view this order",
+        403
+      );
+    }
+
+    return {
+      success: true,
+      data: order,
+      message: "Order details fetched successfully",
+      statusCode: 200,
+    };
+  }
+
+
 
 }

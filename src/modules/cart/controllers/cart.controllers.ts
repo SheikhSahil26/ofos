@@ -224,7 +224,7 @@ export class CartController {
 
             const result = await this.cartService.getCheckoutDetails(user.userId);
 
-            return res.status(result.statusCode).json(result);
+            return res.status(result.statusCode || 200).json(result);
         }
     );
 
