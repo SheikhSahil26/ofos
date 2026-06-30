@@ -3,6 +3,7 @@ import { IRoutes } from "../../../common/interfaces/route.interface";
 import { UserController } from "../controllers/user.controller";
 import { upload } from "../../../middlewares/multer.middleware";
 import { isAuthenticated } from "../../../middlewares/authenticateMiddlware";
+import { authorizeRoles } from "../../../middlewares/roleMiddlware";
 
 export class UserRoutes implements IRoutes {
     path = "/users";
@@ -15,7 +16,7 @@ export class UserRoutes implements IRoutes {
 
     private initializeRoutes(): void {
         this.router.get("/dashboard", isAuthenticated, this.controller.getDashboard);
-        this.router.get("/profile", isAuthenticated, this.controller.getProfile);
+        this.router.get("/profile", isAuthenticated,authorizeRoles("CUSTOMER"), this.controller.getProfile);
         this.router.get("/loyalty-points", isAuthenticated, this.controller.getLoyaltyPointDashboard);
         this.router.patch("/profile", isAuthenticated, upload.single("profilePhoto"), this.controller.updateProfile);
         this.router.delete("/profile", isAuthenticated, this.controller.deleteUserAccount);

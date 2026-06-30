@@ -34,33 +34,25 @@ export class CartController {
         }
     );
 
-    addToCart = asyncHandler(
-        async (req: Request, res: Response) => {
-            const user = req.user as Express.payload // dummy
+    addToCart = asyncHandler(async (req: Request, res: Response) => {
+ const user = req.user as Express.payload; // Replace with req.user.userId
+  const { menuItemId, quantity, modifiers, specialInstruction, replaceCart } = req.body;
 
-            const {
-                menuItemId,
-                quantity,
-                modifiers,
-                specialInstruction,
-            }: AddToCartDTO = req.body;
+  if (!menuItemId) {
+    return res.status(400).json({ success: false, message: "menuItemId is required" });
+  }
 
-            console.log("Add to cart request body:", req.body);
+  const result = await this.cartService.addToCart(
+    user.userId,
+    menuItemId,
+    quantity,
+    modifiers || [],
+    specialInstruction,
+    replaceCart === true,
+  );
 
-
-    const data = await this.cartService.addToCart(
-      user.userId,
-      menuItemId,
-      Number(quantity),
-      modifiers || [],
-      specialInstruction,
-    );
-
-            return res
-                .status(data.statusCode || 200)
-                .json(data);
-        }
-    );
+  return res.status(result.statusCode || 200).json(result);
+});
     removeCartItem = asyncHandler(
         async (
             req: Request,
