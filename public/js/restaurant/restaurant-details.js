@@ -1065,45 +1065,71 @@ function openModifierModal(
 
 }
 
-    async function addToCartWithModifiers(menuItemId, modifiers) {
+  // js/restaurant/restaurant-details.js
 
-        // const branchId = getBranchIdFromUrl();
+async function addToCartWithModifiers(menuItemId, modifiers, replaceCart = false) {
 
-        
+  try {
+    const response = await apiRequest(
+      "/api/cart/add-to-cart",
+      "POST",
+      { menuItemId, modifiers, replaceCart }
+    );
 
-        const payload = {
-            menuItemId,
-            modifiers
-        };
-        console.log("Adding to cart with modifiers:", payload);
-        try {
+    const result = await response.json();
 
-            const response = await apiRequest(
-                "/api/cart/add-to-cart",
-                "POST",
-                {menuItemId, modifiers}
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to add item to cart");
-            }
-
-            const result = await response.json();
-
-            showToast("Item added to cart successfully", "success");
-
-            console.log("Item added to cart:", result);
-
-            // Optionally, you can show a success message or update the cart UI here
-            console.log("Item added to cart:", result);
-
-        } catch (error) {
-            console.error(error);
-            showToast("Failed to add item to cart. Please try again.", "error");
-        }
-
+    // ── Branch conflict — show confirmation modal instead of failing silently ──
+    if (response.status === 409 && result.error === "CART_BRANCH_CONFLICT") {
+      showBranchConflictModal(menuItemId, modifiers);
+      return;
     }
 
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to add item to cart");
+    }
+
+    showToast("Item added to cart successfully", "success");
+
+  } catch (error) {
+    console.error(error);
+    showToast("Failed to add item to cart. Please try again.", "error");
+  }
+}
+
+function showBranchConflictModal(menuItemId, modifiers) {
+  // Reuse the existing modifier modal container — simplest, no new DOM needed
+  modifierContent.innerHTML = `
+    <div class="text-center py-4">
+      <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-triangle-exclamation text-2xl text-[#ff7a00]"></i>
+      </div>
+      <h3 class="text-xl font-semibold mb-2">Start a New Cart?</h3>
+      <p class="text-gray-500 mb-6">
+        Your cart already has items from another restaurant.
+        Adding this item will replace your existing cart.
+      </p>
+      <div class="grid grid-cols-2 gap-3">
+        <button id="cancel-replace-btn" class="border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold">
+          Keep Current Cart
+        </button>
+        <button id="confirm-replace-btn" class="bg-[#ff7a00] hover:bg-[#ea6f00] text-white py-3 rounded-xl font-semibold">
+          Replace Cart
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("confirm-replace-btn").onclick = async () => {
+    modifierModal.classList.add("hidden");
+    await addToCartWithModifiers(menuItemId, modifiers, true); // retry with replaceCart: true
+  };
+
+  document.getElementById("cancel-replace-btn").onclick = () => {
+    modifierModal.classList.add("hidden");
+  };
+
+  modifierModal.classList.remove("hidden");
+}
 
 
 

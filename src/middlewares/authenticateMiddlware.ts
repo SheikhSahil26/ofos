@@ -23,13 +23,7 @@ export const isAuthenticated = (
       
       
 
-      if (!user) {
-        return res.status(401).json({
-          status: "Error",
-          statusCode:401,
-          message: "new kdfk User"
-        });
-      }
+     
 
       console.log("Authenticated user:", user);
 

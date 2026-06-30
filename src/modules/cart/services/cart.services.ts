@@ -97,6 +97,7 @@ export class CartService {
         quantity: number,
          modifiers: CartModifier[] = [],        // new param — defaults to empty
   specialInstruction?: string,   
+   replaceCart: boolean = false, 
     ): Promise<ServiceResponse<EnrichedCart>> {
         if(!quantity) quantity=1
         quantity = Number(quantity);
@@ -169,14 +170,45 @@ export class CartService {
             };
         }
 
-        if (
-            branchId !==
-            existingCart.restaurantBranchId
-        ) {
-            throw new Error(
-                "Cart contains items from another restaurant branch"
-            );
-        }
+       if (branchId !== existingCart.restaurantBranchId) {
+
+    if (!replaceCart) {
+      // Don't error out — return a structured conflict the frontend can act on
+      return {
+        success: false,
+        error: "CART_BRANCH_CONFLICT",
+        statusCode: 409,
+        data: {
+          conflict: true,
+          existingBranchId: existingCart.restaurantBranchId,
+          newBranchId: branchId,
+        },
+      } as any;
+    }
+
+    // replaceCart === true — wipe the old cart and start fresh with this item
+    const newCart = {
+      userId,
+      restaurantBranchId: branchId,
+      items: [{
+        menuItemId,
+        quantity,
+        unitPrice: Number(menuItem.price),
+        modifiers,
+        specialInstruction: specialInstruction as any,
+      }],
+      subtotal: quantity * Number(menuItem.price),
+    };
+
+    await this.cartRepo.saveCart(userId, newCart);
+
+    return {
+      success: true,
+      message: "Cart replaced and item added successfully",
+      data: await this.enrichCart(newCart),
+      statusCode: 200,
+    };
+  }
 
         const existingItem =
             existingCart.items.find(

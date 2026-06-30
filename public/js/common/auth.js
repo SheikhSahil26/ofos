@@ -14,6 +14,8 @@ async function refreshAccessToken() {
             await response.json();
             console.log(result,"result in refeshAccessToken");
 
+            console.log("response in refeshAccessToken",response);
+
         if (response.ok) {
             console.log("==============", result)
 
@@ -28,6 +30,8 @@ async function refreshAccessToken() {
             result.message || "Session Expire",
             "error"
         );
+
+        
 
         return false;
 

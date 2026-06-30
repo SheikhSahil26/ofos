@@ -37,6 +37,8 @@ async function apiRequest(url,method = "GET",body = null) {
                 "accessToken"
             );
 
+            console.log("token removed");
+
             setTimeout(() => {
 
                 // window.location.href =
