@@ -28,6 +28,7 @@ export class PaymentController {
     async (req: Request, res: Response) => {
 
       const { paymentId } = req.body;
+      console.log("paymentId in paymentSuccess controller:", paymentId);
 
       const response =
         await this.paymentService.processPaymentSuccess(

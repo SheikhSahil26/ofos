@@ -36,6 +36,7 @@ export class PaymentService {
     const payment =
       await this.paymentRepo.getPaymentById(paymentId);
 
+      console.log("Payment fetched in processPaymentSuccess:", payment);
       
 
     if (!payment) {

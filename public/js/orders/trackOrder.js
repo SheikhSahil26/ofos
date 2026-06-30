@@ -49,16 +49,143 @@ let previousPartnerId = null; // tracks whether we've already announced this par
 
 const orderId = window.location.pathname.split("/").pop();
 
-document.addEventListener("DOMContentLoaded", () => {
-  fetchTrackingDetails();
-  pollTimer = setInterval(fetchTrackingDetails, 50000); // FIXED — was 500000
-});
 
+
+let paymentId = null ;
+
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await fetchTrackingDetails();
+
+    await fetchPaymentDetails();
+
+    pollTimer =
+        setInterval(
+            fetchTrackingDetails,
+            50000
+        );
+
+});
 window.addEventListener("beforeunload", () => clearInterval(pollTimer));
 
 // ──────────────────────────────────────────────
 // Fetch
 // ──────────────────────────────────────────────
+
+const payNowBtn =
+    document.getElementById("payNowBtn");
+
+if (payNowBtn) {
+
+    payNowBtn.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                payNowBtn.disabled = true;
+                console.log("paymentId in payNowBtn click handler:", paymentId);
+
+                const response =
+                    await apiRequest(
+                        "/api/payments/success",
+                        "POST",{paymentId}
+                    );
+
+                const result =
+                    await response.json();
+
+                if (result.success) {
+
+                    showToast(
+                        "Payment Successful",
+                        "success"
+                    );
+
+                    await fetchPaymentDetails();
+
+                }
+                else {
+
+                    showToast(
+                        result.error || "Payment Failed",
+                        "error"
+                    );
+
+                }
+
+            }
+            catch (err) {
+
+                console.error(err);
+
+                showToast(
+                    "Something went wrong",
+                    "error"
+                );
+
+            }
+            finally {
+
+                payNowBtn.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+async function fetchPaymentDetails() {
+
+    try {
+
+        const response =
+            await apiRequest(
+                `/api/payments/order/${orderId}`,
+                "GET"
+            );
+
+        const result =
+            await response.json();
+
+            console.log(result,"result in fetchPaymentDetails");
+
+            paymentId = result.data.id
+
+            console.log("paymentId in fetchPaymentDetails:", paymentId);
+
+        if (!result.success) {
+
+            showToast(
+                result.error || "Unable to fetch payment details",
+                "error"
+            );
+
+            return;
+        }
+
+        console.log("Payment Details", result.data);
+
+    }
+    catch (err) {
+
+        console.error(err);
+
+        showToast(
+            "Something went wrong",
+            "error"
+        );
+
+    }
+
+}
+
+
+
 async function fetchTrackingDetails() {
   try {
     const response = await apiRequest(`/api/orders/tracking-details/${orderId}`, "GET");
