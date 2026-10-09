@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Branch Details | Ziggy Restaurant</title>
+    <%- include('../partials/head.ejs') %>
+    <link rel="stylesheet" href="/css/common/toast.css">
+</head>
+<body class="bg-[#f8f7f4] min-h-screen">
+    <p id="toast"></p>
+
+    <div class="flex min-h-screen">
+        <%- include('../partials/restaurant-sidebar.ejs') %>
+
+        <div class="flex-1 flex flex-col h-screen overflow-y-auto">
+            <main class="flex-1 px-4 md:px-8 py-6 max-w-7xl mx-auto w-full">
+
+                <!-- Header Actions -->
+                <div class="mb-6">
+                    <a href="/restaurants/branches" class="text-gray-500 hover:text-[#ff7a00] transition flex items-center gap-2 font-medium">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Branches
+                    </a>
+                </div>
+
+                <!-- Page Content -->
+                <div id="pageContent" class="space-y-6">
+
+                    <!-- Branch Header Profile -->
+                    <div class="bg-white rounded-2xl p-6 md:p-8 border border-[#ececec] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+                        
+                        <!-- Top Right Decoration -->
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-[#fff4ea] rounded-bl-full -z-0 opacity-50"></div>
+
+                        <div class="flex items-center gap-6 relative z-10">
+                            <div class="w-20 h-20 rounded-full bg-[#014f38] flex items-center justify-center shadow-lg border-4 border-white">
+                                <i class="fa-solid fa-store text-3xl text-white"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-3 mb-1">
+                                    <h1 id="branchName" class="text-3xl font-bold text-gray-900"></h1>
+                                    <span id="branchStatusBadge"></span>
+                                </div>
+                                <p class="text-gray-500 flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot"></i> <span id="branchAddress"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 relative z-10">
+                            <button id="openEditBranchModal" class="bg-white border border-[#ececec] text-gray-700 hover:text-[#014f38] hover:border-[#014f38] px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-pen"></i> Edit Branch
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Layout Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                        <!-- Left Column (Overview & Menu) -->
+                        <div class="lg:col-span-2 space-y-6">
+                            
+                            <!-- Overview Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
+                                    <p class="text-sm text-gray-500 mb-1">Contact Number</p>
+                                    <p class="font-semibold text-gray-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-phone text-[#ff7a00]"></i>
+                                        <span id="branchContact"></span>
+                                    </p>
+                                </div>
+                                <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
+                                    <p class="text-sm text-gray-500 mb-1">FSSAI License</p>
+                                    <p class="font-semibold text-gray-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-file-shield text-[#014f38]"></i>
+                                        <span id="branchFssai"></span>
+                                    </p>
+                                </div>
+                                <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
+                                    <p class="text-sm text-gray-500 mb-1">GSTIN</p>
+                                    <p class="font-semibold text-gray-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-file-invoice text-[#014f38]"></i>
+                                        <span id="branchGstin"></span>
+                                    </p>
+                                </div>
+                                <div class="bg-white rounded-2xl p-5 border border-[#ececec] shadow-sm">
+                                    <p class="text-sm text-gray-500 mb-1">Delivery Radius</p>
+                                    <p class="font-semibold text-gray-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-route text-[#ff7a00]"></i>
+                                        <span id="branchDeliveryRadius"></span> km
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Menu Section -->
+                            <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-xl font-bold text-gray-900">Branch Menu</h2>
+                                    <button
+                                        id="manageMenuBtn"
+                                        class="text-[#014f38] hover:text-[#ff7a00] font-medium text-sm transition"
+                                    >
+                                        Manage Menu
+                                        <i class="fa-solid fa-arrow-right ml-1"></i>
+                                    </button>
+                                </div>
+
+                                <div id="menuContainer" class="space-y-6">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column (Orders & Schedule) -->
+                        <div class="space-y-6">
+                            
+                            <!-- Operating Hours -->
+                            <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm">
+                                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <i class="fa-regular fa-clock text-[#ff7a00]"></i> Operating Hours
+                                </h2>
+                                <div id="operatingHoursContainer" class="space-y-3 text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Recent Orders -->
+                            <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm flex flex-col h-[500px]">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-lg font-bold text-gray-900">Recent Orders</h2>
+                                    <span id="ordersTotalBadge" class="bg-[#e6f4f0] text-[#014f38] text-xs font-bold px-2 py-1 rounded">0</span>
+                                </div>
+                                
+                                <div id="ordersContainer" class="flex-1 overflow-y-auto pr-2 space-y-3">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit Branch Modal -->
+    <div id="editBranchModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen text-[#ff7a00]"></i> Edit Branch
+                </h2>
+                <button id="closeEditBranchModal" class="text-gray-400 hover:text-gray-600 transition p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="editBranchForm" class="p-6 space-y-5">
+
+                <!-- Branch Name & Contact -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Branch Name</label>
+                        <input type="text" name="branchName" id="edit_branchName"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="e.g. Main Branch" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                        <input type="text" name="contactNumber" id="edit_contactNumber"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="e.g. 9876543210" />
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
+                    <input type="text" name="addressLine1" id="edit_addressLine1"
+                        value=""
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                        placeholder="Street / Building" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 2 <span class="text-gray-400">(optional)</span></label>
+                    <input type="text" name="addressLine2" id="edit_addressLine2"
+                        value=""
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                        placeholder="Area / Landmark" />
+                </div>
+
+                <!-- City, State, Pincode -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                        <input type="text" name="city" id="edit_city"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="City" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                        <input type="text" name="state" id="edit_state"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="State" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
+                        <input type="text" name="pincode" id="edit_pincode"
+                            value=""
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                            placeholder="e.g. 400001" />
+                    </div>
+                </div>
+
+
+
+                <!-- Delivery Radius -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Radius (km)</label>
+                    <input type="number" name="deliveryRadiusKm" id="edit_deliveryRadiusKm"
+                        value=""
+                        min="1" max="50" step="0.5"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#014f38] transition"
+                        placeholder="e.g. 10" />
+                </div>
+
+                <!-- Error message -->
+                <p id="editBranchError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2"></p>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" id="cancelEditBranchBtn"
+                        class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium transition text-sm">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submitEditBranchBtn"
+                        class="px-6 py-2.5 rounded-xl bg-[#014f38] text-white font-semibold hover:bg-[#013d2c] transition text-sm flex items-center gap-2">
+                        <span id="editBranchBtnText">Save Changes</span>
+                        <span id="editBranchBtnSpinner" class="hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/common/auth.js"></script>
+    <script src="/js/common/api.js"></script>
+    <script src="/js/restaurant/branch-details.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Queue — Staff</title>
+<link rel="stylesheet" href="/css/common/toast.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @keyframes pulse-dot {
+    0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+  }
+  .pulse { animation: pulse-dot 1.6s infinite; }
+</style>
+</head>
+
+<body class="bg-[#0F1B14] min-h-screen">
+
+<div id="toast"></div>
+
+<!-- Topbar -->
+<header class="bg-gradient-to-r from-[#014D2F] to-[#006B3F] h-[72px] flex items-center justify-between px-8 shadow-lg">
+  <div class="text-orange-400 text-2xl font-extrabold">
+    Ziggy <span class="text-white text-sm font-normal opacity-70">Kitchen</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="bg-white/10 text-white text-sm px-3.5 py-1.5 rounded-full flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-green-400"></span>
+      <span id="branch-name">Loading branch…</span>
+    </div>
+    <div class="text-white text-sm opacity-90" id="staff-greeting">Hi 👋</div>
+  </div>
+</header>
+
+<div class="px-8 py-7">
+
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-white text-[26px] font-bold">Order Queue</h1>
+    <div class="flex items-center gap-2 text-green-300 text-[13px] font-semibold bg-green-400/10 px-3 py-1.5 rounded-lg">
+      <span class="w-[7px] h-[7px] rounded-full bg-green-400 pulse"></span>
+      Live — updates every 5s
+    </div>
+  </div>
+
+  <div id="order-detail-modal"></div>
+
+  <!-- Board -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4.5" id="board">
+
+    <div class="bg-[#16241C] rounded-2xl p-4 min-h-[200px]">
+      <div class="flex items-center justify-between mb-3.5 px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-[9px] h-[9px] rounded-full bg-orange-500"></span>
+          <span class="text-slate-200 text-[13px] font-bold uppercase tracking-wide">New Orders</span>
+        </div>
+        <span class="bg-white/10 text-slate-400 text-[11px] font-bold px-2 py-0.5 rounded-full" id="count-new">0</span>
+      </div>
+      <div id="col-new"></div>
+    </div>
+
+    <div class="bg-[#16241C] rounded-2xl p-4 min-h-[200px]">
+      <div class="flex items-center justify-between mb-3.5 px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-[9px] h-[9px] rounded-full bg-blue-500"></span>
+          <span class="text-slate-200 text-[13px] font-bold uppercase tracking-wide">Confirmed</span>
+        </div>
+        <span class="bg-white/10 text-slate-400 text-[11px] font-bold px-2 py-0.5 rounded-full" id="count-confirmed">0</span>
+      </div>
+      <div id="col-confirmed"></div>
+    </div>
+
+    <div class="bg-[#16241C] rounded-2xl p-4 min-h-[200px]">
+      <div class="flex items-center justify-between mb-3.5 px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-[9px] h-[9px] rounded-full bg-yellow-500"></span>
+          <span class="text-slate-200 text-[13px] font-bold uppercase tracking-wide">Preparing</span>
+        </div>
+        <span class="bg-white/10 text-slate-400 text-[11px] font-bold px-2 py-0.5 rounded-full" id="count-preparing">0</span>
+      </div>
+      <div id="col-preparing"></div>
+    </div>
+
+    <div class="bg-[#16241C] rounded-2xl p-4 min-h-[200px]">
+      <div class="flex items-center justify-between mb-3.5 px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-[9px] h-[9px] rounded-full bg-green-500"></span>
+          <span class="text-slate-200 text-[13px] font-bold uppercase tracking-wide">Ready for Pickup</span>
+        </div>
+        <span class="bg-white/10 text-slate-400 text-[11px] font-bold px-2 py-0.5 rounded-full" id="count-ready">0</span>
+      </div>
+      <div id="col-ready"></div>
+    </div>
+
+  </div>
+
+</div>
+<script src="/js/common/auth.js"></script>
+<script src="/js/common/api.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/restaurant-staff/orderQueuePage.js"></script>
+
+</body>
+</html>

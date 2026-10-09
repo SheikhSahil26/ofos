@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Restaurants | Ziggy</title>
+    <%- include('../partials/head.ejs') %>
+</head>
+
+<body>
+<p id="toast"></p>
+<div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <%- include('../partials/customer-sidebar.ejs') %>
+
+    <div class="flex-1 flex flex-col">
+
+        <!-- Header -->
+        <%- include("../partials/header.ejs") %>
+
+        <!-- Content -->
+
+        <main class="flex-1 p-8">
+
+            <div class="mb-8">
+
+                <h1 class="text-3xl font-bold text-gray-900">
+                    Restaurants
+                </h1>
+
+                <p class="text-gray-500 mt-2">
+                    Browse available restaurants
+                </p>
+
+            </div>
+
+            <!-- Loading -->
+
+            <div
+                id="loading"
+                class="flex flex-col items-center justify-center py-20">
+
+                <i
+                    class="fa-solid fa-spinner animate-spin text-3xl text-[#014f38]">
+                </i>
+
+                <p class="mt-4 text-gray-500">
+                    Loading restaurants...
+                </p>
+
+            </div>
+
+            <!-- Error -->
+
+            <div
+                id="error"
+                class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6">
+            </div>
+
+            <!-- Restaurants -->
+
+            <div
+                id="restaurantsContainer"
+                class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+<script src="/js/restaurant/listing.js"></script>
+<script src="/js/common/api.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/common/auth.js"></script>
+<script src="/js/customer/profile.js"></script>
+</body>
+
+</html>

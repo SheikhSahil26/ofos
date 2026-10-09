@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Dashboard</title>
+
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <p id="toast"></p>
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar -->
+        <%- include('../partials/customer-sidebar') %>
+
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+
+                <!-- Welcome -->
+                <div class="mb-8">
+
+                    <h2 class="text-3xl font-semibold text-gray-800" id="dashboardName">
+                        Hello, Customer 👋
+                    </h2>
+
+                    <p class="text-gray-500 mt-2">
+                        What would you like to eat today?
+                    </p>
+
+                    <!-- dashboard-stats -->
+                    <%- include("helper/dashboard-stats") %>
+                </div>
+
+                <!-- Cards -->
+                <div class="grid lg:grid-cols-2 gap-6">
+
+                    <!-- Order Again -->
+                    <div class="bg-white rounded-2xl shadow-sm border p-6">
+
+                        <h3 class="font-semibold text-lg mb-5">
+                            Order Again
+                        </h3>
+
+                        <div class="flex gap-4" id="recentRestaurantsContainer">
+
+                            <!-- recent restaurants will be displayed here -->
+
+                        </div>
+
+                    </div>
+
+                    <!-- Current Order -->
+                    <div class="bg-white rounded-2xl shadow-sm border p-6">
+
+                        <h3 class="font-semibold text-lg mb-5">
+                            Current Order
+                        </h3>
+
+                        <div id="currentOrderContainer">
+
+                            <!-- current order will be displayed here -->
+
+                        </div>
+
+                    </div>
+
+                    <!-- Ziggy Points -->
+                    <div class="bg-white rounded-2xl shadow-sm border p-6">
+
+                        <h3 class="font-semibold text-lg">
+                            Ziggy Points
+                        </h3>
+
+                        <h2 class="text-5xl font-bold text-[#014f38] mt-3" id="availablePoints">
+                            320
+                        </h2>
+
+                        <p class="text-gray-500 mt-1">
+                            Available Points
+                        </p>
+
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-2xl shadow-sm border p-6">
+
+                        <h3 class="font-semibold text-lg mb-4">
+                            Quick Actions
+                        </h3>
+
+                        <div class="flex gap-3 flex-wrap">
+
+                            <a href="/customer/orders" class="bg-[#014f38] text-white px-4 py-2 rounded-lg">
+
+                                Orders
+                            </a>
+
+                            <a href="/customer/coupons" class="bg-[#ff7a00] text-white px-4 py-2 rounded-lg">
+
+                                Coupons
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+    </div>
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/api.js"></script>
+    <script src="/js/common/auth.js"></script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/customer/dashboard.js"></script>
+    <script src="/js/customer/profile.js"></script>
+</body>
+
+</html>

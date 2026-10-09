@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Partner Dashboard</title>
+<link rel="stylesheet" href="/css/common/toast.css">
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F8F8F8]">
+
+    <div id="toast"></div>
+
+<header class="bg-gradient-to-r from-[#014D2F] to-[#006B3F] shadow-lg">
+    <div class="max-w-7xl mx-auto h-20 px-8 flex items-center justify-between">
+        <h1 class="text-3xl font-bold text-orange-400">Ziggy Partner</h1>
+        <div class="flex items-center gap-8 text-white">
+            <button>Dashboard</button>
+            <button>Orders</button>
+            <button>Earnings</button>
+            <button><a href="/delivery/profile">Profile</a></button>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-8 py-10">
+
+    <!-- Top Stats -->
+    <div class="grid grid-cols-4 gap-6 mb-10">
+
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+            <p class="text-gray-500">Today's Earnings</p>
+            <h2 class="text-4xl font-bold mt-4 text-green-600" id="stat-earnings">₹0</h2>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+            <p class="text-gray-500">Deliveries Today</p>
+            <h2 class="text-4xl font-bold mt-4" id="stat-deliveries">0</h2>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+            <p class="text-gray-500">Rating</p>
+            <h2 class="text-4xl font-bold text-orange-500 mt-4" id="stat-rating">—</h2>
+        </div>
+
+        <!-- Availability card — STRUCTURE UNTOUCHED, only label text gets an id -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500">Availability</p>
+                    <h2 class="text-xl font-bold mt-3 text-green-600" id="availability-label">Online</h2>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="
+                    w-14 h-8 bg-gray-300 rounded-full
+                    peer peer-checked:bg-green-600
+                    after:absolute after:left-1 after:top-1
+                    after:w-6 after:h-6 after:bg-white
+                    after:rounded-full after:transition-all
+                    peer-checked:after:translate-x-6">
+                    </div>
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+<div id="offer-modal"></div>
+
+    <div class="grid grid-cols-3 gap-8">
+
+        <!-- Active Orders -->
+        <div class="col-span-2">
+            <h2 class="text-3xl font-bold mb-8">Active Orders</h2>
+            <div class="space-y-6" id="active-orders-container">
+                <div class="bg-white rounded-3xl p-8 shadow-sm text-center text-gray-400">
+                    No pending offers right now
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Order -->
+        <div>
+            <div class="bg-white rounded-3xl p-8 shadow-sm sticky top-28" id="current-order-card">
+
+                <h2 class="text-2xl font-bold mb-8">Current Order</h2>
+
+                <div class="space-y-5" id="current-order-details">
+                    <p class="text-gray-400 text-sm">No active order</p>
+                </div>
+
+                <button id="picked-up-btn" style="display:none;"
+                class="w-full mt-10 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-semibold">
+                    Picked Up
+                </button>
+
+                <button id="out-for-delivery-btn" style="display:none;"
+                class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold">
+                    Start Delivery
+                </button>
+
+                <button id="delivered-btn" style="display:none;"
+                class="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-semibold">
+                    Delivered
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Recent Deliveries -->
+    <div class="mt-16">
+        <h2 class="text-3xl font-bold mb-8">Recent Deliveries</h2>
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-8 py-5">Order</th>
+                        <th class="text-left">Restaurant</th>
+                        <th class="text-left">Earnings</th>
+                        <th class="text-left">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-deliveries-body">
+                    <tr><td colspan="4" class="text-center py-8 text-gray-400">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<script src="/js/common/api.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/common/auth.js"></script>
+<script src="/js/delivery-partner/deliveryPartner.js"></script>
+<script src="/js/common/getCurrentLocation.js"></script>
+
+</body>
+</html>

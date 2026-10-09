@@ -1,0 +1,140 @@
+<aside class="w-72 bg-[#014f38] text-white flex flex-col p-6 sticky top-0 h-screen">
+
+    <!-- Logo -->
+    <div class="mb-10">
+        <h1 class="text-3xl font-bold text-[#ff7a00]">
+            Ziggy
+        </h1>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex flex-col gap-2">
+
+        <!-- Dashboard -->
+        <a href="/restaurants/dashboard"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'dashboard'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-chart-line"></i>
+
+            <span>Dashboard</span>
+
+        </a>
+
+        <!-- Branches -->
+        <a href="/restaurants/branches"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'branches'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-store"></i>
+
+            <span>Branches</span>
+
+        </a>
+ 
+
+        <!-- Orders -->
+        <a href="/staff/order-queue/:branchId"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'orders'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-bag-shopping"></i>
+
+            <span>Orders</span>
+
+        </a>
+
+        <!-- Promotions -->
+        <a href="/restaurants/promotions"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'promotions'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-tags"></i>
+
+            <span>Promotions</span>
+
+        </a>
+
+        <!-- Staff Management -->
+        <a href="/restaurants/staff"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'staff'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-users"></i>
+
+            <span>Staff</span>
+
+        </a>
+
+        <!-- Reviews -->
+        <a href="/restaurants/reviews"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+            <%= activePage === 'reviews'
+            ? 'bg-white text-[#014f38] font-semibold'
+            : 'hover:bg-white/10 text-white'
+        %>">
+
+            <i class="fa-solid fa-star"></i>
+
+            <span>Reviews</span>
+
+        </a>
+
+    </nav>
+
+    <!-- User Profile -->
+    <div class="mt-auto pt-6 border-t border-white/10">
+
+        <a href="/profile">
+
+            <div class="mb-5 flex items-center gap-3">
+
+                <div
+                    class="w-12 h-12 rounded-full bg-[#ff7a00] flex items-center justify-center font-bold">
+
+                    <img
+                        src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(locals.currentUser ? locals.currentUser.fullName : 'Owner') %>&background=ff7a00&color=fff&size=256"
+                        alt="Profile"
+                        class="w-12 h-12 rounded-full border-2 border-white object-cover"
+                        id="sidebarProfile">
+
+                </div>
+
+                <div>
+
+                    <h3
+                        class="font-medium"
+                        id="sidebarName">
+                        <%= locals.currentUser ? locals.currentUser.fullName : 'Restaurant Owner' %>
+                    </h3>
+
+                    <p
+                        class="text-xs text-gray-300"
+                        id="sidebarRole">
+                        <%= locals.currentUser ? locals.currentUser.email : 'Restaurant Partner' %>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</aside>

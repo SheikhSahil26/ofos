@@ -1,0 +1,16 @@
+:root {
+    --primary-green: #014f38;
+    --primary-orange: #ff6b00;
+    --orange-hover: #e86000;
+
+    --bg-color: #f8f7f4;
+    --white: #ffffff;
+
+    --text-primary: #222222;
+    --text-secondary: #666666;
+
+    --border-color: #e3e3e3;
+
+    --success: #16a34a;
+    --error: #dc2626;
+}

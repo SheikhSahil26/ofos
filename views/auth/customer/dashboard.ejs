@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashbord</title>
+
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/common/toast.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body>
+    <div id="toast"></div>
+    <h1>Customer Dahbord</h1>
+    <h1>Helooo </h1>
+    <p id="attatchProfile"></p>
+
+
+    <script>const role = "<%= role %>";</script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/common/auth.js"></script>
+    <script src="/js/common/api.js"></script>
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadProfile
+        );
+
+        async function loadProfile() {
+
+            try {
+
+                const response =
+                    await apiRequest(
+                        "/api/users/profile"
+                    );
+
+                const result = await response.json();    
+                document.getElementById(
+                    "attatchProfile"
+                ).innerHTML = `
+            <h3>${result.data.fullName}</h3>
+            <p>${result.data.email}</p>
+            <p>${result.data.mobile}</p>
+        `;
+
+            } catch (error) {
+
+                showToast(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+    </script>
+    <!-- <script src="/js/customer/dashboard.js"></script> -->
+</body>
+
+</html>

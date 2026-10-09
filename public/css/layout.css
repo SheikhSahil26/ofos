@@ -1,0 +1,51 @@
+.sidebar {
+    background-color: #014f38;
+    min-height: 100vh;
+    color: #fff;
+}
+
+.logo {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar-link:hover {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+}
+
+.sidebar-link.active {
+    background: #ff7a00;
+    color: #fff;
+}
+
+.custom-navbar {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.navbar-brand {
+    color: #014f38 !important;
+}
+
+.nav-profile-image {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#logoutBtn{
+    background-color: #ff7a00;
+    color: #fff;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Ziggy Points</title>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+
+<p id="toast"></p>
+
+<div class="flex min-h-screen bg-[#f8f7f4]">
+
+    <%- include('../partials/customer-sidebar') %>
+
+    <main class="flex-1 p-8">
+
+        <div class="mb-8">
+
+            <h1 class="text-3xl font-semibold">
+                Ziggy Points
+            </h1>
+
+            <p class="text-gray-500 mt-1">
+                Track your loyalty rewards
+            </p>
+
+        </div>
+
+        <%- include('./helper/loyalty-summary') %>
+
+        <%- include('./helper/loyalty-transactions') %>
+
+    </main>
+
+</div>
+
+<script src="/js/common/api.js"></script>
+<script src="/js/common/auth.js"></script>
+<script src="/js/common/toast.js"></script>
+<script src="/js/customer/loyalty-point.js"></script>
+</body>
+</html>

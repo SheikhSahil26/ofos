@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Checkout | Ziggy</title>
+<link rel="stylesheet" href="/css/common/toast.css">
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-[#F8F8F8] min-h-screen">
+    <div id="toast"></div>
+
+<!-- NAVBAR -->
+<header class="sticky top-0 z-50 bg-gradient-to-r from-[#014D2F] to-[#006B3F] shadow-lg">
+
+    <div class="max-w-7xl mx-auto h-20 px-8 flex items-center justify-between">
+
+        <div class="flex items-center gap-5">
+
+            <button
+                onclick="history.back()"
+                class="text-white text-2xl">
+
+                ←
+
+            </button>
+
+            <h1 class="text-3xl font-bold text-orange-400">
+                Ziggy
+            </h1>
+
+        </div>
+
+        <h2 class="text-xl text-white font-medium">
+            Checkout
+        </h2>
+
+    </div>
+
+</header>
+
+
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto px-8 py-10">
+
+<div class="grid grid-cols-12 gap-8">
+
+
+
+
+<!-- LEFT -->
+<div class="col-span-8 space-y-8">
+
+
+
+<!-- DELIVERY ADDRESS -->
+<section class="bg-white rounded-3xl shadow-sm p-8">
+
+<div class="flex justify-between items-center mb-8">
+
+<h2 class="text-2xl font-bold">
+Delivery Address
+</h2>
+
+<button
+id="change-address-btn"
+class="text-orange-500 font-semibold">
+
+Change
+
+</button>
+
+</div>
+
+<div id="address-container">
+
+<!-- selected address -->
+
+</div>
+
+<div
+id="address-list"
+class="hidden mt-6 space-y-4">
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- PAYMENT METHOD -->
+<section class="bg-white rounded-3xl shadow-sm p-8">
+
+<h2 class="text-2xl font-bold mb-8">
+Payment Method
+</h2>
+
+<div
+id="payment-methods-container"
+class="space-y-4">
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- COUPON -->
+<section class="bg-white rounded-3xl shadow-sm p-8">
+
+<h2 class="text-2xl font-bold mb-8">
+Apply Coupon
+</h2>
+
+<div class="flex">
+
+<input
+id="coupon-input"
+type="text"
+placeholder="Enter coupon code"
+class="flex-1 border-2 border-orange-400 rounded-l-2xl px-6 py-4 outline-none">
+
+
+<button
+id="apply-coupon-btn"
+class="bg-orange-500 hover:bg-orange-600 px-8 rounded-r-2xl text-white font-semibold">
+
+Apply
+
+</button>
+
+</div>
+
+
+<div
+id="coupon-message"
+class="mt-4 text-sm">
+
+</div>
+
+
+<div
+id="available-coupons"
+class="mt-8 space-y-4">
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- CART ITEMS -->
+<section class="bg-white rounded-3xl shadow-sm p-8">
+
+<div class="flex justify-between items-center mb-8"> 
+
+<h2 class="text-2xl font-bold">
+Items
+</h2>
+
+<span
+id="item-count"
+class="text-gray-500">
+
+0 Items
+
+</span>
+
+</div>
+
+<div
+id="cart-items-container"
+class="space-y-6">
+
+</div>
+
+</section>
+
+
+
+</div>
+
+
+
+
+
+<!-- RIGHT -->
+<div class="col-span-4">
+
+<div class="sticky top-28">
+
+<div class="bg-white rounded-3xl shadow-sm p-8">
+
+<h2 class="text-2xl font-bold mb-8">
+Order Summary
+</h2>
+
+
+
+<div class="space-y-6">
+
+
+
+<div class="flex justify-between">
+
+<span class="text-gray-600">
+Subtotal
+</span>
+
+<span
+id="summary-subtotal"
+class="font-medium">
+
+₹0
+
+</span>
+
+</div>
+
+
+
+
+<div class="flex justify-between">
+
+<span class="text-gray-600">
+Delivery Fee
+</span>
+
+<span
+id="summary-delivery-fee"
+class="font-medium">
+
+₹40
+
+</span>
+
+</div>
+
+
+
+
+<div class="flex justify-between">
+
+<span class="text-gray-600">
+Taxes
+</span>
+
+<span
+id="summary-tax"
+class="font-medium">
+
+₹0
+
+</span>
+
+</div>
+
+
+
+
+<div
+id="coupon-discount-row"
+class="hidden flex justify-between text-green-600">
+
+<span>
+Coupon Discount
+</span>
+
+<span
+id="summary-discount">
+
+-₹0
+
+</span>
+
+</div>
+
+
+
+
+<hr>
+
+
+
+
+<div class="flex justify-between text-2xl font-bold">
+
+<span>
+To Pay
+</span>
+
+<span
+id="summary-total">
+
+₹0
+
+</span>
+
+</div>
+
+</div>
+
+
+
+
+<button
+id="place-order-btn"
+class="w-full mt-10 py-5 rounded-2xl bg-orange-500 hover:bg-orange-600 transition text-white font-semibold text-lg">
+
+Place Order
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+
+
+
+
+<!-- LOADER -->
+<div
+id="checkout-loader"
+class="fixed inset-0 bg-black/20 backdrop-blur-sm hidden justify-center items-center z-[100]">
+
+<div class="bg-white px-10 py-8 rounded-3xl shadow-xl">
+
+<div class="text-lg font-semibold">
+Loading...
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<script src="/js/common/toast.js"></script>
+<script src="/js/common/api.js"></script>
+<script src="/js/common/auth.js"></script>
+
+<script src="/js/cart/checkoutPage.js"></script>
+
+</body>
+</html>
+```

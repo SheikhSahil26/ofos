@@ -1,0 +1,789 @@
+// modules/delivery/services/delivery.service.ts
+
+import Redis from "ioredis";
+import { IDeliveryService } from "../interfaces/delivery.interface";
+import { DeliveryRepository } from "../repositories/delivery.repository";
+import {
+  UpdateLocationInputs,
+  AssignPartnerInput,
+  ToggleAvailabilityInput,
+  ToggleAvailabilityResult,
+  UpdateDeliveryPartnerProfileInput,
+  GetEarningsInput,
+  EarningsSummary,
+  GetPartnerRatingsInput,
+} from "../types/delivery.types";
+import { ServiceResponse } from "../../../common/types/service-response.types";
+import { prisma } from "../../../config/prisma";
+import { OrderService } from "../../orders/services/orders.service";
+import { CartService } from "../../cart/services/cart.services";
+import { AddressService } from "../../address/services/address.service";
+import { BranchService } from "../../restaurantBranch/services/branch.service";
+import redisClient from "../../../config/redis";
+import { DeliveryPartnerStatus, VehicleType } from "@prisma/client";
+
+export class DeliveryService{
+  private deliveryRepo = new DeliveryRepository(prisma);
+   private prisma = prisma;
+  constructor(
+   
+  ) {}
+  private branchService = new BranchService();
+ private orderService =
+    new OrderService(
+        prisma,
+        new CartService(),
+        new AddressService()
+    );
+  async updatePartnerLocation(
+   partnerId: string,
+   latitude: number,
+   longitude: number
+  ): Promise<ServiceResponse<any>> {
+
+    const partner = await this.deliveryRepo.findPartnerByUserId(partnerId);
+    if (!partner) {
+      return {
+        success: false,
+        error: "Delivery partner profile not found",
+        statusCode: 404,
+      };
+    }
+        
+    const updateLocation = await this.deliveryRepo.updatePartnerLocation(partner.id, latitude, longitude);
+
+    return {   
+        success: true,
+        message: "Location updated successfully",
+        data: null,
+        statusCode : 200,
+    }
+  }
+
+async assignNearestPartner(orderId: string): Promise<ServiceResponse<any>> {
+
+  const orderResult = await this.orderService.getOrderById(orderId);
+  if (!orderResult.success || !orderResult.data) {
+    return { success: false, error: "Order not found", statusCode: 404 };
+  }
+  const order = orderResult.data;
+
+  if (!order.delivery) {
+    return { success: false, error: "Delivery record not found for this order", statusCode: 404 };
+  }
+  if (order.delivery.currentPartnerId) {
+    return { success: false, error: "A delivery partner is already assigned to this order", statusCode: 409 };
+  }
+
+  // Check no PENDING offer already exists for this delivery — avoid duplicate offers
+  const existingPendingOffer = await this.deliveryRepo.findPendingOffer(order.delivery.id);
+  if (existingPendingOffer) {
+    return { success: false, error: "An offer is already pending for this order", statusCode: 409 };
+  }
+
+  const branchResult = await this.branchService.getBranchDetails(order.branchId, order.customerId);
+  if (!branchResult.data) {
+    return { success: false, error: "Branch not found", statusCode: 404 };
+  }
+
+  const branchLat = branchResult.data.latitude;
+  const branchLng = branchResult.data.longitude;
+
+  if (branchLat === null || branchLng === null) {
+    return { success: false, error: "Branch coordinates not configured", statusCode: 400 };
+  }
+
+  const nearbyResults = await redisClient.sendCommand([
+    "GEORADIUS",
+    "delivery_partners",
+    branchLng.toString(),
+    branchLat.toString(),
+    "10",
+    "km",
+    "WITHDIST",
+    "ASC",
+    "COUNT", "20",
+  ])as unknown as [string, string][];
+
+  if (!nearbyResults || nearbyResults.length === 0) {
+    return { success: false, error: "No delivery partners found nearby", statusCode: 503 };
+  }
+
+  const candidateIds: string[] = (nearbyResults as [string, string][]).map((r) => r[0]);
+
+  // Exclude partners who already REJECTED this delivery — don't re-offer to them
+  const rejectedPartnerIds = await this.deliveryRepo.findRejectedPartnerIds(order.delivery.id);
+
+  const activePartners = await this.deliveryRepo.findActivePartnersByIds(candidateIds);
+  const activePartnerIds = new Set(
+    activePartners
+      .filter((p) => !rejectedPartnerIds.has(p.id))
+      .map((p) => p.id)
+  );
+
+  let chosen: { partnerId: string; distanceKm: number } | null = null;
+
+  for (const [partnerId, distance] of nearbyResults as [string, string][]) {
+    if (activePartnerIds.has(partnerId)) {
+      chosen = { partnerId, distanceKm: parseFloat(distance) };
+      break;
+    }
+  }
+
+  if (!chosen) {
+    return { success: false, error: "No active delivery partners available right now", statusCode: 503 };
+  }
+
+  const chosenPartner = activePartners.find((p) => p.id === chosen!.partnerId)!;
+
+  // ── Create OFFER only — do not touch delivery.currentPartnerId yet ──
+  await this.prisma.$transaction(async (tx) => {
+
+    await tx.deliveryAssignment.create({
+      data: {
+        deliveryId: order.delivery.id,
+        partnerId: chosen!.partnerId,
+        assignedAt: new Date(),
+        // responseStatus and respondedAt stay null = "pending offer"
+      },
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: chosenPartner.userId,
+        title: "New Delivery Offer",
+        message: `New order ${order.orderNumber} available, ${chosen!.distanceKm.toFixed(1)} km away. Accept now!`,
+        notificationType: "ORDER_UPDATE",
+        status: "PENDING",
+      },
+    });
+  });
+
+  return {
+    success: true,
+    message: "Delivery offer sent to nearest partner",
+    data: {
+      orderId,
+      offeredPartnerId: chosen.partnerId,
+      distanceFromBranch: `${chosen.distanceKm.toFixed(2)} km`,
+    },
+    statusCode: 200,
+  };
+}
+
+  async assignNearestPartnerWithRetry(
+    orderId: string,
+    maxRetries: number = 3,
+    delayMs: number = 10000,
+  ): Promise<void> {}
+
+
+
+  // modules/delivery/services/delivery.service.ts
+
+async toggleAvailability(
+  input: ToggleAvailabilityInput
+): Promise<ServiceResponse<ToggleAvailabilityResult>> {
+
+  const { deliveryUserId } = input;
+
+  // 1. Find partner profile
+  const partner = await this.deliveryRepo.findPartnerByUserId(deliveryUserId);
+
+  if (!partner) {
+    return {
+      success: false,
+      error: "Delivery partner profile not found",
+      statusCode: 404,
+    };
+  }
+
+  // 2. Block toggle for statuses that partner cannot self-manage
+  if (partner.status === "PENDING_VERIFICATION") {
+    return {
+      success: false,
+      error: "Your account is pending verification. Please wait for admin approval.",
+      statusCode: 403,
+    };
+  }
+
+  if (partner.status === "SUSPENDED") {
+    return {
+      success: false,
+      error: "Your account has been suspended. Please contact support.",
+      statusCode: 403,
+    };
+  }
+
+  if (partner.status === "ON_DELIVERY") {
+    return {
+      success: false,
+      error: "You cannot go offline while on an active delivery.",
+      statusCode: 400,
+    };
+  }
+
+  // 3. Toggle: ACTIVE → INACTIVE or INACTIVE → ACTIVE
+  const previousStatus = partner.status;
+  const newStatus =
+    partner.status === "ACTIVE"
+      ? "INACTIVE"
+      : "ACTIVE";
+
+  // 4. Update in DB
+  const updated = await this.deliveryRepo.updatePartnerStatus(
+    partner.id,
+    newStatus as DeliveryPartnerStatus
+  );
+
+  // 5. If going INACTIVE — clear their location from Redis
+  //    No point keeping stale location for an offline partner
+if (newStatus === "INACTIVE") {
+  console.log("clearing partner location from redis!!!!")
+  console.log("partner id is", partner.id)
+  await this.deliveryRepo.clearPartnerLocation(partner.id);
+}
+  return {
+    success: true,
+    message:
+      newStatus === "ACTIVE"
+        ? "You are now online and accepting orders"
+        : "You are now offline",
+    data: {
+      partnerId: updated.userId,
+      previousStatus,
+      currentStatus: updated.status,
+    },
+    statusCode: 200,
+  };
+}
+
+  async getPartnerProfile(
+  deliveryUserId: string
+): Promise<ServiceResponse<any>> {
+
+  const partner = await this.deliveryRepo.findPartnerProfileByUserId(
+    deliveryUserId
+  );
+
+  if (!partner) {
+    return {
+      success: false,
+      error: "Delivery partner profile not found",
+      statusCode: 404,
+    };
+  }
+
+  return {
+    success: true,
+    message: "Profile fetched successfully",
+    data: partner,
+    statusCode: 200,
+  };
+}
+
+async updatePartnerProfile(
+  input: UpdateDeliveryPartnerProfileInput
+): Promise<ServiceResponse<any>> {
+
+  const { deliveryUserId, vehicleType, vehicleNumber, governmentId } = input;
+
+
+  // 1. Find partner
+  const partner =
+    await this.deliveryRepo
+    .findPartnerByUserId(
+        deliveryUserId
+    );
+
+if (!partner) {
+
+  if (
+    !vehicleType ||
+    !vehicleNumber ||
+    !governmentId
+) {
+    return {
+        success: false,
+        error: "Missing required fields",
+        statusCode: 400
+    };
+}
+
+    const createdPartner =
+        await this.deliveryRepo
+        .createDeliveryPartner({
+            userId: deliveryUserId,
+            vehicleType,
+            vehicleNumber,
+            governmentId
+        });
+
+    return {
+        success: true,
+        message: "Profile created",
+        data: createdPartner,
+        statusCode: 201
+    };
+}
+
+
+  // 2. Suspended partners cannot update profile
+  if (partner.status === "SUSPENDED") {
+    return {
+      success: false,
+      error: "Your account has been suspended. Please contact support.",
+      statusCode: 403,
+    };
+  }
+
+  // 3. Check vehicle number uniqueness if being updated
+  if (vehicleNumber && vehicleNumber !== partner.vehicleNumber) {
+    const existing = await this.prisma.deliveryPartner.findFirst({
+      where: {
+        vehicleNumber,
+        isDeleted: false,
+      },
+    });
+
+    if (existing) {
+      return {
+        success: false,
+        error: "This vehicle number is already registered",
+        statusCode: 409,
+      };
+    }
+  }
+
+  // 4. Build update payload — only include fields that were sent
+  const updateData: any = {};
+  if (vehicleType) updateData.vehicleType = vehicleType;
+  if (vehicleNumber) updateData.vehicleNumber = vehicleNumber;
+  if (governmentId) updateData.governmentId = governmentId;
+
+  if (Object.keys(updateData).length === 0) {
+    return {
+      success: false,
+      error: "No fields provided to update",
+      statusCode: 400,
+    };
+  }
+
+  // 5. Update
+  const updated = await this.deliveryRepo.updatePartnerProfile(
+    partner.id,
+    updateData
+  );
+
+  return {
+    success: true,
+    message: "Profile updated successfully",
+    data: updated,
+    statusCode: 200,
+  };
+}
+
+async getEarnings(
+  input: GetEarningsInput
+): Promise<ServiceResponse<EarningsSummary>> {
+
+  const { deliveryUserId, period = "month" } = input;
+
+  // 1. Find partner
+  const partner = await this.deliveryRepo.findPartnerByUserId(deliveryUserId);
+
+  if (!partner) {
+    return {
+      success: false,
+      error: "Delivery partner profile not found",
+      statusCode: 404,
+    };
+  }
+
+  // 2. Calculate fromDate based on period
+  const now = new Date();
+  let fromDate: Date;
+
+  if (period === "today") {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  } else if (period === "week") {
+    fromDate = new Date(now);
+    fromDate.setDate(now.getDate() - 7);
+  } else if (period === "month") {
+    fromDate = new Date(now);
+    fromDate.setMonth(now.getMonth() - 1);
+  } else {
+    // all time — use account creation as start
+    fromDate = new Date(0);
+  }
+
+  // 3. Fetch completed deliveries + assignment stats in parallel
+  const [completedDeliveries, assignmentStats] = await Promise.all([
+    this.deliveryRepo.findCompletedDeliveries(partner.id, fromDate),
+    this.deliveryRepo.findAssignmentStats(partner.id, fromDate),
+  ]);
+
+  // 4. Calculate earnings
+  // Partner earns the delivery fee from each completed order
+  const totalDeliveries = completedDeliveries.length;
+
+  const totalEarnings = completedDeliveries.reduce(
+    (sum, delivery) => sum + Number(delivery.order.deliveryFee),
+    0
+  );
+
+  const averageEarningPerDelivery =
+    totalDeliveries > 0
+      ? parseFloat((totalEarnings / totalDeliveries).toFixed(2))
+      : 0;
+
+  // 5. Calculate acceptance rate
+  const { totalAccepted, totalRejected, totalTimedOut } = assignmentStats;
+  const totalAssignments = totalAccepted + totalRejected + totalTimedOut;
+
+  const acceptanceRate =
+    totalAssignments > 0
+      ? `${((totalAccepted / totalAssignments) * 100).toFixed(1)}%`
+      : "0%";
+
+  // 6. Format recent deliveries — last 10
+  const recentDeliveries = completedDeliveries.slice(0, 10).map((d) => ({
+    deliveryId: d.id,
+    orderNumber: d.order.orderNumber,
+    earnings: Number(d.order.deliveryFee),
+    pickedUpFrom: d.order.branch.branchName,
+    deliveredTo: d.order.address.city,
+    deliveredAt: d.deliveredAt,
+  }));
+
+  return {
+    success: true,
+    message: "Earnings summary fetched successfully",
+    data: {
+      period,
+      totalDeliveries,
+      totalEarnings: parseFloat(totalEarnings.toFixed(2)),
+      averageEarningPerDelivery,
+      totalAccepted,
+      totalRejected: totalRejected + totalTimedOut,
+      acceptanceRate,
+      recentDeliveries,
+    },
+    statusCode: 200,
+  };
+}
+
+
+// modules/delivery/services/delivery.service.ts
+
+async getPartnerRatings(
+  input: GetPartnerRatingsInput
+): Promise<ServiceResponse<any>> {
+
+  const { deliveryUserId, page = 1, limit = 10 } = input;
+
+  // 1. Find partner
+  const partner = await this.deliveryRepo.findPartnerByUserId(deliveryUserId);
+
+  if (!partner) {
+    return {
+      success: false,
+      error: "Delivery partner profile not found",
+      statusCode: 404,
+    };
+  }
+
+  const skip = (page - 1) * limit;
+
+  // 2. Fetch stats + paginated reviews in parallel
+  const [stats, { reviews, total }] = await Promise.all([
+    this.deliveryRepo.findPartnerRatingStats(partner.id),
+    this.deliveryRepo.findPartnerRatings(partner.id, skip, limit),
+  ]);
+
+  // 3. Format reviews
+  const formattedReviews = reviews.map((r) => ({
+    reviewId: r.id,
+    orderNumber: r.order.orderNumber,
+    rating: r.deliveryRating,
+    comment: r.reviewText ?? null,
+    reviewedBy: {
+      fullName: r.user.fullName,
+      profilePhoto: r.user.profilePhoto ?? null,
+    },
+    createdAt: r.createdAt,
+  }));
+
+  // 4. Pagination meta
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    success: true,
+    message: "Ratings fetched successfully",
+    data: {
+      summary: {
+        averageRating: stats.averageRating,
+        totalReviews: stats.totalReviews,
+        breakdown: {
+          fiveStar: stats.breakdown[5],
+          fourStar: stats.breakdown[4],
+          threeStar: stats.breakdown[3],
+          twoStar: stats.breakdown[2],
+          oneStar: stats.breakdown[1],
+        },
+      },
+      reviews: formattedReviews,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    },
+    statusCode: 200,
+  };
+}
+
+
+// modules/delivery/services/delivery.service.ts
+
+async respondToOffer(
+  partnerUserId: string,
+  assignmentId: string,
+  response: "ACCEPTED" | "REJECTED",
+): Promise<ServiceResponse<any>> {
+
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const assignment = await this.prisma.deliveryAssignment.findFirst({
+    where: { id: assignmentId, partnerId: partner.id },
+    include: { delivery: { include: { order: true } } },
+  });
+
+  if (!assignment) {
+    return { success: false, error: "Offer not found", statusCode: 404 };
+  }
+
+  if (assignment.responseStatus !== null) {
+    return { success: false, error: "This offer has already been responded to", statusCode: 409 };
+  }
+
+  // Someone else may have already been accepted while this partner was deciding
+  if (assignment.delivery.currentPartnerId) {
+    return { success: false, error: "This order has already been assigned to another partner", statusCode: 409 };
+  }
+
+  await this.prisma.$transaction(async (tx) => {
+
+    await tx.deliveryAssignment.update({
+      where: { id: assignmentId },
+      data: {
+        responseStatus: response,
+        respondedAt: new Date(),
+      },
+    });
+
+    if (response === "ACCEPTED") {
+      await tx.delivery.update({
+        where: { id: assignment.deliveryId },
+        data: { currentPartnerId: partner.id },
+      });
+
+      await tx.deliveryPartner.update({
+        where: { id: partner.id },
+        data: { status: "ON_DELIVERY" },
+      });
+    }
+  });
+
+  // If rejected — automatically try the next nearest partner
+  if (response === "REJECTED") {
+    this.assignNearestPartner(assignment.delivery.orderId)
+      .catch((err) => console.error("Re-assignment after rejection failed:", err));
+  }
+
+  return {
+    success: true,
+    message: response === "ACCEPTED" ? "Offer accepted" : "Offer rejected",
+    data: { assignmentId, response },
+    statusCode: 200,
+  };
+}
+
+
+// ── Polling endpoint — delivery partner app checks for pending offers ──
+async getPendingOffer(partnerUserId: string): Promise<ServiceResponse<any>> {
+  console.log("Fetching pending offer for partner:", partnerUserId);
+
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+  const offer = await this.deliveryRepo.findPendingOfferForPartner(partner.id);
+
+  console.log("Pending offer fetched for partner:", offer);
+
+  if (!offer) {
+    return {
+      success: true,
+      message: "No pending offers",
+      data: null,
+      statusCode: 200,
+    };
+  }
+
+  const order = offer.delivery.order;
+
+  return {
+    success: true,
+    message: "Pending offer found",
+    data: {
+      assignmentId: offer.id,
+      orderNumber: order.orderNumber,
+      earnings: Number(order.deliveryFee),
+      pickupBranch: order.branch.branchName,
+      pickupAddress: order.branch.addressLine1,
+      dropCity: order.address.city,
+      dropPincode: order.address.pincode,
+      assignedAt: offer.assignedAt,
+    },
+    statusCode: 200,
+  };
+}
+
+async getActiveOrders(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const assignments = await this.deliveryRepo.findActiveOrdersForPartner(partner.id);
+
+  // Calculate distance from partner's last known location to each branch
+  const raw = await redisClient.get(`location:${partner.id}`);
+  const partnerLoc = raw ? JSON.parse(raw) : null;
+
+  const orders = assignments.map((a) => {
+    const branch = a.delivery.order.branch;
+    let distanceKm: number | null = null;
+
+    if (partnerLoc && branch.latitude && branch.longitude) {
+      distanceKm = this.haversine(
+        partnerLoc.lat, partnerLoc.lng,
+        Number(branch.latitude), Number(branch.longitude)
+      );
+    }
+
+    return {
+      id: a.id, // assignmentId — needed for accept action
+      orderId: a.delivery.order.id,
+      orderNumber: a.delivery.order.orderNumber,
+      restaurantName: branch.branchName,
+      distanceKm: distanceKm ? parseFloat(distanceKm.toFixed(1)) : null,
+    };
+  });
+
+  return { success: true, message: "Active orders fetched", data: orders, statusCode: 200 };
+}
+
+async getCurrentOrder(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const delivery = await this.deliveryRepo.findCurrentOrderForPartner(partner.id);
+
+  if (!delivery) {
+    return { success: true, message: "No current order", data: null, statusCode: 200 };
+  }
+
+  const raw = await redisClient.get(`location:${partner.id}`);
+  const partnerLoc = raw ? JSON.parse(raw) : null;
+  let distanceKm: number | null = null;
+
+  if (partnerLoc && delivery.order.branch.latitude) {
+    distanceKm = this.haversine(
+      partnerLoc.lat, partnerLoc.lng,
+      Number(delivery.order.branch.latitude), Number(delivery.order.branch.longitude)
+    );
+  }
+
+  return {
+    success: true,
+    message: "Current order fetched",
+    data: {
+      id: delivery.order.id,
+      orderNumber: delivery.order.orderNumber,
+      orderStatus: delivery.order.status,
+      restaurantName: delivery.order.branch.branchName,
+      customerName: delivery.order.customer.fullName,
+      distanceKm: distanceKm ? parseFloat(distanceKm.toFixed(1)) : null,
+    },
+    statusCode: 200,
+  };
+}
+
+async getTodayStats(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const stats = await this.deliveryRepo.findTodayStats(partner.id);
+  const ratingStats = await this.deliveryRepo.findPartnerRatingStats(partner.id);
+
+  return {
+    success: true,
+    message: "Stats fetched",
+    data: {
+      earnings: stats.earnings,
+      deliveriesToday: stats.deliveries,
+      rating: ratingStats.totalReviews > 0 ? ratingStats.averageRating : null,
+    },
+    statusCode: 200,
+  };
+}
+
+async getRecentDeliveries(partnerUserId: string): Promise<ServiceResponse<any>> {
+  const partner = await this.deliveryRepo.findPartnerByUserId(partnerUserId);
+  if (!partner) {
+    return { success: false, error: "Delivery partner profile not found", statusCode: 404 };
+  }
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const deliveries = await this.deliveryRepo.findCompletedDeliveries(partner.id, thirtyDaysAgo);
+
+  const formatted = deliveries.slice(0, 5).map((d) => ({
+    orderNumber: d.order.orderNumber,
+    restaurantName: d.order.branch.branchName,
+    earnings: Number(d.order.deliveryFee),
+  }));
+
+  return { success: true, message: "Recent deliveries fetched", data: formatted, statusCode: 200 };
+}
+
+// Accept an offer from the Active Orders list — reuses your existing respondToOffer logic
+async acceptActiveOrder(partnerUserId: string, assignmentId: string): Promise<ServiceResponse<any>> {
+  return this.respondToOffer(partnerUserId, assignmentId, "ACCEPTED");
+}
+
+private haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+
+
+
+}

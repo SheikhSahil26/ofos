@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<link rel="stylesheet" href="/css/common/toast.css">
+<head>
+  <title>Restaurant Details | Ziggy</title>
+  <%- include('../partials/head.ejs') %>
+  
+</head>
+
+<body class="bg-[#f8f7f4] min-h-screen">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <%- include('../partials/customer-sidebar') %>
+
+    <div id="toast"></div>
+
+      <div class="flex-1 flex flex-col">
+        <!-- header -->
+        <%- include("../partials/header") %>
+
+        <!-- Main Content -->
+        <main id="restaurantPage" class="max-w-7xl w-full mx-auto px-4 lg:px-6 py-6 lg:py-8">
+          <!-- Breadcrumb -->
+
+          <div class="mb-6">
+            <button id="backBtn" class="flex items-center gap-2 text-sm text-gray-600 hover:text-[#ff7a00] transition">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Back to Restaurants</span>
+            </button>
+          </div>
+
+          <!-- Hero Section -->
+
+          <section id="restaurantHero"
+            class="bg-white rounded-[28px] border border-[#ececec] overflow-hidden shadow-sm mb-8">
+            <div class="h-[400px] flex items-center justify-center">
+              <div class="text-center">
+                <i class="fa-solid fa-spinner fa-spin text-4xl text-[#ff7a00]"></i>
+
+                <p class="mt-4 text-gray-500">Loading restaurant...</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Promotion Banner -->
+
+          <section id="promotionContainer" class="mb-8 hidden"></section>
+
+          <!-- Category Tabs -->
+
+          <section class="sticky top-[82px] z-30 bg-[#f8f7f4] py-4 px-5 mb-6">
+            <div id="categoryTabs" class="flex gap-3 overflow-x-auto scrollbar-hide"></div>
+          </section>
+
+          <!-- Menu Container -->
+
+          <section id="menuContainer" class="space-y-12">
+            <div class="bg-white rounded-[28px] border border-[#ececec] p-10 text-center">
+              <i class="fa-solid fa-spinner fa-spin text-4xl text-[#ff7a00]"></i>
+
+              <p class="mt-4 text-gray-500">Loading menu...</p>
+            </div>
+          </section>
+        </main>
+
+        <!-- Modifier Modal -->
+
+        <div id="modifierModal" class="fixed inset-0 bg-black/50 hidden z-[999]">
+          <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-2xl mx-auto">
+            <div class="bg-white rounded-[28px] p-6 max-h-[85vh] overflow-y-auto">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900">Customize Item</h2>
+
+                <button id="closeModifierModal" class="h-10 w-10 rounded-full border border-gray-200">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <div id="modifierContent"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden Templates -->
+
+        <template id="categoryTabTemplate">
+          <button
+            class="category-tab shrink-0 px-6 py-3 rounded-xl border border-[#e5e7eb] bg-white text-gray-700 font-medium transition hover:border-[#ff7a00]"></button>
+        </template>
+
+        <template id="menuCategoryTemplate">
+          <section class="menu-category">
+            <div class="flex items-center justify-between mb-5">
+              <h2 class="text-2xl font-semibold text-gray-900"></h2>
+
+              <span class="text-sm text-gray-500"></span>
+            </div>
+
+            <div class="space-y-5 menu-items"></div>
+          </section>
+        </template>
+
+        <template id="menuItemTemplate">
+          <div class="bg-white rounded-[24px] border border-[#ececec] p-5 shadow-sm">
+            <div class="flex flex-col md:flex-row gap-5">
+              <img class="item-image w-full md:w-40 h-40 object-cover rounded-2xl" />
+
+              <div class="flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <span class="veg-badge hidden text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                      Veg
+                    </span>
+
+                    <span class="bestseller-badge hidden text-xs px-2 py-1 rounded-full bg-[#fff1e5] text-[#ff7a00]">
+                      Bestseller
+                    </span>
+                  </div>
+
+                  <h3 class="item-name text-xl font-semibold text-gray-900"></h3>
+
+                  <p class="item-description text-gray-500 mt-2 leading-relaxed"></p>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between gap-4">
+                  <div>
+                    <p class="item-price text-2xl font-bold text-gray-900"></p>
+
+                    <p class="item-status text-sm mt-1"></p>
+                  </div>
+
+                  <button
+                    class="add-to-cart-btn bg-[#014f38] hover:bg-[#014f38] text-white px-6 py-3 rounded-xl font-semibold transition">
+                    Add +
+                    <% console.log("#014f38") %>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Empty State -->
+
+        <template id="emptyMenuTemplate">
+          <div class="bg-white border border-[#ececec] rounded-[28px] p-12 text-center">
+            <i class="fa-solid fa-utensils text-5xl text-gray-300"></i>
+
+            <h3 class="mt-4 text-xl font-semibold">No Menu Available</h3>
+
+            <p class="mt-2 text-gray-500">
+              This restaurant hasn't added menu items yet.
+            </p>
+          </div>
+        </template>
+
+        <!-- Error State -->
+
+        <template id="errorTemplate">
+          <div class="bg-white border border-[#ececec] rounded-[28px] p-12 text-center">
+            <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
+
+            <h3 class="mt-4 text-xl font-semibold">Unable to load restaurant</h3>
+
+            <p class="mt-2 text-gray-500">Please try again later.</p>
+          </div>
+        </template>
+
+      </div>
+  </div>
+ 
+<script src="/js/common/toast.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/restaurant/restaurant-details.js"></script>
+</body>
+
+</html>

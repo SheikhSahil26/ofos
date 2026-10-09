@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard | Ziggy Restaurant</title>
+    <%- include('../partials/head.ejs') %>
+</head>
+<body class="bg-[#f8f7f4] min-h-screen">
+    <p id="toast"></p>
+
+    <!-- Dashboard Layout -->
+    <div class="flex min-h-screen">
+
+        <%- include('../partials/restaurant-sidebar.ejs') %>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <main class="flex-1 px-4 md:px-8 py-6">
+
+                <!-- Page Heading -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            Dashboard
+                        </h1>
+                        <p class="text-gray-500 mt-1">
+                            Overview of your restaurant's performance.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden" id="statsGrid">
+                    <!-- Total Orders -->
+                    <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-[#e6f4f0] flex items-center justify-center">
+                            <i class="fa-solid fa-receipt text-2xl text-[#014f38]"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Total Orders</p>
+                            <h3 class="text-2xl font-bold text-gray-900" id="statTotalOrders">-</h3>
+                        </div>
+                    </div>
+
+                    <!-- Orders Today -->
+                    <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-[#fff4ea] flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-day text-2xl text-[#ff7a00]"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Orders Today</p>
+                            <h3 class="text-2xl font-bold text-gray-900" id="statOrdersToday">-</h3>
+                        </div>
+                    </div>
+
+                    <!-- Total Revenue -->
+                    <div class="bg-white rounded-2xl p-6 border border-[#ececec] shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-[#e6f4f0] flex items-center justify-center">
+                            <i class="fa-solid fa-indian-rupee-sign text-2xl text-[#014f38]"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Total Revenue</p>
+                            <h3 class="text-2xl font-bold text-gray-900" id="statTotalRevenue">-</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="dashboardLoading" class="flex flex-col items-center justify-center py-20">
+                    <i class="fa-solid fa-spinner animate-spin text-3xl text-[#ff7a00]"></i>
+                    <p class="mt-4 text-gray-500">Loading dashboard data...</p>
+                </div>
+
+            </main>
+        </div>
+    </div>
+    <script src="/js/common/auth.js"></script>
+    <script src="/js/common/toast.js"></script>
+    <script src="/js/common/api.js"></script>
+    <script src="/js/restaurant/dashboard.js"></script>
+
+</body>
+</html>
